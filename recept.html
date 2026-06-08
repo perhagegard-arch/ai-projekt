@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <!-- Sidans metadata och teckenkodning -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sous Vide Entrecôte – Perfekt Resultat Varje Gång</title>
+
+  <style>
+    /* Grundläggande återställning och mörkt tema */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Georgia', serif;
+      line-height: 1.8;
+      padding: 2rem 1rem;
+    }
+
+    /* Centrerad innehållsbredd */
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    /* Sidhuvud med subtil gradient */
+    header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid #2a2a2a;
+      margin-bottom: 3rem;
+    }
+
+    /* Dekorativ etikett ovanför titeln */
+    .etikett {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #c0832a;
+      margin-bottom: 0.75rem;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      font-weight: normal;
+      color: #f5f0e8;
+      letter-spacing: 0.03em;
+      line-height: 1.25;
+    }
+
+    /* Introduktionstext under titeln */
+    .intro {
+      margin-top: 1rem;
+      color: #9a9a9a;
+      font-size: 1.05rem;
+      font-style: italic;
+    }
+
+    /* Snabbfakta-rad med temperatur, tid och svårighet */
+    .fakta-rad {
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      margin: 2.5rem 0;
+      flex-wrap: wrap;
+    }
+
+    .fakta {
+      text-align: center;
+    }
+
+    .fakta .värde {
+      display: block;
+      font-size: 1.7rem;
+      color: #c0832a;
+      font-weight: bold;
+      letter-spacing: 0.05em;
+    }
+
+    .fakta .etikett-liten {
+      font-size: 0.75rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #666;
+      margin-top: 0.2rem;
+    }
+
+    /* Avsnitt för ingredienser och steg */
+    section {
+      margin-bottom: 3rem;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: #c0832a;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    /* Ingredienslista utan punkter */
+    .ingredienser {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem 2rem;
+    }
+
+    .ingredienser li {
+      color: #ccc;
+      font-size: 0.97rem;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid #1f1f1f;
+    }
+
+    .ingredienser li span {
+      color: #888;
+      float: right;
+      font-style: italic;
+    }
+
+    /* Numrerade steg med markerade siffror */
+    .steg-lista {
+      list-style: none;
+      counter-reset: steg;
+    }
+
+    .steg-lista li {
+      counter-increment: steg;
+      display: flex;
+      gap: 1.25rem;
+      margin-bottom: 1.75rem;
+      align-items: flex-start;
+    }
+
+    /* Cirkulär siffra framför varje steg */
+    .steg-lista li::before {
+      content: counter(steg);
+      min-width: 2rem;
+      height: 2rem;
+      background-color: #c0832a;
+      color: #121212;
+      font-size: 0.85rem;
+      font-weight: bold;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 0.1rem;
+      flex-shrink: 0;
+    }
+
+    .steg-lista li p {
+      color: #ccc;
+      font-size: 0.97rem;
+    }
+
+    .steg-lista li strong {
+      color: #f0e8d8;
+      display: block;
+      margin-bottom: 0.2rem;
+      font-size: 1rem;
+    }
+
+    /* Tips-box med distinkt bakgrund */
+    .tips-box {
+      background-color: #1a1a1a;
+      border-left: 3px solid #c0832a;
+      border-radius: 4px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .tips-box .tips-titel {
+      color: #c0832a;
+      font-size: 0.8rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.4rem;
+    }
+
+    .tips-box p {
+      color: #bbb;
+      font-size: 0.95rem;
+    }
+
+    /* Temperaturguide som ett horisontellt band */
+    .temp-guide {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .temp-kort {
+      background-color: #1a1a1a;
+      border-radius: 6px;
+      padding: 0.85rem;
+      text-align: center;
+      border: 1px solid #2a2a2a;
+      transition: border-color 0.2s;
+    }
+
+    /* Markera det rekommenderade alternativet */
+    .temp-kort.rekommenderad {
+      border-color: #c0832a;
+    }
+
+    .temp-kort .grad {
+      font-size: 1.3rem;
+      color: #f0e8d8;
+      font-weight: bold;
+    }
+
+    .temp-kort .tillagning {
+      font-size: 0.72rem;
+      color: #888;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 0.2rem;
+    }
+
+    .temp-kort.rekommenderad .tillagning {
+      color: #c0832a;
+    }
+
+    /* Sidfot */
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      border-top: 1px solid #2a2a2a;
+      color: #444;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+    }
+
+    /* Navigeringsmeny för hela sajten */
+    .sitenav {
+      background: rgba(10, 10, 10, 0.97);
+      border-bottom: 1px solid #2a2a2a;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+      margin: -2rem -1rem 0;
+    }
+    .sitenav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      padding: 0 1rem;
+    }
+    .sitenav-link {
+      display: block;
+      padding: 0.9rem 1.1rem;
+      text-decoration: none;
+      color: #666;
+      font-family: sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+    .sitenav-link:hover { color: #e0e0e0; }
+    .sitenav-link.aktiv {
+      color: #c0832a;
+      border-bottom-color: #c0832a;
+    }
+
+    /* Inspirationskort från nätet */
+    .inspiration-kort {
+      background-color: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .inspiration-etikett {
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 0.4rem;
+    }
+    .inspiration-titel {
+      font-size: 1.1rem;
+      color: #f0e8d8;
+      font-weight: normal;
+      margin-bottom: 0.75rem;
+    }
+    .inspiration-text {
+      color: #bbb;
+      font-size: 0.95rem;
+      margin-bottom: 0.75rem;
+    }
+    .inspiration-tagg {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #c0832a;
+    }
+
+    /* Hamburger-knapp (dold på stora skärmar) */
+    .nav-links { display: flex; }
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.9rem 1rem;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      margin-left: auto;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #666;
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+    .hamburger:hover span { background: #e0e0e0; }
+
+    /* Responsiv navigering för mobil */
+    @media (max-width: 600px) {
+      .sitenav-inner { flex-wrap: wrap; }
+      .hamburger { display: flex; }
+      .nav-links {
+        display: none;
+        flex-direction: column;
+        width: 100%;
+        border-top: 1px solid #2a2a2a;
+        padding-bottom: 0.25rem;
+      }
+      .nav-links.oppet { display: flex; }
+      .sitenav-link {
+        border-bottom: none !important;
+        border-left: 3px solid transparent;
+        padding: 0.75rem 1.2rem;
+      }
+      .sitenav-link.aktiv { border-left-color: #c0832a !important; }
+    }
+
+    /* Responsiv layout för mellanstora skärmar (surfplatta) */
+    @media (max-width: 680px) {
+      /* Snabbfakta-raden får mer utrymme per kort */
+      .fakta-rad { gap: 1.5rem; }
+      .fakta .värde { font-size: 1.4rem; }
+    }
+
+    /* Responsiv layout för mobil */
+    @media (max-width: 540px) {
+      /* Rubriken krymps för smal skärm */
+      h1 { font-size: 1.75rem; }
+      /* Snabbfakta staplas i 2×2 */
+      .fakta-rad { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 0.5rem; }
+      /* Ingredienser i en kolumn */
+      .ingredienser { grid-template-columns: 1fr; }
+      /* Temperaturguide staplas i 2 kolumner */
+      .temp-guide { grid-template-columns: repeat(2, 1fr); }
+      /* Steg-lista med mer luftighet */
+      .steg-lista li { gap: 0.9rem; }
+      /* Inspirationskorten får reducerad padding */
+      .inspiration-kort { padding: 1.1rem 1rem; }
+      /* Sidfot lite kompaktare */
+      footer { padding: 1.5rem 0; }
+    }
+
+    @media (max-width: 380px) {
+      /* Temperaturguide i en enda kolumn på riktigt liten skärm */
+      .temp-guide { grid-template-columns: 1fr; }
+      h1 { font-size: 1.5rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigeringsmeny – klicka mellan sidorna -->
+  <nav class="sitenav">
+    <div class="sitenav-inner">
+      <div class="nav-links" id="nav-links">
+        <a href="index.html" class="sitenav-link">🏠 Hem</a>
+        <a href="sousvide.html" class="sitenav-link">♨️ Sous Vide Dagbok</a>
+        <a href="vinkallare.html" class="sitenav-link">🍷 Vinkällare</a>
+      </div>
+      <!-- Hamburgermeny-knapp – syns bara på mobil -->
+      <button class="hamburger" id="hamburger" aria-label="Öppna meny" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- Sidhuvud -->
+    <header>
+      <p class="etikett">Receptguide</p>
+      <h1>Sous Vide Entrecôte</h1>
+      <p class="intro">Den vetenskapliga vägen till ett perfekt tillagat kött – mört, saftigt och precis som du vill ha det.</p>
+
+      <!-- Snabbfakta: temperatur, tid och svårighet -->
+      <div class="fakta-rad">
+        <div class="fakta">
+          <span class="värde">54°C</span>
+          <span class="etikett-liten">Temperatur</span>
+        </div>
+        <div class="fakta">
+          <span class="värde">2–4 h</span>
+          <span class="etikett-liten">Tillagningstid</span>
+        </div>
+        <div class="fakta">
+          <span class="värde">Medium</span>
+          <span class="etikett-liten">Svårighet</span>
+        </div>
+        <div class="fakta">
+          <span class="värde">2 pers</span>
+          <span class="etikett-liten">Portioner</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Ingredienser -->
+    <section>
+      <h2>Ingredienser</h2>
+      <ul class="ingredienser">
+        <li>Entrecôte <span>2 × 250 g</span></li>
+        <li>Smör <span>30 g</span></li>
+        <li>Flingsalt <span>efter smak</span></li>
+        <li>Grovmalen svartpeppar <span>efter smak</span></li>
+        <li>Vitlök <span>2 klyftor</span></li>
+        <li>Färsk timjan <span>3–4 kvistar</span></li>
+        <li>Färsk rosmarin <span>1–2 kvistar</span></li>
+        <li>Rapsolja (stekning) <span>1 msk</span></li>
+      </ul>
+    </section>
+
+    <!-- Tillvägagångssätt steg för steg -->
+    <section>
+      <h2>Tillvägagångssätt</h2>
+      <ol class="steg-lista">
+
+        <li>
+          <p>
+            <strong>Förbered sous vide-badet</strong>
+            Fyll en stor kastrull eller låda med vatten och sätt på cirkulator. Ställ in temperaturen på 54 °C för medium-rare. Låt vattnet värmas upp helt innan köttet läggs i.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            <strong>Krydda köttet</strong>
+            Torka av entrecôterna med hushållspapper. Krydda generöst med flingsalt och grovmalen peppar på båda sidor. Salt i förväg hjälper köttets proteiner att hålla kvar saften.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            <strong>Vakuumförpacka</strong>
+            Lägg varje biff i en vakuumpåse tillsammans med en klick smör, en vitlöksklyfta och ett par kvistar timjan och rosmarin. Förslut påsen med vakuummaskin – eller använd vattendränkningsmetoden med en zip-lock-påse om du inte har maskin.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            <strong>Tillaga i vattenbadet</strong>
+            Sänk ner påsarna i vattenbadet och se till att de är helt nedsänkta. Tillaga i 2–4 timmar. 2 timmar räcker för mjukt resultat; 4 timmar ger ett ännu mörare kött utan att texturen påverkas negativt.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            <strong>Ta upp och torka av</strong>
+            Lyft upp påsarna och ta ut biffarna. Lägg dem på hushållspapper och torka av dem noggrant – ytan måste vara torr för att du ska få en perfekt stekyta.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            <strong>Bryn på hög värme</strong>
+            Hetta upp en gjutjärnspanna på max värme med lite rapsolja tills det ryker. Stek biffarna i 45–60 sekunder per sida för en djup, karamelliserad yta (Maillard-reaktionen). Tillsätt smör, en krossad vitlöksklyfta och rosmarin de sista 30 sekunderna och ösa köttet med det smälta smöret.
+          </p>
+        </li>
+
+        <li>
+          <p>
+            <strong>Vila och servera</strong>
+            Låt köttet vila 2–3 minuter. Skiva och avsluta med flingsalt. Servera direkt – gärna med rödvinssky, ugnsrostad potatis eller en het smörstekt sparris.
+          </p>
+        </li>
+
+      </ol>
+    </section>
+
+    <!-- Temperaturguide för olika stekgrader -->
+    <section>
+      <h2>Temperaturguide</h2>
+      <div class="temp-guide">
+        <div class="temp-kort">
+          <div class="grad">50°C</div>
+          <div class="tillagning">Rare</div>
+        </div>
+        <!-- 54°C är det rekommenderade valet för medium-rare -->
+        <div class="temp-kort rekommenderad">
+          <div class="grad">54°C</div>
+          <div class="tillagning">Medium-rare ★</div>
+        </div>
+        <div class="temp-kort">
+          <div class="grad">58°C</div>
+          <div class="tillagning">Medium</div>
+        </div>
+        <div class="temp-kort">
+          <div class="grad">63°C</div>
+          <div class="tillagning">Well done</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Proffstips -->
+    <section>
+      <h2>Proffstips</h2>
+
+      <!-- Tips 1: Välj rätt kött -->
+      <div class="tips-box">
+        <div class="tips-titel">Välj rätt kött</div>
+        <p>Köp en entrecôte med god marmorering – fettets intramuskulära spridning är det som ger smak och saftighet. Tjocklek på minst 3 cm ger bäst resultat vid sous vide.</p>
+      </div>
+
+      <!-- Tips 2: Is-bad för förberedelse -->
+      <div class="tips-box">
+        <div class="tips-titel">Förbered i förväg</div>
+        <p>Sous vide-köttet kan kylas snabbt i isvatten direkt efter tillagning och förvaras i kylskåp i upp till 3 dagar. Bryn det sedan 60 sekunder per sida precis innan servering.</p>
+      </div>
+
+      <!-- Tips 3: Pannan måste vara rykande het -->
+      <div class="tips-box">
+        <div class="tips-titel">Pannan måste vara rykande het</div>
+        <p>Det vanligaste misstaget är att steka i för låg temperatur. En ljummen panna kokar köttet istället för att bränna ytan. Gjutjärn eller kolstålspanna är idealiskt – och vädra köket.</p>
+      </div>
+
+      <!-- Tips 4: Undvik aromöverföring -->
+      <div class="tips-box">
+        <div class="tips-titel">Var försiktig med aromater i påsen</div>
+        <p>Färsk vitlök kan ge en skarp, otrevlig smak vid långa sous vide-tider. Använd hellre torkad vitlök, eller lägg i vitlöken enbart vid stekningen istället.</p>
+      </div>
+
+    </section>
+
+    <!-- Inspiration från nätet – söktjänsten var tillfälligt otillgänglig vid skapandet; tipsen bygger på välkänd kulinarisk kunskap -->
+    <section>
+      <h2>Inspiration från nätet</h2>
+
+      <!-- Tip 1: Miso-smör från japansk kökskultur -->
+      <div class="inspiration-kort">
+        <div class="inspiration-etikett">Teknik &numero;1</div>
+        <h3 class="inspiration-titel">Miso-smör i vakuumpåsen</h3>
+        <p class="inspiration-text">
+          En teknik inspirerad av det japanska köket: blanda vit miso (shiro miso) med rumstempererat smör i lika delar och bred ett tunt lager på köttet innan du försluter påsen. Misopastan innehåller enzymer (proteaser) som fortsätter bryta ner köttets muskelfibrer under de timmar det cirkulerar – resultatet är djupare umami och ännu mjukare konsistens. Bryn sedan på extremt hög värme i max 60 sekunder per sida; misosocker­blandningen karamelliseras och ger en nästan glaserad, mörkbrun yta som är svår att slå.
+        </p>
+        <div class="inspiration-tagg">Umami &middot; Japanskt inflytande &middot; Avancerat</div>
+      </div>
+
+      <!-- Tip 2: Kaffegnidning från amerikanska BBQ-kretsar -->
+      <div class="inspiration-kort">
+        <div class="inspiration-etikett">Teknik &numero;2</div>
+        <h3 class="inspiration-titel">Kaffegnidning – Texas möter sous vide</h3>
+        <p class="inspiration-text">
+          Populärt i amerikanska BBQ-kretsar och nu även bland sous vide-entusiaster: gnid in entrecôten med en blandning av finmalet espresso, rökt paprika, lite brunt socker och en nypa cayenne – minst 30 minuter (gärna över natten) innan vakuumpackning. Kaffets bitterhet skapar ett spännande djup mot köttets fettrika smak, och sockret karamelliseras dramatiskt i den glödheta stekpannan och bildar en nästan krispig bark på utsidan. Servera med chimichurri eller en klassisk bearnaise för att balansera de kraftiga smakerna.
+        </p>
+        <div class="inspiration-tagg">Rök &middot; Kaffebitterhet &middot; BBQ-fusion</div>
+      </div>
+
+      <!-- Tip 3: Hemma dry-age kombinerat med sous vide för dubbel kontroll -->
+      <div class="inspiration-kort">
+        <div class="inspiration-etikett">Teknik &numero;3</div>
+        <h3 class="inspiration-titel">Hemma dry-age i 3–5 dagar, sedan sous vide</h3>
+        <p class="inspiration-text">
+          Kombinationen som ger restaurangresultat hemma: lägg entrecôten oövertäckt på ett galler (med en tallrik under) i kylskåpet i 3–5 dagar. Se till att luft cirkulerar runt hela köttet. Ytan torkar och koncentrerar smakerna på ett sätt som påminner om professionell dry-aging. Skär sedan bort det yttersta tunna lagret och kör sous vide som vanligt. Den torra, koncentrerade ytan bryns sedan fenomenalt i gjutjärnspannan – du får dubbel kontroll: exakt innertemperatur från cirkulatorn och maximal smakskikt från åldringsprocessen. Tålamod är det enda kravet.
+        </p>
+        <div class="inspiration-tagg">Dry-age &middot; Tålamod belönat &middot; Proffsresultat</div>
+      </div>
+
+    </section>
+
+    <!-- Sidfot -->
+    <footer>
+      <p>God aptit &mdash; recept framtaget med omsorg</p>
+    </footer>
+
+  </div>
+
+  <!-- Hamburger-toggle för mobilnavigation -->
+  <script>
+    document.getElementById('hamburger').addEventListener('click', function () {
+      const links = document.getElementById('nav-links');
+      links.classList.toggle('oppet');
+      this.setAttribute('aria-expanded', links.classList.contains('oppet'));
+    });
+  </script>
+</body>
+</html>

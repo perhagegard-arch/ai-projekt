@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <!-- Metadata och teckenkodning -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Min Vinkällare</title>
+  <style>
+    /* Grundläggande återställning och mörkt vin-tema */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f0c14;
+      color: #e8ddd5;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── NAVIGERINGSMENY ──────────────────────────────────────── */
+    .sitenav {
+      background: rgba(6, 4, 14, 0.97);
+      border-bottom: 1px solid #3e2d55;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .sitenav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      padding: 0 1.5rem;
+    }
+    .nav-links { display: flex; }
+    .sitenav-link {
+      display: block;
+      padding: 0.9rem 1.1rem;
+      text-decoration: none;
+      color: #9c84b8;
+      font-size: 0.78rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+    }
+    .sitenav-link:hover { color: #e8ddd5; }
+    .sitenav-link.aktiv { color: #c42840; border-bottom-color: #c42840; }
+
+    /* Hamburger-knapp för mobil */
+    .hamburger {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.9rem 1rem;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      margin-left: auto;
+    }
+    .hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: #9c84b8;
+      border-radius: 2px;
+      transition: background 0.2s;
+    }
+    .hamburger:hover span { background: #e8ddd5; }
+
+    /* ── HERO ─────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 3.5rem 1rem 2.5rem;
+      background: linear-gradient(180deg, #1e0f2e 0%, #0f0c14 100%);
+      border-bottom: 1px solid #281e3a;
+    }
+    .hero-ikon { font-size: 4rem; display: block; margin-bottom: 0.75rem; }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: #e8ddd5;
+      margin-bottom: 0.5rem;
+    }
+    .hero h1 strong { color: #c42840; font-weight: 700; }
+    .hero-meta { color: #8c7aa0; font-size: 0.85rem; letter-spacing: 0.1em; }
+
+    /* ── CONTAINER ────────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+
+    /* ── FILTER-RAD ───────────────────────────────────────────── */
+    .filter-rad {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1.2rem 1.5rem;
+      background: #1f1530;
+      border: 1px solid #3e2d55;
+      border-radius: 14px;
+    }
+    .sok-wrapper { position: relative; flex: 1; min-width: 200px; }
+    .sok-ikon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #6a5888;
+      pointer-events: none;
+    }
+    #sok {
+      width: 100%;
+      background: #0f0c14;
+      border: 1px solid #3e2d55;
+      border-radius: 8px;
+      color: #e8ddd5;
+      padding: 0.65rem 1rem 0.65rem 2.5rem;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #sok:focus { border-color: #c42840; box-shadow: 0 0 0 3px rgba(155,27,48,0.15); }
+    #sok::placeholder { color: #5c4878; }
+
+    /* Typ-filterknappar */
+    .typ-knappar { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+    .typ-btn {
+      background: #0f0c14;
+      border: 1px solid #3e2d55;
+      color: #9c84b8;
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .typ-btn:hover { border-color: #c42840; color: #e8ddd5; }
+    .typ-btn.aktiv { background: #c42840; border-color: #c42840; color: white; }
+
+    /* Antal-visning */
+    #antal-text {
+      font-size: 0.8rem;
+      color: #8c7aa0;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    /* ── VINGITTER MED 3D-FLIP ────────────────────────────────── */
+    .vin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 1.25rem;
+    }
+
+    /* Flipcontainer */
+    .vin-kort { perspective: 1000px; height: 340px; cursor: pointer; }
+    .vin-kort-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+    }
+    /* Klicka för att flippa */
+    .vin-kort.flippad .vin-kort-inner { transform: rotateY(180deg); }
+
+    /* Gemensamma egenskaper för fram och bak */
+    .vin-fram, .vin-bak {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #3e2d55;
+    }
+
+    /* ── FRAMSIDA ─────────────────────────────────────────────── */
+    .vin-fram { background: #1f1530; display: flex; flex-direction: column; }
+    .vin-bild-yta {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #160d20;
+    }
+    .vin-bild-yta img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Platshållare utan bild */
+    .vin-platshallare {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      width: 100%;
+      height: 100%;
+      color: #3e2d55;
+    }
+    .vin-platshallare .stor { font-size: 3.5rem; }
+    .vin-platshallare .liten {
+      font-size: 0.7rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    /* Typmärkning */
+    .vin-typ-badge {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: rgba(10, 6, 18, 0.88);
+    }
+    .badge-rott { color: #e07070; border: 1px solid #5a1a1a; }
+    .badge-vitt { color: #d4c870; border: 1px solid #5a5010; }
+    .badge-rose { color: #e070a0; border: 1px solid #5a1a40; }
+    .badge-mouss { color: #70d4c8; border: 1px solid #105a50; }
+    .badge-annan { color: #a0a0a0; border: 1px solid #404040; }
+
+    /* Kortinfo längst ner på framsidan */
+    .vin-kort-info {
+      padding: 0.65rem 0.75rem;
+      border-top: 1px solid #281e3a;
+    }
+    .vin-kort-namn {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #e8ddd5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 0.15rem;
+    }
+    .vin-kort-meta { font-size: 0.7rem; color: #9c84b8; }
+
+    /* ── BAKSIDA ──────────────────────────────────────────────── */
+    .vin-bak {
+      background: #1f1530;
+      transform: rotateY(180deg);
+      display: flex;
+      flex-direction: column;
+    }
+    .vin-bak-bild {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #160d20;
+    }
+    .vin-bak-bild img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Baksida utan bild – visa detaljer */
+    .vin-detaljer {
+      padding: 0.75rem 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 0.25rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .vin-arsgang { font-size: 2.4rem; font-weight: 700; color: #d4a843; line-height: 1; text-align: center; }
+    .vin-detalj-rad { font-size: 0.75rem; color: #a890b8; line-height: 1.5; text-align: center; }
+
+    /* AI-genererade smaknoter */
+    .vin-smaknot {
+      margin-top: 0.6rem;
+      padding-top: 0.6rem;
+      border-top: 1px solid #3e2d55;
+      font-size: 0.72rem;
+      color: #d0c0e0;
+      line-height: 1.65;
+      white-space: pre-line;
+    }
+    /* Laddningsindikator medan Gemini analyserar */
+    .vin-smaknot.laddar {
+      color: #9c84b8;
+      font-style: italic;
+      text-align: center;
+    }
+    /* Hint när ingen smakanalys finns än */
+    .vin-smaknot-hint {
+      margin-top: 0.6rem;
+      padding: 0.5rem 0.75rem;
+      border: 1px dashed #3e2d55;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      color: #6a5888;
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* Knappar på baksidan */
+    .vin-bak-knappar {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 0.4rem;
+      padding: 0.6rem;
+      border-top: 1px solid #281e3a;
+    }
+    .btn-bild {
+      background: #281e3a;
+      border: 1px solid #3e2d55;
+      color: #a890b8;
+      padding: 0.4rem 0;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-align: center;
+    }
+    .btn-bild:hover { background: #3e2d55; color: #e8ddd5; }
+    .btn-drucken {
+      background: #921a32;
+      border: 1px solid #c42840;
+      color: #fbbfca;
+      padding: 0.4rem 0;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-drucken:hover { background: #c42840; color: white; }
+    .btn-redigera {
+      background: #1e2a3a;
+      border: 1px solid #3a5068;
+      color: #93c5fd;
+      padding: 0.4rem 0;
+      border-radius: 6px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-redigera:hover { background: #2a3f55; color: #bfdbfe; }
+
+    /* ── TOM KÄLLARE ──────────────────────────────────────────── */
+    .tom-kall {
+      text-align: center;
+      padding: 5rem 2rem;
+      display: none;
+    }
+    .tom-kall .ikon { font-size: 5rem; margin-bottom: 1rem; display: block; }
+    .tom-kall h3 { font-size: 1.5rem; color: #8c7aa0; font-weight: 300; }
+    .tom-kall p { color: #8c7aa0; margin-top: 0.5rem; font-size: 0.9rem; }
+    .tom-kall .tom-knapp {
+      display: inline-block;
+      margin-top: 1.75rem;
+      background: linear-gradient(135deg, #c42840, #921a32);
+      color: white;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(155,27,48,0.45);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .tom-kall .tom-knapp:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(155,27,48,0.65);
+    }
+
+    /* Instruktionspil mot flytande knappen */
+    .pil-hint {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 1.5rem;
+      color: #c42840;
+      font-size: 0.75rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      text-align: right;
+      animation: pilanim 1.5s ease-in-out infinite;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .pil-hint.visa { opacity: 1; }
+    @keyframes pilanim {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(4px); }
+    }
+
+    /* ── MODAL ────────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.aktiv { display: flex; }
+    .modal-kort {
+      background: #1f1530;
+      border: 1px solid #3e2d55;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.85);
+      animation: modal-in 0.2s ease;
+    }
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(0.96) translateY(10px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .modal-rubrik {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    .modal-rubrik span { font-size: 1.3rem; color: #d4a843; font-weight: 600; }
+    .modal-stang {
+      background: none;
+      border: none;
+      color: #6a5888;
+      font-size: 1.8rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      transition: color 0.15s;
+    }
+    .modal-stang:hover { color: #e8ddd5; }
+
+    /* Formulärfält */
+    .form-rad { margin-bottom: 1rem; }
+    .form-rad label {
+      display: block;
+      font-size: 0.74rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #9c84b8;
+      margin-bottom: 0.35rem;
+    }
+    .form-rad input, .form-rad select, .form-rad textarea {
+      width: 100%;
+      background: #0f0c14;
+      border: 1px solid #3e2d55;
+      border-radius: 8px;
+      color: #e8ddd5;
+      font-size: 0.9rem;
+      padding: 0.6rem 0.85rem;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+      resize: vertical;
+    }
+    .form-rad input:focus, .form-rad select:focus, .form-rad textarea:focus {
+      border-color: #c42840;
+      box-shadow: 0 0 0 3px rgba(155,27,48,0.15);
+    }
+    .form-rad input::placeholder, .form-rad textarea::placeholder { color: #5c4878; }
+    .form-rad select option { background: #1f1530; }
+    .tvakol { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .form-knappar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    .btn-avbryt {
+      background: none;
+      border: 1px solid #3e2d55;
+      color: #9c84b8;
+      padding: 0.65rem 1.4rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .btn-avbryt:hover { border-color: #c42840; color: #e8ddd5; }
+    .btn-spara {
+      background: linear-gradient(135deg, #c42840, #921a32);
+      border: none;
+      color: white;
+      padding: 0.65rem 1.6rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-spara:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    /* ── FLYTANDE KNAPP ───────────────────────────────────────── */
+    .lagg-till-btn {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: linear-gradient(135deg, #c42840, #921a32);
+      color: white;
+      border: none;
+      padding: 0.85rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 999px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(155,27,48,0.5);
+      transition: transform 0.15s, box-shadow 0.15s;
+      z-index: 50;
+    }
+    .lagg-till-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(155,27,48,0.65);
+    }
+
+    /* ── TOAST ────────────────────────────────────────────────── */
+    .toast {
+      position: fixed;
+      bottom: 5.5rem;
+      right: 2rem;
+      background: #16a34a;
+      color: white;
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.3s, transform 0.3s;
+      pointer-events: none;
+      z-index: 300;
+    }
+    .toast.visa { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIV DESIGN ─────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .sitenav-inner { flex-wrap: wrap; }
+      .hamburger { display: flex; }
+      .nav-links {
+        display: none; flex-direction: column; width: 100%;
+        border-top: 1px solid #3e2d55; padding-bottom: 0.25rem;
+      }
+      .nav-links.oppet { display: flex; }
+      .sitenav-link {
+        border-bottom: none !important;
+        border-left: 3px solid transparent;
+        padding: 0.75rem 1.2rem;
+      }
+      .sitenav-link.aktiv { border-left-color: #c42840 !important; }
+      .vin-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+      .tvakol { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Navigeringsmeny -->
+  <nav class="sitenav">
+    <div class="sitenav-inner">
+      <div class="nav-links" id="nav-links">
+        <a href="index.html"      class="sitenav-link">🏠 Hem</a>
+        <a href="sousvide.html"   class="sitenav-link">♨️ Sous Vide Dagbok</a>
+        <a href="vinkallare.html" class="sitenav-link aktiv">🍷 Vinkällare</a>
+      </div>
+      <button class="hamburger" id="hamburger" aria-label="Öppna meny" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Hero-sektion -->
+  <div class="hero">
+    <span class="hero-ikon">🍷</span>
+    <h1>Min <strong>Vinkällare</strong></h1>
+    <p class="hero-meta" id="hero-meta">Laddar källaren…</p>
+  </div>
+
+  <!-- Huvudinnehåll -->
+  <div class="container">
+
+    <!-- Filter-rad -->
+    <div class="filter-rad">
+      <div class="sok-wrapper">
+        <span class="sok-ikon">🔍</span>
+        <input type="text" id="sok" placeholder="Sök druva, vin, land, region…" autocomplete="off">
+      </div>
+      <div class="typ-knappar">
+        <button class="typ-btn aktiv" data-typ="">Alla</button>
+        <button class="typ-btn" data-typ="Rött">Rött</button>
+        <button class="typ-btn" data-typ="Vitt">Vitt</button>
+        <button class="typ-btn" data-typ="Rosé">Rosé</button>
+        <button class="typ-btn" data-typ="Mousserande">Mousserande</button>
+        <button class="typ-btn" data-typ="Dessertvin">Dessertvin</button>
+      </div>
+      <span id="antal-text"></span>
+    </div>
+
+    <!-- Vingittret – fylls av JavaScript -->
+    <div class="vin-grid" id="vin-grid"></div>
+
+    <!-- Visas när källaren är tom eller filtrering ger noll träffar -->
+    <div class="tom-kall" id="tom-kall">
+      <span class="ikon">🍾</span>
+      <h3 id="tom-rubrik">Källaren är tom</h3>
+      <p id="tom-text">Lägg till din första flaska!</p>
+      <!-- Synlig knapp direkt i det tomma läget -->
+      <button class="tom-knapp" id="tom-lagg-till-btn">＋ Lägg till flaska</button>
+    </div>
+
+  </div>
+
+  <!-- Flytande knapp – alltid synlig längst ner till höger -->
+  <button class="lagg-till-btn" id="open-modal">＋ Lägg till flaska</button>
+  <div class="pil-hint" id="pil-hint">Klicka här ↓</div>
+
+  <!-- Toast-bekräftelse -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Modal för ny flaska -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-kort">
+      <div class="modal-rubrik">
+        <span id="modal-rubrik-text">Ny flaska</span>
+        <button class="modal-stang" id="modal-stang">&times;</button>
+      </div>
+      <form id="ny-vin-form">
+
+        <!-- Vinets namn -->
+        <div class="form-rad">
+          <label for="f-namn">Namn *</label>
+          <input type="text" id="f-namn" placeholder="t.ex. Château Margaux 2016" required>
+        </div>
+
+        <!-- Druva och typ -->
+        <div class="form-rad tvakol">
+          <div>
+            <label for="f-druva">Druva</label>
+            <input type="text" id="f-druva" placeholder="t.ex. Cabernet Sauvignon">
+          </div>
+          <div>
+            <label for="f-typ">Typ</label>
+            <select id="f-typ">
+              <option value="Rött">Rött</option>
+              <option value="Vitt">Vitt</option>
+              <option value="Rosé">Rosé</option>
+              <option value="Mousserande">Mousserande</option>
+              <option value="Dessertvin">Dessertvin</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Land och region -->
+        <div class="form-rad tvakol">
+          <div>
+            <label for="f-land">Land</label>
+            <input type="text" id="f-land" placeholder="t.ex. Frankrike">
+          </div>
+          <div>
+            <label for="f-region">Region</label>
+            <input type="text" id="f-region" placeholder="t.ex. Bordeaux">
+          </div>
+        </div>
+
+        <!-- Årgång -->
+        <div class="form-rad">
+          <label for="f-arsgang">Årgång</label>
+          <input type="number" id="f-arsgang" placeholder="t.ex. 2019" min="1900" max="2099">
+        </div>
+
+        <!-- Egna anteckningar -->
+        <div class="form-rad">
+          <label for="f-anteckningar">Anteckningar</label>
+          <textarea id="f-anteckningar" rows="2"
+            placeholder="Inköpsplats, pris, smaknoter…"></textarea>
+        </div>
+
+        <div class="form-knappar">
+          <button type="button" class="btn-avbryt" id="modal-avbryt">Avbryt</button>
+          <button type="submit" class="btn-spara" id="btn-spara">Spara flaska</button>
+        </div>
+        <!-- Dold: sätts till vinets id vid redigering, tomt vid ny flaska -->
+        <input type="hidden" id="f-vin-id" value="">
+      </form>
+    </div>
+  </div>
+
+  <script>
+    /* ── DATA ───────────────────────────────────────────────────── */
+    let ALLA_VIN  = [];
+    let AKTIV_TYP = '';
+    let toastTimer;
+
+    /* ── HÄMTA & RENDERA ────────────────────────────────────────── */
+    async function laddaVin() {
+      try {
+        const svar = await fetch('/api/vinkallare');
+        ALLA_VIN   = svar.ok ? await svar.json() : [];
+      } catch (_) { ALLA_VIN = []; }
+      renderVin();
+    }
+
+    function renderVin() {
+      const sok        = document.getElementById('sok').value.toLowerCase();
+      const filtrerade = ALLA_VIN.filter(v => {
+        const matchTyp = !AKTIV_TYP || v.typ === AKTIV_TYP;
+        const matchSok = !sok ||
+          (v.namn        || '').toLowerCase().includes(sok) ||
+          (v.druva       || '').toLowerCase().includes(sok) ||
+          (v.land        || '').toLowerCase().includes(sok) ||
+          (v.region      || '').toLowerCase().includes(sok) ||
+          (v.anteckningar|| '').toLowerCase().includes(sok);
+        return matchTyp && matchSok;
+      });
+
+      /* Uppdatera räknare i hero och filter */
+      document.getElementById('hero-meta').textContent =
+        `${ALLA_VIN.length} flaskor i källaren`;
+      document.getElementById('antal-text').textContent =
+        sok || AKTIV_TYP
+          ? `${filtrerade.length} av ${ALLA_VIN.length} flaskor`
+          : `${ALLA_VIN.length} flaskor`;
+
+      const grid   = document.getElementById('vin-grid');
+      const tomDiv = document.getElementById('tom-kall');
+
+      if (filtrerade.length === 0) {
+        grid.innerHTML = '';
+        tomDiv.style.display = '';
+        /* Anpassa tom-text beroende på orsak */
+        document.getElementById('tom-rubrik').textContent =
+          (sok || AKTIV_TYP) ? 'Inga träffar' : 'Källaren är tom';
+        document.getElementById('tom-text').textContent =
+          (sok || AKTIV_TYP)
+            ? 'Prova ett annat sökord eller filter.'
+            : 'Lägg till din första flaska med knappen nedan.';
+        return;
+      }
+
+      tomDiv.style.display = 'none';
+      grid.innerHTML = filtrerade.map(kortHtml).join('');
+    }
+
+    /* ── GENERERA KORT-HTML ─────────────────────────────────────── */
+    function typBadge(typ) {
+      const klass = { Rött:'rott', Vitt:'vitt', Rosé:'rose',
+                      Mousserande:'mouss' }[typ] || 'annan';
+      return `<span class="vin-typ-badge badge-${klass}">${typ || ''}</span>`;
+    }
+
+    function kortHtml(v) {
+      /* Framsidans bild eller platshållare */
+      const framBild = v.bild_fram
+        ? `<img src="/static/vinkallare/${v.bild_fram}" alt="${v.namn}">`
+        : `<div class="vin-platshallare">
+             <span class="stor">🍷</span>
+             <span class="liten">${v.typ || ''}</span>
+           </div>`;
+
+      /* Bygg smaknoter-sektionen */
+      const smaknot = v.smaknot
+        ? `<div class="vin-smaknot">${v.smaknot}</div>`
+        : `<div class="vin-smaknot-hint">
+             🤖 Ladda upp framsidan för AI-smakanalys
+           </div>`;
+
+      /* Baksidans bild eller detaljer */
+      const bakInnehall = v.bild_bak
+        ? `<img src="/static/vinkallare/${v.bild_bak}" alt="baksida"
+               style="width:100%;height:100%;object-fit:cover">`
+        : `<div class="vin-detaljer">
+             ${v.arsgang ? `<div class="vin-arsgang">${v.arsgang}</div>` : ''}
+             <div class="vin-detalj-rad">
+               ${[v.druva, v.region, v.land].filter(Boolean).join('<br>')}
+             </div>
+             ${smaknot}
+           </div>`;
+
+      /* Escape för onclick-strängar */
+      const namnSafe = v.namn.replace(/'/g, "\\'");
+
+      return `
+      <div class="vin-kort" id="kort-${v.id}"
+           onclick="vaxlaFlip(event, ${v.id})">
+        <div class="vin-kort-inner">
+
+          <!-- Framsida -->
+          <div class="vin-fram">
+            <div class="vin-bild-yta">${framBild}</div>
+            ${typBadge(v.typ)}
+            <div class="vin-kort-info">
+              <div class="vin-kort-namn">${v.namn}</div>
+              <div class="vin-kort-meta">
+                ${[v.druva, v.arsgang].filter(Boolean).join(' · ')}
+              </div>
+            </div>
+          </div>
+
+          <!-- Baksida -->
+          <div class="vin-bak">
+            <div class="vin-bak-bild">${bakInnehall}</div>
+            <div class="vin-bak-knappar">
+              <!-- Uppladdningsknappar för etikett -->
+              <label class="btn-bild" title="Byt framsida"
+                     onclick="event.stopPropagation()">
+                📷 Fram
+                <input type="file" accept="image/jpeg,image/png,image/webp"
+                       style="display:none"
+                       onchange="laddaUppVinBild(${v.id},'fram',this)">
+              </label>
+              <label class="btn-bild" title="Byt baksida"
+                     onclick="event.stopPropagation()">
+                📷 Bak
+                <input type="file" accept="image/jpeg,image/png,image/webp"
+                       style="display:none"
+                       onchange="laddaUppVinBild(${v.id},'bak',this)">
+              </label>
+              <!-- Redigera flaskans uppgifter -->
+              <button class="btn-redigera"
+                      onclick="event.stopPropagation();redigeraVin(${v.id})">
+                ✏️ Redigera
+              </button>
+              <!-- Radera drucken flaska -->
+              <button class="btn-drucken"
+                      onclick="event.stopPropagation();taBortVin(${v.id},'${namnSafe}')">
+                🍷 Drucken
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>`;
+    }
+
+    /* ── FLIP-LOGIK ─────────────────────────────────────────────── */
+    function vaxlaFlip(event, vinId) {
+      /* Klick på knappar och fileinputs ska inte trigga flip */
+      if (event.target.closest('button, label, input')) return;
+      document.getElementById(`kort-${vinId}`).classList.toggle('flippad');
+    }
+
+    /* ── BILDUPPLADDNING ────────────────────────────────────────── */
+    async function laddaUppVinBild(vinId, sida, input) {
+      const fil = input.files[0];
+      if (!fil) return;
+
+      /* Visa laddningsmeddelande – Gemini-analysen kan ta några sekunder */
+      visaToast(sida === 'fram'
+        ? '⏳ Laddar upp och analyserar med AI…'
+        : '⏳ Laddar upp baksida…');
+
+      const form = new FormData();
+      form.append('fil', fil);
+      try {
+        const svar = await fetch(`/api/vinkallare/${vinId}/bild/${sida}`,
+          { method: 'POST', body: form });
+        if (!svar.ok) { alert('Uppladdning misslyckades.'); return; }
+        const data = await svar.json();
+
+        /* Uppdatera lokalt och rendera om utan ny fetch */
+        const v = ALLA_VIN.find(v => v.id === vinId);
+        if (v) {
+          v[`bild_${sida}`] = data.bild;
+          /* Om Gemini returnerade smaknoter, spara dem också */
+          if (data.smaknot) v.smaknot = data.smaknot;
+        }
+        renderVin();
+
+        if (sida === 'fram' && data.smaknot) {
+          visaToast('✓ Bild uppladdad · AI-analys klar – vänd kortet!');
+        } else {
+          visaToast(`✓ ${sida === 'fram' ? 'Framsida' : 'Baksida'} uppladdad!`);
+        }
+      } catch (_) { alert('Serverfel vid uppladdning.'); }
+    }
+
+    /* ── REDIGERA FLASKA ───────────────────────────────────────── */
+    function redigeraVin(vinId) {
+      const v = ALLA_VIN.find(v => v.id === vinId);
+      if (!v) return;
+
+      /* Fyll i formuläret med befintliga värden */
+      document.getElementById('f-vin-id').value        = vinId;
+      document.getElementById('f-namn').value          = v.namn          || '';
+      document.getElementById('f-druva').value         = v.druva         || '';
+      document.getElementById('f-typ').value           = v.typ           || 'Rött';
+      document.getElementById('f-land').value          = v.land          || '';
+      document.getElementById('f-region').value        = v.region        || '';
+      document.getElementById('f-arsgang').value       = v.arsgang       || '';
+      document.getElementById('f-anteckningar').value  = v.anteckningar  || '';
+
+      /* Anpassa modal-rubrik och knapptext */
+      document.getElementById('modal-rubrik-text').textContent = 'Redigera flaska';
+      document.getElementById('btn-spara').textContent         = 'Spara ändringar';
+
+      const overlay = document.getElementById('modal-overlay');
+      overlay.classList.add('aktiv');
+      document.body.style.overflow = 'hidden';
+    }
+
+    /* ── TA BORT FLASKA ─────────────────────────────────────────── */
+    async function taBortVin(vinId, namn) {
+      if (!confirm(`Ta bort "${namn}" ur källaren?\n(Flaskan är drucken – åtgärden går inte att ångra.)`))
+        return;
+      try {
+        const svar = await fetch(`/api/vinkallare/${vinId}`, { method: 'DELETE' });
+        if (svar.ok) {
+          ALLA_VIN = ALLA_VIN.filter(v => v.id !== vinId);
+          renderVin();
+          visaToast('🍷 Skål! Flaskan är borttagen.');
+        }
+      } catch (_) { alert('Kunde inte ta bort flaskan.'); }
+    }
+
+    /* ── TOAST ──────────────────────────────────────────────────── */
+    function visaToast(text) {
+      const t = document.getElementById('toast');
+      t.textContent = text;
+      t.classList.add('visa');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('visa'), 2800);
+    }
+
+    /* ── MODAL ──────────────────────────────────────────────────── */
+    function initModal() {
+      const overlay  = document.getElementById('modal-overlay');
+      const openBtn  = document.getElementById('open-modal');
+      const stangBtn = document.getElementById('modal-stang');
+      const avbryt   = document.getElementById('modal-avbryt');
+      const form     = document.getElementById('ny-vin-form');
+
+      const oppna = () => {
+        document.getElementById('modal-rubrik-text').textContent = 'Ny flaska';
+        document.getElementById('btn-spara').textContent = 'Spara flaska';
+        document.getElementById('f-vin-id').value = '';
+        overlay.classList.add('aktiv');
+        document.body.style.overflow = 'hidden';
+      };
+      const stang = () => { overlay.classList.remove('aktiv'); document.body.style.overflow = ''; form.reset(); };
+
+      openBtn.addEventListener('click', oppna);
+      /* Knappen i det tomma läget öppnar samma modal */
+      const tomKnapp = document.getElementById('tom-lagg-till-btn');
+      if (tomKnapp) tomKnapp.addEventListener('click', oppna);
+      stangBtn.addEventListener('click', stang);
+      avbryt.addEventListener('click', stang);
+      overlay.addEventListener('click', e => { if (e.target === overlay) stang(); });
+
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+        const vinId = document.getElementById('f-vin-id').value;
+        const data = {
+          namn:         document.getElementById('f-namn').value.trim(),
+          druva:        document.getElementById('f-druva').value.trim(),
+          typ:          document.getElementById('f-typ').value,
+          land:         document.getElementById('f-land').value.trim(),
+          region:       document.getElementById('f-region').value.trim(),
+          arsgang:      +document.getElementById('f-arsgang').value || null,
+          anteckningar: document.getElementById('f-anteckningar').value.trim(),
+        };
+        try {
+          /* Redigera befintlig flaska eller lägg till ny */
+          const url    = vinId ? `/api/vinkallare/${vinId}` : '/api/vinkallare';
+          const metod  = vinId ? 'PATCH' : 'POST';
+          const svar   = await fetch(url, {
+            method:  metod,
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(data),
+          });
+          if (svar.ok) {
+            const sparat = await svar.json();
+            if (vinId) {
+              /* Ersätt den gamla posten i minnet */
+              const idx = ALLA_VIN.findIndex(v => v.id === sparat.id);
+              if (idx !== -1) ALLA_VIN[idx] = sparat;
+              visaToast(`✓ "${sparat.namn}" uppdaterad!`);
+            } else {
+              ALLA_VIN.push(sparat);
+              visaToast(`✓ "${sparat.namn}" tillagd i källaren!`);
+            }
+            stang();
+            renderVin();
+          }
+        } catch (_) { alert('Serverfel – kunde inte spara flaskan.'); }
+      });
+    }
+
+    /* ── SÖK & FILTER ───────────────────────────────────────────── */
+    function initFilter() {
+      document.getElementById('sok').addEventListener('input', renderVin);
+      document.querySelectorAll('.typ-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('.typ-btn').forEach(b => b.classList.remove('aktiv'));
+          btn.classList.add('aktiv');
+          AKTIV_TYP = btn.dataset.typ;
+          renderVin();
+        });
+      });
+    }
+
+    /* ── HAMBURGERMENY ──────────────────────────────────────────── */
+    function initHamburger() {
+      const btn   = document.getElementById('hamburger');
+      const links = document.getElementById('nav-links');
+      btn.addEventListener('click', function () {
+        links.classList.toggle('oppet');
+        this.setAttribute('aria-expanded', links.classList.contains('oppet'));
+      });
+    }
+
+    /* ── START ──────────────────────────────────────────────────── */
+    document.addEventListener('DOMContentLoaded', async () => {
+      await laddaVin();
+      initModal();
+      initFilter();
+      initHamburger();
+
+      /* Visa pil-hint mot flytande knappen när källaren är tom */
+      if (ALLA_VIN.length === 0) {
+        setTimeout(() => {
+          document.getElementById('pil-hint').classList.add('visa');
+        }, 800);
+      }
+    });
+  </script>
+
+</body>
+</html>

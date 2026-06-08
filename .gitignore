@@ -1,0 +1,10 @@
+# Autogenererade filer – ska inte checkas in
+vin-data.js
+vin-status.json
+
+# Python
+__pycache__/
+*.pyc
+
+# Claude-inställningar
+.claude/settings.local.json

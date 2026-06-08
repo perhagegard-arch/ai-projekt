@@ -1,0 +1,110 @@
+[
+  {
+    "namn":   "Château Solstice Réserve 2019",
+    "typ":    "Rött vin",
+    "druva":  "Cabernet Sauvignon, Petit Verdot",
+    "land":   "Frankrike – Bordeaux",
+    "pris":   "349 kr",
+    "antal":  3,
+    "status": "I lager"
+  },
+  {
+    "namn":   "Côte-Rôtie Les Grandes Places 2019",
+    "typ":    "Rött vin",
+    "druva":  "Syrah",
+    "land":   "Frankrike – Norra Rhône",
+    "pris":   "589 kr",
+    "antal":  1,
+    "status": "Sista flaskorna"
+  },
+  {
+    "namn":   "Barolo del Vecchio Maestro 2018",
+    "typ":    "Rött vin",
+    "druva":  "Nebbiolo",
+    "land":   "Italien – Piemonte",
+    "pris":   "495 kr",
+    "antal":  2,
+    "status": "Sista flaskorna"
+  },
+  {
+    "namn":   "Amarone della Valpolicella Classico 2017",
+    "typ":    "Rött vin",
+    "druva":  "Corvina, Rondinella, Molinara",
+    "land":   "Italien – Veneto",
+    "pris":   "649 kr",
+    "antal":  1,
+    "status": "Sista flaskorna"
+  },
+  {
+    "namn":   "Priorat Camí Pessebre 2018",
+    "typ":    "Rött vin",
+    "druva":  "Garnacha, Cariñena",
+    "land":   "Spanien – Priorat",
+    "pris":   "445 kr",
+    "antal":  4,
+    "status": "Begränsat antal"
+  },
+  {
+    "namn":   "Quinta da Pedra Negra Reserva 2020",
+    "typ":    "Rött vin",
+    "druva":  "Touriga Nacional, Tinta Roriz",
+    "land":   "Portugal – Douro",
+    "pris":   "265 kr",
+    "antal":  6,
+    "status": "I lager"
+  },
+  {
+    "namn":   "Penfolds Bin 389 Cabernet Shiraz 2020",
+    "typ":    "Rött vin",
+    "druva":  "Cabernet Sauvignon, Shiraz",
+    "land":   "Australien – South Australia",
+    "pris":   "379 kr",
+    "antal":  5,
+    "status": "I lager"
+  },
+  {
+    "namn":   "Domaine de la Lune Noire 2021",
+    "typ":    "Vitt vin",
+    "druva":  "Chardonnay",
+    "land":   "Frankrike – Bourgogne",
+    "pris":   "289 kr",
+    "antal":  5,
+    "status": "I lager"
+  },
+  {
+    "namn":   "Chablis Premier Cru Montée de Tonnerre 2022",
+    "typ":    "Vitt vin",
+    "druva":  "Chardonnay",
+    "land":   "Frankrike – Chablis",
+    "pris":   "319 kr",
+    "antal":  3,
+    "status": "Begränsat antal"
+  },
+  {
+    "namn":   "Sancerre La Croix du Roy 2022",
+    "typ":    "Vitt vin",
+    "druva":  "Sauvignon Blanc",
+    "land":   "Frankrike – Loire",
+    "pris":   "259 kr",
+    "antal":  7,
+    "status": "I lager"
+  },
+  {
+    "namn":   "Grüner Veltliner Smaragd Stein am Rain 2022",
+    "typ":    "Vitt vin",
+    "druva":  "Grüner Veltliner",
+    "land":   "Österrike – Wachau",
+    "pris":   "229 kr",
+    "antal":  4,
+    "status": "I lager"
+  },
+  {
+    "namn":   "Weingut Wieninger Nussberg Grande Reserve 2021",
+    "typ":    "Vitt vin",
+    "druva":  "Grüner Veltliner, Riesling",
+    "land":   "Österrike – Wien",
+    "pris":   "209 kr",
+    "antal":  8,
+    "status": "I lager"
+  }
+]
