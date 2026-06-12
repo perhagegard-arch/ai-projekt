@@ -4,6 +4,12 @@ En personlig hemmaköksplattform som samlar frys, vinkällare och kök i en enda
 
 ---
 
+## Startsida
+
+**[https://perhagegard-arch.github.io/ai-projekt/hub.html](https://perhagegard-arch.github.io/ai-projekt/hub.html)**
+
+---
+
 ## Vision
 
 Plattformen löser ett konkret vardagsproblem: vad ska man laga till middag med det man har?
