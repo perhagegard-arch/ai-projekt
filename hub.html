@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pers Kök & Vinkällare</title>
+  <style>
+    /* Basinställningar – mörkt tema per CLAUDE.md */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2.5rem 1rem 3rem;
+    }
+
+    /* Emblem och rubrik */
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .emblem {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      margin-bottom: 1rem;
+    }
+
+    .emblem-fallback {
+      font-size: 4.5rem;
+      line-height: 1;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      color: #f5f5f5;
+    }
+
+    .undertitel {
+      font-size: 0.85rem;
+      color: #666;
+      margin-top: 0.25rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* Överblicksrad */
+    .overblick {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .overblick-post {
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+      padding: 0.9rem 1rem;
+      border-right: 1px solid #2a2a2a;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    .overblick-post:last-child { border-right: none; }
+
+    .overblick-post .siffra {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      margin-bottom: 0.15rem;
+      letter-spacing: -0.01em;
+    }
+
+    /* Ingångskort */
+    .ingångar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .kort {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+      min-height: 160px;
+      padding: 1.75rem 1rem 1.5rem;
+      border-radius: 18px;
+      text-decoration: none;
+      color: #e0e0e0;
+      border: 1px solid transparent;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .kort:active { transform: scale(0.96); }
+
+    /* Hover bara på enheter med pekare (ej touch) */
+    @media (hover: hover) {
+      .kort:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .kort-ikon { font-size: 2.8rem; line-height: 1; }
+    .kort-namn  { font-size: 1.05rem; font-weight: 700; }
+
+    .snart {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #666;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 0.2rem 0.55rem;
+    }
+
+    /* Frysen – is-blå accent */
+    .kort-frys {
+      background: linear-gradient(145deg, #0d2a35, #0a1e27);
+      border-color: #1a5f7a;
+    }
+
+    /* Vinkällaren – vinröd accent */
+    .kort-vin {
+      background: linear-gradient(145deg, #2a0d14, #1e0a0f);
+      border-color: #7a1a2a;
+    }
+
+    /* Köket – guld-accent */
+    .kort-kok {
+      background: linear-gradient(145deg, #271d08, #1c1506);
+      border-color: #7a5f14;
+    }
+
+    /* Smal skärm: en kolumn med horisontella kort */
+    @media (max-width: 520px) {
+      .ingångar {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+      }
+
+      .kort {
+        flex-direction: row;
+        justify-content: flex-start;
+        min-height: 90px;
+        padding: 1.25rem 1.5rem;
+        gap: 1.25rem;
+      }
+
+      .kort-text { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img
+      src="Logga.png"
+      alt="Pers Kök & Vinkällare"
+      class="emblem"
+      onerror="this.style.display='none'; document.getElementById('emblem-fb').style.display='block';"
+    >
+    <div id="emblem-fb" class="emblem-fallback">👨‍🍳</div>
+    <h1>Pers Kök & Vinkällare</h1>
+    <p class="undertitel">Frys · Vinkällare · Kök</p>
+  </header>
+
+  <!-- Överblick – frysdata läses live från localStorage; övriga visas när etapp 2–3 är klara -->
+  <div class="overblick" role="status" aria-label="Snabböversikt">
+    <div class="overblick-post">
+      <span class="siffra" id="frys-antal">—</span>
+      förp i frysen
+    </div>
+    <div class="overblick-post">
+      <span class="siffra">—</span>
+      flaskor i källaren
+    </div>
+    <div class="overblick-post">
+      <span class="siffra">—</span>
+      loggade körningar
+    </div>
+  </div>
+
+  <nav class="ingångar" aria-label="Plattformens delar">
+
+    <a href="https://perhagegard-arch.github.io/frysregister/" class="kort kort-frys">
+      <span class="kort-ikon">🧊</span>
+      <div class="kort-text">
+        <div class="kort-namn">Frysen</div>
+      </div>
+    </a>
+
+    <a href="vinkallare-snart.html" class="kort kort-vin">
+      <span class="kort-ikon">🍷</span>
+      <div class="kort-text">
+        <div class="kort-namn">Vinkällaren</div>
+        <span class="snart">Kommer snart</span>
+      </div>
+    </a>
+
+    <a href="kok-snart.html" class="kort kort-kok">
+      <span class="kort-ikon">🍳</span>
+      <div class="kort-text">
+        <div class="kort-namn">Köket</div>
+        <span class="snart">Kommer snart</span>
+      </div>
+    </a>
+
+  </nav>
+
+  <script>
+    // Läs frysdata från localStorage.
+    // Nyckeln "frysregister_v1" är en JSON-array med objekt som har fältet qty.
+    // Fungerar bara på publicerad GitHub Pages (samma origin).
+    // Lokal fil (file://) ger SecurityError eller tomt svar – visa streck som fallback.
+    (function () {
+      if (window.location.protocol === 'file:') return; // lokal fil – streck visas
+
+      try {
+        var raw = localStorage.getItem('frysregister_v1');
+        if (!raw) return;
+
+        var varor = JSON.parse(raw);
+        var totalAntal = varor.reduce(function (sum, v) {
+          return sum + (Number(v.qty) || 0);
+        }, 0);
+
+        document.getElementById('frys-antal').textContent = totalAntal;
+      } catch (e) {
+        // Parsningsfel eller behörighetsfel – behåll streck
+      }
+    }());
+  </script>
+
+</body>
+</html>
