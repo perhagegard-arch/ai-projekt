@@ -532,6 +532,38 @@
 
     .etikettmagi-status.fel { color: #e05060; }
 
+    /* Analysresultat-kort – visas efter lyckad skanning */
+    .etikett-analys {
+      display: none;
+      background: #1a1a2e;
+      border: 1px solid #4a2a5a;
+      border-radius: 12px;
+      padding: 0.9rem 1rem;
+      margin-bottom: 1rem;
+      font-size: 0.84rem;
+      line-height: 1.55;
+      color: #ccc;
+    }
+
+    .etikett-analys.synlig { display: block; }
+
+    .etikett-analys-rubrik {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #c080e0;
+      margin-bottom: 0.65rem;
+    }
+
+    .etikett-analys p { margin-bottom: 0.45rem; }
+    .etikett-analys p:last-child { margin-bottom: 0; }
+
+    .analys-etikett {
+      display: block;
+      font-size: 0.72rem;
+      color: #777;
+      margin-bottom: 0.1rem;
+    }
+
     /* ── Responsivt ──────────────────────────────────────────────── */
     @media (max-width: 520px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -619,6 +651,7 @@
         <input type="file" accept="image/*" capture="environment" id="etikett-input" style="display:none">
         <button type="button" class="etikett-knapp" id="etikett-knapp">📷 Fota etikett</button>
         <div class="etikettmagi-status" id="etikettmagi-status"></div>
+        <div class="etikett-analys" id="etikett-analys"></div>
 
         <div class="formrad hel">
           <label>Namn *
@@ -848,6 +881,10 @@
       document.getElementById('f-antal').value = '1';
       document.getElementById('ta-bort-btn').style.display = 'none';
       document.getElementById('historik-sektion').style.display = 'none';
+      // Rensa analysresultatet från föregående skanning
+      const ap = document.getElementById('etikett-analys');
+      ap.innerHTML = ''; ap.classList.remove('synlig');
+      document.getElementById('etikettmagi-status').textContent = '';
       oppnaModal();
     });
 
@@ -1081,7 +1118,7 @@
           },
           body: JSON.stringify({
             model:      'claude-sonnet-4-6',
-            max_tokens: 400,
+            max_tokens: 1000,
             messages: [{
               role: 'user',
               content: [
@@ -1091,10 +1128,25 @@
                 },
                 {
                   type: 'text',
-                  text: 'Läs vinlabeln i bilden och svara med ENDAST ett JSON-objekt, inget annat:\n' +
-                        '{"namn":"...","typ":"rött|vitt|mousserande|rosé|sött","druva":"...",' +
-                        '"land":"...","region":"...","arsgang":2019,' +
-                        '"smaknot":"2-3 meningar om doft, smak och maträtter, på svenska"}'
+                  text: 'Läs vinlabeln i bilden och svara med ENDAST ett JSON-objekt, inget annat.\n\n' +
+                        'Format:\n' +
+                        '{\n' +
+                        '  "namn": "...",\n' +
+                        '  "typ": "rött|vitt|mousserande|rosé|sött",\n' +
+                        '  "druva": "...",\n' +
+                        '  "land": "...",\n' +
+                        '  "region": "...",\n' +
+                        '  "arsgang": 2019,\n' +
+                        '  "doft": "2-3 meningar om doftens karaktär och aromer",\n' +
+                        '  "smak": "2-3 meningar om smak, fyllighet, syra, tanniner och eftersmak",\n' +
+                        '  "passar_till": "konkreta maträtter, gärna vilt där det passar",\n' +
+                        '  "drinkfran": 2022,\n' +
+                        '  "dricktill": 2030,\n' +
+                        '  "lagring": "1-2 meningar om lagringspotential och när vinet är som bäst"\n' +
+                        '}\n\n' +
+                        'Bedöm drickfönstret (drinkfran/dricktill) utifrån vintyp, druva, region och årgång. ' +
+                        'Om etiketten inte ger tillräcklig information för en säker bedömning, sätt null på drinkfran och dricktill. ' +
+                        'Svara ENBART med JSON – inga förklaringar, inga staket, inget annat.'
                 }
               ]
             }]
@@ -1126,13 +1178,16 @@
         return;
       }
 
-      // Förifyll formulärfälten med det Claude läst av
+      // Förifyll grundfält
       if (data.namn)    document.getElementById('f-namn').value    = data.namn;
       if (data.druva)   document.getElementById('f-druva').value   = data.druva;
       if (data.land)    document.getElementById('f-land').value    = data.land;
       if (data.region)  document.getElementById('f-region').value  = data.region;
       if (data.arsgang) document.getElementById('f-arsgang').value = parseInt(data.arsgang) || '';
-      if (data.smaknot) document.getElementById('f-anteckningar').value = data.smaknot;
+
+      // Drickfönster – sätt bara om Claude gav numeriska värden
+      if (data.drinkfran) document.getElementById('f-drinkfran').value = parseInt(data.drinkfran) || '';
+      if (data.dricktill) document.getElementById('f-dricktill').value = parseInt(data.dricktill) || '';
 
       // Sätt vintyp – mappa till ett giltigt alternativ om möjligt
       const gyltigaTyper = ['rött', 'vitt', 'mousserande', 'rosé', 'sött'];
@@ -1141,10 +1196,41 @@
         document.getElementById('f-typ').value = typVal;
       }
 
+      // Bygg strukturerad anteckningstext av de fyra textsektionerna
+      const antDel = [];
+      if (data.doft)       antDel.push('🍷 Doft: '      + data.doft);
+      if (data.smak)       antDel.push('👅 Smak: '      + data.smak);
+      if (data.passar_till) antDel.push('🍽️ Passar till: ' + data.passar_till);
+      if (data.lagring)    antDel.push('🕰️ Lagring: '   + data.lagring);
+      if (antDel.length)   document.getElementById('f-anteckningar').value = antDel.join('\n\n');
+
+      // Visa analysresultatet snyggt formaterat i modalen
+      const preview = document.getElementById('etikett-analys');
+      const arsTxt  = data.arsgang ? ' ' + data.arsgang : '';
+      preview.innerHTML =
+        `<div class="etikett-analys-rubrik">${h(data.namn || 'Vin')}${h(String(arsTxt))}</div>` +
+        byggAnalysHtml(data);
+      preview.classList.add('synlig');
+
       knapp.disabled    = false;
       knapp.textContent = '📷 Fota etikett';
       visaInfo('✓ Fälten förfyllda – kontrollera och spara');
     });
+
+    // Bygger HTML för analysresultat-kortet
+    function byggAnalysHtml(d) {
+      const rader = [];
+      if (d.doft)        rader.push(['🍷 Doft', d.doft]);
+      if (d.smak)        rader.push(['👅 Smak', d.smak]);
+      if (d.passar_till) rader.push(['🍽️ Passar till', d.passar_till]);
+      if (d.lagring)     rader.push(['🕰️ Lagring', d.lagring]);
+      if (d.drinkfran || d.dricktill)
+        rader.push(['🗓️ Drickfönster', (d.drinkfran || '?') + '–' + (d.dricktill || '?')]);
+      return rader
+        .map(([etikett, text]) =>
+          `<p><span class="analys-etikett">${etikett}</span>${h(text)}</p>`)
+        .join('');
+    }
 
     // Skalar och komprimerar en bild via Canvas API
     // Returnerar ett Promise med base64-strängen (utan data:-prefix)
