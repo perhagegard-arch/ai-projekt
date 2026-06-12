@@ -1,1041 +1,987 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <!-- Metadata och teckenkodning -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Min Vinkällare</title>
+  <title>Vinkällaren – Pers Kök & Vinkällare</title>
   <style>
-    /* Grundläggande återställning och mörkt vin-tema */
+    /* Mörkt tema per CLAUDE.md */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #0f0c14;
-      color: #e8ddd5;
-      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
+      padding-bottom: 6rem;
     }
 
-    /* ── NAVIGERINGSMENY ──────────────────────────────────────── */
-    .sitenav {
-      background: rgba(6, 4, 14, 0.97);
-      border-bottom: 1px solid #3e2d55;
+    /* ── Header ─────────────────────────────────────────────────── */
+    .header {
       position: sticky;
       top: 0;
       z-index: 100;
-      backdrop-filter: blur(8px);
-    }
-    .sitenav-inner {
-      max-width: 1200px;
-      margin: 0 auto;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0.75rem 1.25rem;
       display: flex;
-      padding: 0 1.5rem;
+      align-items: center;
+      gap: 0.75rem;
     }
-    .nav-links { display: flex; }
-    .sitenav-link {
-      display: block;
-      padding: 0.9rem 1.1rem;
+
+    .header-emblem {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .header-titel {
+      font-size: 1.05rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .tillbaka {
+      color: #888;
       text-decoration: none;
-      color: #9c84b8;
-      font-size: 0.78rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      transition: color 0.2s;
-      border-bottom: 2px solid transparent;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.7rem;
+      border: 1px solid #333;
+      border-radius: 8px;
+      -webkit-tap-highlight-color: transparent;
       white-space: nowrap;
     }
-    .sitenav-link:hover { color: #e8ddd5; }
-    .sitenav-link.aktiv { color: #c42840; border-bottom-color: #c42840; }
 
-    /* Hamburger-knapp för mobil */
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.9rem 1rem;
-      flex-direction: column;
-      justify-content: center;
-      gap: 5px;
-      margin-left: auto;
-    }
-    .hamburger span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: #9c84b8;
-      border-radius: 2px;
-      transition: background 0.2s;
-    }
-    .hamburger:hover span { background: #e8ddd5; }
+    .tillbaka:hover { color: #e0e0e0; border-color: #555; }
 
-    /* ── HERO ─────────────────────────────────────────────────── */
-    .hero {
+    /* ── Huvudinnehåll ───────────────────────────────────────────── */
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem;
+    }
+
+    /* ── Statistikrad ────────────────────────────────────────────── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat-post {
       text-align: center;
-      padding: 3.5rem 1rem 2.5rem;
-      background: linear-gradient(180deg, #1e0f2e 0%, #0f0c14 100%);
-      border-bottom: 1px solid #281e3a;
+      padding: 0.8rem 0.5rem;
+      border-right: 1px solid #2a2a2a;
+      font-size: 0.75rem;
+      color: #777;
     }
-    .hero-ikon { font-size: 4rem; display: block; margin-bottom: 0.75rem; }
-    .hero h1 {
-      font-size: clamp(2rem, 5vw, 3rem);
-      font-weight: 300;
-      letter-spacing: 0.08em;
-      color: #e8ddd5;
-      margin-bottom: 0.5rem;
+
+    .stat-post:last-child { border-right: none; }
+
+    .stat-siffra {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      line-height: 1.25;
     }
-    .hero h1 strong { color: #c42840; font-weight: 700; }
-    .hero-meta { color: #8c7aa0; font-size: 0.85rem; letter-spacing: 0.1em; }
 
-    /* ── CONTAINER ────────────────────────────────────────────── */
-    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
-
-    /* ── FILTER-RAD ───────────────────────────────────────────── */
-    .filter-rad {
+    /* ── Filterrad ───────────────────────────────────────────────── */
+    .filterrad {
       display: flex;
-      gap: 1rem;
+      gap: 0.5rem;
       flex-wrap: wrap;
       align-items: center;
-      margin-bottom: 2rem;
-      padding: 1.2rem 1.5rem;
-      background: #1f1530;
-      border: 1px solid #3e2d55;
-      border-radius: 14px;
+      margin-bottom: 1.25rem;
     }
-    .sok-wrapper { position: relative; flex: 1; min-width: 200px; }
-    .sok-ikon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #6a5888;
-      pointer-events: none;
-    }
-    #sok {
-      width: 100%;
-      background: #0f0c14;
-      border: 1px solid #3e2d55;
-      border-radius: 8px;
-      color: #e8ddd5;
-      padding: 0.65rem 1rem 0.65rem 2.5rem;
-      font-size: 0.95rem;
+
+    .sok-input {
+      flex: 1;
+      min-width: 160px;
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #e0e0e0;
+      padding: 0.6rem 0.9rem;
+      font-size: 0.9rem;
       outline: none;
-      transition: border-color 0.2s;
     }
-    #sok:focus { border-color: #c42840; box-shadow: 0 0 0 3px rgba(155,27,48,0.15); }
-    #sok::placeholder { color: #5c4878; }
 
-    /* Typ-filterknappar */
-    .typ-knappar { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-    .typ-btn {
-      background: #0f0c14;
-      border: 1px solid #3e2d55;
-      color: #9c84b8;
-      padding: 0.4rem 0.9rem;
-      border-radius: 999px;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-    .typ-btn:hover { border-color: #c42840; color: #e8ddd5; }
-    .typ-btn.aktiv { background: #c42840; border-color: #c42840; color: white; }
+    .sok-input::placeholder { color: #555; }
+    .sok-input:focus { border-color: #555; }
 
-    /* Antal-visning */
-    #antal-text {
+    .filter-btn {
+      padding: 0.5rem 0.8rem;
+      border-radius: 20px;
+      border: 1px solid #333;
+      background: transparent;
+      color: #999;
       font-size: 0.8rem;
-      color: #8c7aa0;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
       white-space: nowrap;
-      margin-left: auto;
+      transition: all 0.12s;
     }
 
-    /* ── VINGITTER MED 3D-FLIP ────────────────────────────────── */
-    .vin-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 1.25rem;
-    }
+    .filter-btn.aktiv                        { background: #2a2a2a; border-color: #555; color: #e0e0e0; }
+    .filter-btn[data-typ="rött"].aktiv       { background: #2a0d14; border-color: #7a1a2a; color: #e07a8a; }
+    .filter-btn[data-typ="vitt"].aktiv       { background: #271d08; border-color: #7a5f14; color: #e0c06a; }
+    .filter-btn[data-typ="mousserande"].aktiv{ background: #0d2a1a; border-color: #1a7a4a; color: #6ae0a0; }
+    .filter-btn[data-typ="rosé"].aktiv       { background: #2a0d1a; border-color: #7a1a3a; color: #e07ab0; }
+    .filter-btn[data-typ="sött"].aktiv       { background: #271508; border-color: #7a4a14; color: #e0a06a; }
 
-    /* Flipcontainer */
-    .vin-kort { perspective: 1000px; height: 340px; cursor: pointer; }
-    .vin-kort-inner {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
-      transform-style: preserve-3d;
-    }
-    /* Klicka för att flippa */
-    .vin-kort.flippad .vin-kort-inner { transform: rotateY(180deg); }
-
-    /* Gemensamma egenskaper för fram och bak */
-    .vin-fram, .vin-bak {
-      position: absolute;
-      inset: 0;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1px solid #3e2d55;
-    }
-
-    /* ── FRAMSIDA ─────────────────────────────────────────────── */
-    .vin-fram { background: #1f1530; display: flex; flex-direction: column; }
-    .vin-bild-yta {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #160d20;
-    }
-    .vin-bild-yta img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* Platshållare utan bild */
-    .vin-platshallare {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.4rem;
-      width: 100%;
-      height: 100%;
-      color: #3e2d55;
-    }
-    .vin-platshallare .stor { font-size: 3.5rem; }
-    .vin-platshallare .liten {
-      font-size: 0.7rem;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-
-    /* Typmärkning */
-    .vin-typ-badge {
-      position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      padding: 0.2rem 0.55rem;
-      border-radius: 999px;
-      background: rgba(10, 6, 18, 0.88);
-    }
-    .badge-rott { color: #e07070; border: 1px solid #5a1a1a; }
-    .badge-vitt { color: #d4c870; border: 1px solid #5a5010; }
-    .badge-rose { color: #e070a0; border: 1px solid #5a1a40; }
-    .badge-mouss { color: #70d4c8; border: 1px solid #105a50; }
-    .badge-annan { color: #a0a0a0; border: 1px solid #404040; }
-
-    /* Kortinfo längst ner på framsidan */
-    .vin-kort-info {
-      padding: 0.65rem 0.75rem;
-      border-top: 1px solid #281e3a;
-    }
-    .vin-kort-namn {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: #e8ddd5;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      margin-bottom: 0.15rem;
-    }
-    .vin-kort-meta { font-size: 0.7rem; color: #9c84b8; }
-
-    /* ── BAKSIDA ──────────────────────────────────────────────── */
-    .vin-bak {
-      background: #1f1530;
-      transform: rotateY(180deg);
-      display: flex;
-      flex-direction: column;
-    }
-    .vin-bak-bild {
-      flex: 1;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #160d20;
-    }
-    .vin-bak-bild img { width: 100%; height: 100%; object-fit: cover; }
-
-    /* Baksida utan bild – visa detaljer */
-    .vin-detaljer {
-      padding: 0.75rem 1rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      gap: 0.25rem;
-      overflow-y: auto;
-      flex: 1;
-    }
-    .vin-arsgang { font-size: 2.4rem; font-weight: 700; color: #d4a843; line-height: 1; text-align: center; }
-    .vin-detalj-rad { font-size: 0.75rem; color: #a890b8; line-height: 1.5; text-align: center; }
-
-    /* AI-genererade smaknoter */
-    .vin-smaknot {
-      margin-top: 0.6rem;
-      padding-top: 0.6rem;
-      border-top: 1px solid #3e2d55;
-      font-size: 0.72rem;
-      color: #d0c0e0;
-      line-height: 1.65;
-      white-space: pre-line;
-    }
-    /* Laddningsindikator medan Gemini analyserar */
-    .vin-smaknot.laddar {
-      color: #9c84b8;
-      font-style: italic;
-      text-align: center;
-    }
-    /* Hint när ingen smakanalys finns än */
-    .vin-smaknot-hint {
-      margin-top: 0.6rem;
+    .land-select {
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #999;
       padding: 0.5rem 0.75rem;
-      border: 1px dashed #3e2d55;
-      border-radius: 6px;
-      font-size: 0.68rem;
-      color: #6a5888;
-      text-align: center;
-      font-style: italic;
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
     }
 
-    /* Knappar på baksidan */
-    .vin-bak-knappar {
+    /* ── Vinkort-grid ────────────────────────────────────────────── */
+    .viner-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 0.4rem;
-      padding: 0.6rem;
-      border-top: 1px solid #281e3a;
-    }
-    .btn-bild {
-      background: #281e3a;
-      border: 1px solid #3e2d55;
-      color: #a890b8;
-      padding: 0.4rem 0;
-      border-radius: 6px;
-      font-size: 0.68rem;
-      cursor: pointer;
-      transition: background 0.15s;
-      text-align: center;
-    }
-    .btn-bild:hover { background: #3e2d55; color: #e8ddd5; }
-    .btn-drucken {
-      background: #921a32;
-      border: 1px solid #c42840;
-      color: #fbbfca;
-      padding: 0.4rem 0;
-      border-radius: 6px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-drucken:hover { background: #c42840; color: white; }
-    .btn-redigera {
-      background: #1e2a3a;
-      border: 1px solid #3a5068;
-      color: #93c5fd;
-      padding: 0.4rem 0;
-      border-radius: 6px;
-      font-size: 0.68rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s;
-    }
-    .btn-redigera:hover { background: #2a3f55; color: #bfdbfe; }
-
-    /* ── TOM KÄLLARE ──────────────────────────────────────────── */
-    .tom-kall {
-      text-align: center;
-      padding: 5rem 2rem;
-      display: none;
-    }
-    .tom-kall .ikon { font-size: 5rem; margin-bottom: 1rem; display: block; }
-    .tom-kall h3 { font-size: 1.5rem; color: #8c7aa0; font-weight: 300; }
-    .tom-kall p { color: #8c7aa0; margin-top: 0.5rem; font-size: 0.9rem; }
-    .tom-kall .tom-knapp {
-      display: inline-block;
-      margin-top: 1.75rem;
-      background: linear-gradient(135deg, #c42840, #921a32);
-      color: white;
-      border: none;
-      padding: 1rem 2.5rem;
-      font-size: 1.05rem;
-      font-weight: 600;
-      border-radius: 999px;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(155,27,48,0.45);
-      transition: transform 0.15s, box-shadow 0.15s;
-    }
-    .tom-kall .tom-knapp:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(155,27,48,0.65);
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
     }
 
-    /* Instruktionspil mot flytande knappen */
-    .pil-hint {
-      position: fixed;
-      bottom: 5.5rem;
-      right: 1.5rem;
-      color: #c42840;
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
+    .tomt-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: #555;
+    }
+
+    .tomt-ikon { font-size: 3.5rem; margin-bottom: 0.75rem; }
+
+    /* ── Vinkort ─────────────────────────────────────────────────── */
+    .vinkort {
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .vinkort:hover { border-color: #3a3a3a; }
+
+    .vinkort-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    /* Typ-badges */
+    .typ-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
       text-transform: uppercase;
-      text-align: right;
-      animation: pilanim 1.5s ease-in-out infinite;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    .pil-hint.visa { opacity: 1; }
-    @keyframes pilanim {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(4px); }
+      padding: 0.18rem 0.55rem;
+      border-radius: 20px;
+      flex-shrink: 0;
     }
 
-    /* ── MODAL ────────────────────────────────────────────────── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.85);
-      z-index: 200;
+    .typ-rott  { background: rgba(122,26,42,0.3);  color: #e07a8a; border: 1px solid #7a1a2a; }
+    .typ-vitt  { background: rgba(122,95,20,0.3);  color: #e0c06a; border: 1px solid #7a5f14; }
+    .typ-mous  { background: rgba(26,122,74,0.3);  color: #6ae0a0; border: 1px solid #1a7a4a; }
+    .typ-rose  { background: rgba(122,26,58,0.3);  color: #e07ab0; border: 1px solid #7a1a3a; }
+    .typ-sott  { background: rgba(122,74,20,0.3);  color: #e0a06a; border: 1px solid #7a4a14; }
+
+    .edit-knapp {
+      background: none;
+      border: none;
+      color: #444;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.15rem 0.3rem;
+      -webkit-tap-highlight-color: transparent;
+      transition: color 0.12s;
+      line-height: 1;
+    }
+
+    .edit-knapp:hover { color: #aaa; }
+
+    .vinkort-namn {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f0f0f0;
+      line-height: 1.3;
+    }
+
+    .vinkort-meta {
+      font-size: 0.78rem;
+      color: #888;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 0.5rem;
+    }
+
+    .hyllplats-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      color: #666;
+      background: #252525;
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+    }
+
+    /* Drickfönster */
+    .drinkfonstret {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.72rem;
+      border-radius: 8px;
+      padding: 0.22rem 0.55rem;
+    }
+
+    .drink-ok       { color: #555; }
+    .drink-snart    { background: rgba(180,130,0,0.14);  color: #e0b040; border: 1px solid rgba(180,130,0,0.3); }
+    .drink-passerat { background: rgba(180,50,50,0.14);  color: #e07070; border: 1px solid rgba(180,50,50,0.3); }
+
+    /* Flaskräknare */
+    .raknar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 0.6rem;
+      margin-top: 0.2rem;
+      border-top: 1px solid #242424;
+    }
+
+    .antal-display {
+      font-size: 1.4rem;
+      font-weight: 700;
+      min-width: 2.5rem;
+      text-align: center;
+    }
+
+    .antal-display.noll { color: #444; }
+
+    .raknar-knapp {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: #242424;
+      color: #e0e0e0;
+      font-size: 1.4rem;
+      cursor: pointer;
+      display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1rem;
-      backdrop-filter: blur(4px);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+      transition: background 0.1s;
     }
-    .modal-overlay.aktiv { display: flex; }
-    .modal-kort {
-      background: #1f1530;
-      border: 1px solid #3e2d55;
-      border-radius: 16px;
+
+    .raknar-knapp:active { background: #333; }
+    .raknar-knapp:disabled { opacity: 0.25; cursor: default; }
+
+    /* ── Export/import ───────────────────────────────────────────── */
+    .verktygsrad {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .verktygknapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1rem;
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #999;
+      font-size: 0.85rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s;
+    }
+
+    .verktygknapp:hover { background: #252525; color: #e0e0e0; }
+
+    /* ── FAB ─────────────────────────────────────────────────────── */
+    .fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 58px;
+      height: 58px;
+      border-radius: 17px;
+      background: #7a1a2a;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s, background 0.12s;
+      z-index: 50;
+    }
+
+    .fab:hover   { background: #9a2a3a; }
+    .fab:active  { transform: scale(0.93); }
+
+    /* ── Modal ───────────────────────────────────────────────────── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+    }
+
+    .modal-overlay.oppet { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: #1e1e1e;
+      border-radius: 20px 20px 0 0;
       width: 100%;
-      max-width: 500px;
+      max-width: 600px;
       max-height: 90vh;
       overflow-y: auto;
-      padding: 2rem;
-      box-shadow: 0 24px 64px rgba(0,0,0,0.85);
-      animation: modal-in 0.2s ease;
+      padding: 1.5rem 1.25rem 2.5rem;
+      transform: translateY(100%);
+      transition: transform 0.22s ease;
     }
-    @keyframes modal-in {
-      from { opacity: 0; transform: scale(0.96) translateY(10px); }
-      to   { opacity: 1; transform: scale(1) translateY(0); }
-    }
+
+    .modal-overlay.oppet .modal { transform: translateY(0); }
+
     .modal-rubrik {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
+      justify-content: space-between;
     }
-    .modal-rubrik span { font-size: 1.3rem; color: #d4a843; font-weight: 600; }
+
     .modal-stang {
       background: none;
       border: none;
-      color: #6a5888;
-      font-size: 1.8rem;
+      color: #555;
+      font-size: 1.4rem;
       cursor: pointer;
+      padding: 0.2rem 0.4rem;
       line-height: 1;
-      padding: 0;
-      transition: color 0.15s;
     }
-    .modal-stang:hover { color: #e8ddd5; }
+
+    .modal-stang:hover { color: #aaa; }
 
     /* Formulärfält */
-    .form-rad { margin-bottom: 1rem; }
-    .form-rad label {
-      display: block;
-      font-size: 0.74rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #9c84b8;
-      margin-bottom: 0.35rem;
-    }
-    .form-rad input, .form-rad select, .form-rad textarea {
-      width: 100%;
-      background: #0f0c14;
-      border: 1px solid #3e2d55;
-      border-radius: 8px;
-      color: #e8ddd5;
-      font-size: 0.9rem;
-      padding: 0.6rem 0.85rem;
-      outline: none;
-      transition: border-color 0.2s;
-      font-family: inherit;
-      resize: vertical;
-    }
-    .form-rad input:focus, .form-rad select:focus, .form-rad textarea:focus {
-      border-color: #c42840;
-      box-shadow: 0 0 0 3px rgba(155,27,48,0.15);
-    }
-    .form-rad input::placeholder, .form-rad textarea::placeholder { color: #5c4878; }
-    .form-rad select option { background: #1f1530; }
-    .tvakol { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-
-    .form-knappar {
-      display: flex;
-      justify-content: flex-end;
+    .formrad {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 0.75rem;
-      margin-top: 1.5rem;
+      margin-bottom: 0.75rem;
     }
-    .btn-avbryt {
-      background: none;
-      border: 1px solid #3e2d55;
-      color: #9c84b8;
-      padding: 0.65rem 1.4rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-    }
-    .btn-avbryt:hover { border-color: #c42840; color: #e8ddd5; }
-    .btn-spara {
-      background: linear-gradient(135deg, #c42840, #921a32);
-      border: none;
-      color: white;
-      padding: 0.65rem 1.6rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .btn-spara:hover { opacity: 0.88; transform: translateY(-1px); }
 
-    /* ── FLYTANDE KNAPP ───────────────────────────────────────── */
-    .lagg-till-btn {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: linear-gradient(135deg, #c42840, #921a32);
-      color: white;
+    .formrad.hel { grid-template-columns: 1fr; }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      color: #888;
+    }
+
+    input, select, textarea {
+      background: #282828;
+      border: 1px solid #383838;
+      border-radius: 8px;
+      color: #e0e0e0;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: #7a1a2a; }
+
+    textarea { resize: vertical; min-height: 70px; }
+
+    select option { background: #282828; }
+
+    /* Historik */
+    .historik-label {
+      font-size: 0.75rem;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 1rem 0 0.4rem;
+    }
+
+    .historik-lista {
+      list-style: none;
+      font-size: 0.78rem;
+      color: #555;
+    }
+
+    .historik-lista li {
+      display: flex;
+      gap: 0.75rem;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .hist-datum { color: #444; flex-shrink: 0; }
+
+    /* Modalknappar */
+    .modal-knappar {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .knapp-spara {
+      flex: 1;
+      min-width: 100px;
+      padding: 0.85rem;
+      background: #7a1a2a;
       border: none;
-      padding: 0.85rem 1.5rem;
+      border-radius: 12px;
+      color: #fff;
       font-size: 0.95rem;
-      font-weight: 600;
-      border-radius: 999px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 4px 20px rgba(155,27,48,0.5);
-      transition: transform 0.15s, box-shadow 0.15s;
-      z-index: 50;
-    }
-    .lagg-till-btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 28px rgba(155,27,48,0.65);
+      -webkit-tap-highlight-color: transparent;
     }
 
-    /* ── TOAST ────────────────────────────────────────────────── */
-    .toast {
-      position: fixed;
-      bottom: 5.5rem;
-      right: 2rem;
-      background: #16a34a;
-      color: white;
-      padding: 0.7rem 1.2rem;
-      border-radius: 8px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: opacity 0.3s, transform 0.3s;
-      pointer-events: none;
-      z-index: 300;
-    }
-    .toast.visa { opacity: 1; transform: translateY(0); }
+    .knapp-spara:hover { background: #9a2a3a; }
 
-    /* ── RESPONSIV DESIGN ─────────────────────────────────────── */
-    @media (max-width: 600px) {
-      .sitenav-inner { flex-wrap: wrap; }
-      .hamburger { display: flex; }
-      .nav-links {
-        display: none; flex-direction: column; width: 100%;
-        border-top: 1px solid #3e2d55; padding-bottom: 0.25rem;
-      }
-      .nav-links.oppet { display: flex; }
-      .sitenav-link {
-        border-bottom: none !important;
-        border-left: 3px solid transparent;
-        padding: 0.75rem 1.2rem;
-      }
-      .sitenav-link.aktiv { border-left-color: #c42840 !important; }
-      .vin-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
-      .tvakol { grid-template-columns: 1fr; }
+    .knapp-avbryt {
+      padding: 0.85rem 1.25rem;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 12px;
+      color: #aaa;
+      font-size: 0.95rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .knapp-slett {
+      padding: 0.85rem 1rem;
+      background: transparent;
+      border: 1px solid #4a1a1a;
+      border-radius: 12px;
+      color: #9a5050;
+      font-size: 0.95rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .knapp-slett:hover { background: rgba(90,26,26,0.3); }
+
+    /* ── Responsivt ──────────────────────────────────────────────── */
+    @media (max-width: 520px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat-post:nth-child(2) { border-right: none; }
+      .stat-post:nth-child(3),
+      .stat-post:nth-child(4) { border-top: 1px solid #2a2a2a; }
+      .formrad { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 600px) {
+      .modal-overlay { align-items: center; }
+      .modal { border-radius: 20px; margin: 1rem; max-height: 85vh; }
     }
   </style>
 </head>
-
 <body>
 
-  <!-- Navigeringsmeny -->
-  <nav class="sitenav">
-    <div class="sitenav-inner">
-      <div class="nav-links" id="nav-links">
-        <a href="index.html"      class="sitenav-link">🏠 Hem</a>
-        <a href="sousvide.html"   class="sitenav-link">♨️ Sous Vide Dagbok</a>
-        <a href="vinkallare.html" class="sitenav-link aktiv">🍷 Vinkällare</a>
-      </div>
-      <button class="hamburger" id="hamburger" aria-label="Öppna meny" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
+  <header class="header">
+    <img src="Logga.png" alt="" class="header-emblem"
+         onerror="this.style.display='none'">
+    <span class="header-titel">🍷 Vinkällaren</span>
+    <a href="hub.html" class="tillbaka">← Startsidan</a>
+  </header>
 
-  <!-- Hero-sektion -->
-  <div class="hero">
-    <span class="hero-ikon">🍷</span>
-    <h1>Min <strong>Vinkällare</strong></h1>
-    <p class="hero-meta" id="hero-meta">Laddar källaren…</p>
-  </div>
-
-  <!-- Huvudinnehåll -->
   <div class="container">
 
-    <!-- Filter-rad -->
-    <div class="filter-rad">
-      <div class="sok-wrapper">
-        <span class="sok-ikon">🔍</span>
-        <input type="text" id="sok" placeholder="Sök druva, vin, land, region…" autocomplete="off">
+    <!-- Statistikrad -->
+    <div class="stats">
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-flaskor">0</span>flaskor
       </div>
-      <div class="typ-knappar">
-        <button class="typ-btn aktiv" data-typ="">Alla</button>
-        <button class="typ-btn" data-typ="Rött">Rött</button>
-        <button class="typ-btn" data-typ="Vitt">Vitt</button>
-        <button class="typ-btn" data-typ="Rosé">Rosé</button>
-        <button class="typ-btn" data-typ="Mousserande">Mousserande</button>
-        <button class="typ-btn" data-typ="Dessertvin">Dessertvin</button>
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-viner">0</span>viner
       </div>
-      <span id="antal-text"></span>
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-aldst">—</span>äldsta årgång
+      </div>
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-lander">0</span>länder
+      </div>
     </div>
 
-    <!-- Vingittret – fylls av JavaScript -->
-    <div class="vin-grid" id="vin-grid"></div>
+    <!-- Filterrad -->
+    <div class="filterrad">
+      <input type="search" class="sok-input" id="sokruta"
+             placeholder="🔍  Sök vin, druva, land…">
+      <button class="filter-btn aktiv" data-typ="">Alla</button>
+      <button class="filter-btn" data-typ="rött">Rött</button>
+      <button class="filter-btn" data-typ="vitt">Vitt</button>
+      <button class="filter-btn" data-typ="mousserande">Mousse.</button>
+      <button class="filter-btn" data-typ="rosé">Rosé</button>
+      <button class="filter-btn" data-typ="sött">Sött</button>
+      <select class="land-select" id="land-filter">
+        <option value="">Alla länder</option>
+      </select>
+    </div>
 
-    <!-- Visas när källaren är tom eller filtrering ger noll träffar -->
-    <div class="tom-kall" id="tom-kall">
-      <span class="ikon">🍾</span>
-      <h3 id="tom-rubrik">Källaren är tom</h3>
-      <p id="tom-text">Lägg till din första flaska!</p>
-      <!-- Synlig knapp direkt i det tomma läget -->
-      <button class="tom-knapp" id="tom-lagg-till-btn">＋ Lägg till flaska</button>
+    <!-- Vinkort -->
+    <div class="viner-grid" id="viner-grid"></div>
+
+    <!-- Verktyg -->
+    <div class="verktygsrad">
+      <button class="verktygknapp" id="exportera-btn">↓ Säkerhetskopia</button>
+      <label class="verktygknapp">
+        ↑ Importera
+        <input type="file" accept=".json" id="importera-fil" style="display:none">
+      </label>
     </div>
 
   </div>
 
-  <!-- Flytande knapp – alltid synlig längst ner till höger -->
-  <button class="lagg-till-btn" id="open-modal">＋ Lägg till flaska</button>
-  <div class="pil-hint" id="pil-hint">Klicka här ↓</div>
+  <!-- FAB -->
+  <button class="fab" id="lagg-till-fab" title="Lägg till vin">＋</button>
 
-  <!-- Toast-bekräftelse -->
-  <div class="toast" id="toast"></div>
-
-  <!-- Modal för ny flaska -->
+  <!-- Modal -->
   <div class="modal-overlay" id="modal-overlay">
-    <div class="modal-kort">
+    <div class="modal">
       <div class="modal-rubrik">
-        <span id="modal-rubrik-text">Ny flaska</span>
-        <button class="modal-stang" id="modal-stang">&times;</button>
+        <span id="modal-titel">Lägg till vin</span>
+        <button class="modal-stang" id="modal-stang">✕</button>
       </div>
-      <form id="ny-vin-form">
 
-        <!-- Vinets namn -->
-        <div class="form-rad">
-          <label for="f-namn">Namn *</label>
-          <input type="text" id="f-namn" placeholder="t.ex. Château Margaux 2016" required>
+      <form id="vin-form" autocomplete="off">
+        <div class="formrad hel">
+          <label>Namn *
+            <input id="f-namn" type="text" placeholder="t.ex. Barolo del Vecchio Maestro 2018" required>
+          </label>
         </div>
-
-        <!-- Druva och typ -->
-        <div class="form-rad tvakol">
-          <div>
-            <label for="f-druva">Druva</label>
-            <input type="text" id="f-druva" placeholder="t.ex. Cabernet Sauvignon">
-          </div>
-          <div>
-            <label for="f-typ">Typ</label>
+        <div class="formrad">
+          <label>Typ
             <select id="f-typ">
-              <option value="Rött">Rött</option>
-              <option value="Vitt">Vitt</option>
-              <option value="Rosé">Rosé</option>
-              <option value="Mousserande">Mousserande</option>
-              <option value="Dessertvin">Dessertvin</option>
+              <option value="rött">Rött</option>
+              <option value="vitt">Vitt</option>
+              <option value="mousserande">Mousserande</option>
+              <option value="rosé">Rosé</option>
+              <option value="sött">Sött</option>
             </select>
-          </div>
+          </label>
+          <label>Druva
+            <input id="f-druva" type="text" placeholder="t.ex. Nebbiolo">
+          </label>
+        </div>
+        <div class="formrad">
+          <label>Land
+            <input id="f-land" type="text" placeholder="t.ex. Italien">
+          </label>
+          <label>Region
+            <input id="f-region" type="text" placeholder="t.ex. Piemonte">
+          </label>
+        </div>
+        <div class="formrad">
+          <label>Årgång
+            <input id="f-arsgang" type="number" placeholder="2018" min="1800" max="2100">
+          </label>
+          <label>Antal flaskor
+            <input id="f-antal" type="number" value="1" min="0" max="9999">
+          </label>
+        </div>
+        <div class="formrad">
+          <label>Hyllplats
+            <input id="f-hyllplats" type="text" placeholder="t.ex. A3">
+          </label>
+          <div></div>
+        </div>
+        <div class="formrad">
+          <label>Drick från (år)
+            <input id="f-drinkfran" type="number" placeholder="2024" min="1800" max="2100">
+          </label>
+          <label>Drick till (år)
+            <input id="f-dricktill" type="number" placeholder="2032" min="1800" max="2100">
+          </label>
+        </div>
+        <div class="formrad hel">
+          <label>Anteckningar
+            <textarea id="f-anteckningar" placeholder="Smaknoter, pris, köpplats…"></textarea>
+          </label>
         </div>
 
-        <!-- Land och region -->
-        <div class="form-rad tvakol">
-          <div>
-            <label for="f-land">Land</label>
-            <input type="text" id="f-land" placeholder="t.ex. Frankrike">
-          </div>
-          <div>
-            <label for="f-region">Region</label>
-            <input type="text" id="f-region" placeholder="t.ex. Bordeaux">
-          </div>
+        <div id="historik-sektion" style="display:none">
+          <p class="historik-label">Historik</p>
+          <ul class="historik-lista" id="historik-lista"></ul>
         </div>
 
-        <!-- Årgång -->
-        <div class="form-rad">
-          <label for="f-arsgang">Årgång</label>
-          <input type="number" id="f-arsgang" placeholder="t.ex. 2019" min="1900" max="2099">
+        <div class="modal-knappar">
+          <button type="button" class="knapp-slett" id="ta-bort-btn" style="display:none">
+            Ta bort
+          </button>
+          <button type="button" class="knapp-avbryt" id="avbryt-btn">Avbryt</button>
+          <button type="submit" class="knapp-spara">Spara</button>
         </div>
-
-        <!-- Egna anteckningar -->
-        <div class="form-rad">
-          <label for="f-anteckningar">Anteckningar</label>
-          <textarea id="f-anteckningar" rows="2"
-            placeholder="Inköpsplats, pris, smaknoter…"></textarea>
-        </div>
-
-        <div class="form-knappar">
-          <button type="button" class="btn-avbryt" id="modal-avbryt">Avbryt</button>
-          <button type="submit" class="btn-spara" id="btn-spara">Spara flaska</button>
-        </div>
-        <!-- Dold: sätts till vinets id vid redigering, tomt vid ny flaska -->
-        <input type="hidden" id="f-vin-id" value="">
       </form>
     </div>
   </div>
 
   <script>
-    /* ── DATA ───────────────────────────────────────────────────── */
-    let ALLA_VIN  = [];
-    let AKTIV_TYP = '';
-    let toastTimer;
+    // Datalagring i localStorage med prefix "vinkallare_"
+    const LS_NYCKEL = 'vinkallare_viner';
+    const AR_NU = new Date().getFullYear();
 
-    /* ── HÄMTA & RENDERA ────────────────────────────────────────── */
-    async function laddaVin() {
-      try {
-        const svar = await fetch('/api/vinkallare');
-        ALLA_VIN   = svar.ok ? await svar.json() : [];
-      } catch (_) { ALLA_VIN = []; }
-      renderVin();
+    let viner = [];
+    let filter = { typ: '', land: '', sok: '' };
+    let redigerarId = null;
+
+    // ── Data ────────────────────────────────────────────────────────
+
+    function ladda() {
+      try { viner = JSON.parse(localStorage.getItem(LS_NYCKEL) || '[]'); }
+      catch { viner = []; }
     }
 
-    function renderVin() {
-      const sok        = document.getElementById('sok').value.toLowerCase();
-      const filtrerade = ALLA_VIN.filter(v => {
-        const matchTyp = !AKTIV_TYP || v.typ === AKTIV_TYP;
-        const matchSok = !sok ||
-          (v.namn        || '').toLowerCase().includes(sok) ||
-          (v.druva       || '').toLowerCase().includes(sok) ||
-          (v.land        || '').toLowerCase().includes(sok) ||
-          (v.region      || '').toLowerCase().includes(sok) ||
-          (v.anteckningar|| '').toLowerCase().includes(sok);
-        return matchTyp && matchSok;
-      });
+    function spara() {
+      localStorage.setItem(LS_NYCKEL, JSON.stringify(viner));
+    }
 
-      /* Uppdatera räknare i hero och filter */
-      document.getElementById('hero-meta').textContent =
-        `${ALLA_VIN.length} flaskor i källaren`;
-      document.getElementById('antal-text').textContent =
-        sok || AKTIV_TYP
-          ? `${filtrerade.length} av ${ALLA_VIN.length} flaskor`
-          : `${ALLA_VIN.length} flaskor`;
+    function nyId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
 
-      const grid   = document.getElementById('vin-grid');
-      const tomDiv = document.getElementById('tom-kall');
+    function idag() {
+      return new Date().toISOString().slice(0, 10);
+    }
 
-      if (filtrerade.length === 0) {
-        grid.innerHTML = '';
-        tomDiv.style.display = '';
-        /* Anpassa tom-text beroende på orsak */
-        document.getElementById('tom-rubrik').textContent =
-          (sok || AKTIV_TYP) ? 'Inga träffar' : 'Källaren är tom';
-        document.getElementById('tom-text').textContent =
-          (sok || AKTIV_TYP)
-            ? 'Prova ett annat sökord eller filter.'
-            : 'Lägg till din första flaska med knappen nedan.';
+    // Returnerar 'snart', 'passerat' eller null baserat på drickfönster
+    function drinkStatus(v) {
+      if (!v.dricktill) return null;
+      const till = parseInt(v.dricktill);
+      if (AR_NU > till) return 'passerat';
+      if (till - AR_NU <= 2) return 'snart';
+      return null;
+    }
+
+    // ── Render ──────────────────────────────────────────────────────
+
+    function renderAllt() {
+      renderStats();
+      renderLandFilter();
+      renderGrid();
+    }
+
+    function renderStats() {
+      const total = viner.reduce((s, v) => s + (v.antal || 0), 0);
+      const lander = new Set(viner.filter(v => v.land).map(v => v.land)).size;
+      const artal = viner.filter(v => v.arsgang).map(v => v.arsgang);
+      document.getElementById('stat-flaskor').textContent = total;
+      document.getElementById('stat-viner').textContent = viner.length;
+      document.getElementById('stat-aldst').textContent = artal.length ? Math.min(...artal) : '—';
+      document.getElementById('stat-lander').textContent = lander;
+    }
+
+    function renderLandFilter() {
+      const sel = document.getElementById('land-filter');
+      const valt = sel.value;
+      const lander = [...new Set(viner.filter(v => v.land).map(v => v.land))].sort();
+      sel.innerHTML = '<option value="">Alla länder</option>' +
+        lander.map(l => `<option value="${h(l)}"${l === valt ? ' selected' : ''}>${h(l)}</option>`).join('');
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('viner-grid');
+      let lista = viner;
+
+      if (filter.typ) lista = lista.filter(v => v.typ === filter.typ);
+      if (filter.land) lista = lista.filter(v => v.land === filter.land);
+      if (filter.sok) {
+        const s = filter.sok.toLowerCase();
+        lista = lista.filter(v =>
+          [v.namn, v.druva, v.land, v.region].some(f => (f || '').toLowerCase().includes(s))
+        );
+      }
+
+      if (lista.length === 0) {
+        grid.innerHTML = `<div class="tomt-state">
+          <div class="tomt-ikon">🍷</div>
+          <p>${viner.length === 0
+            ? 'Vinkällaren är tom – tryck ＋ för att lägga till ditt första vin!'
+            : 'Inga viner matchar filtret.'}</p>
+        </div>`;
         return;
       }
 
-      tomDiv.style.display = 'none';
-      grid.innerHTML = filtrerade.map(kortHtml).join('');
+      grid.innerHTML = lista.map(vinkortHtml).join('');
+
+      lista.forEach(v => {
+        document.getElementById('plus-' + v.id).addEventListener('click', () => andraAntal(v.id, 1));
+        document.getElementById('minus-' + v.id).addEventListener('click', () => andraAntal(v.id, -1));
+        document.getElementById('edit-' + v.id).addEventListener('click', () => oppnaRedigera(v.id));
+      });
     }
 
-    /* ── GENERERA KORT-HTML ─────────────────────────────────────── */
-    function typBadge(typ) {
-      const klass = { Rött:'rott', Vitt:'vitt', Rosé:'rose',
-                      Mousserande:'mouss' }[typ] || 'annan';
-      return `<span class="vin-typ-badge badge-${klass}">${typ || ''}</span>`;
-    }
+    function vinkortHtml(v) {
+      const typKlass  = { rött:'typ-rott', vitt:'typ-vitt', mousserande:'typ-mous', rosé:'typ-rose', sött:'typ-sott' };
+      const typLabel  = { rött:'Rött', vitt:'Vitt', mousserande:'Mousserande', rosé:'Rosé', sött:'Sött' };
+      const ds = drinkStatus(v);
 
-    function kortHtml(v) {
-      /* Framsidans bild eller platshållare */
-      const framBild = v.bild_fram
-        ? `<img src="/static/vinkallare/${v.bild_fram}" alt="${v.namn}">`
-        : `<div class="vin-platshallare">
-             <span class="stor">🍷</span>
-             <span class="liten">${v.typ || ''}</span>
-           </div>`;
+      // Metarad: druva · land·region · årgång
+      const meta = [
+        v.druva,
+        [v.land, v.region].filter(Boolean).join(' · '),
+        v.arsgang ? String(v.arsgang) : ''
+      ].filter(Boolean).map(s => `<span>${h(s)}</span>`).join('');
 
-      /* Bygg smaknoter-sektionen */
-      const smaknot = v.smaknot
-        ? `<div class="vin-smaknot">${v.smaknot}</div>`
-        : `<div class="vin-smaknot-hint">
-             🤖 Ladda upp framsidan för AI-smakanalys
-           </div>`;
+      // Drickfönster-badge
+      let drinkBadge = '';
+      if (v.drinkfran || v.dricktill) {
+        const span = (v.drinkfran || '?') + '–' + (v.dricktill || '?');
+        if (ds === 'passerat')
+          drinkBadge = `<span class="drinkfonstret drink-passerat">⚠ Passerat fönster ${span}</span>`;
+        else if (ds === 'snart')
+          drinkBadge = `<span class="drinkfonstret drink-snart">⏳ Drick snart ${span}</span>`;
+        else
+          drinkBadge = `<span class="drinkfonstret drink-ok">🍷 ${span}</span>`;
+      }
 
-      /* Baksidans bild eller detaljer */
-      const bakInnehall = v.bild_bak
-        ? `<img src="/static/vinkallare/${v.bild_bak}" alt="baksida"
-               style="width:100%;height:100%;object-fit:cover">`
-        : `<div class="vin-detaljer">
-             ${v.arsgang ? `<div class="vin-arsgang">${v.arsgang}</div>` : ''}
-             <div class="vin-detalj-rad">
-               ${[v.druva, v.region, v.land].filter(Boolean).join('<br>')}
-             </div>
-             ${smaknot}
-           </div>`;
-
-      /* Escape för onclick-strängar */
-      const namnSafe = v.namn.replace(/'/g, "\\'");
-
-      return `
-      <div class="vin-kort" id="kort-${v.id}"
-           onclick="vaxlaFlip(event, ${v.id})">
-        <div class="vin-kort-inner">
-
-          <!-- Framsida -->
-          <div class="vin-fram">
-            <div class="vin-bild-yta">${framBild}</div>
-            ${typBadge(v.typ)}
-            <div class="vin-kort-info">
-              <div class="vin-kort-namn">${v.namn}</div>
-              <div class="vin-kort-meta">
-                ${[v.druva, v.arsgang].filter(Boolean).join(' · ')}
-              </div>
-            </div>
-          </div>
-
-          <!-- Baksida -->
-          <div class="vin-bak">
-            <div class="vin-bak-bild">${bakInnehall}</div>
-            <div class="vin-bak-knappar">
-              <!-- Uppladdningsknappar för etikett -->
-              <label class="btn-bild" title="Byt framsida"
-                     onclick="event.stopPropagation()">
-                📷 Fram
-                <input type="file" accept="image/jpeg,image/png,image/webp"
-                       style="display:none"
-                       onchange="laddaUppVinBild(${v.id},'fram',this)">
-              </label>
-              <label class="btn-bild" title="Byt baksida"
-                     onclick="event.stopPropagation()">
-                📷 Bak
-                <input type="file" accept="image/jpeg,image/png,image/webp"
-                       style="display:none"
-                       onchange="laddaUppVinBild(${v.id},'bak',this)">
-              </label>
-              <!-- Redigera flaskans uppgifter -->
-              <button class="btn-redigera"
-                      onclick="event.stopPropagation();redigeraVin(${v.id})">
-                ✏️ Redigera
-              </button>
-              <!-- Radera drucken flaska -->
-              <button class="btn-drucken"
-                      onclick="event.stopPropagation();taBortVin(${v.id},'${namnSafe}')">
-                🍷 Drucken
-              </button>
-            </div>
-          </div>
-
+      return `<div class="vinkort">
+        <div class="vinkort-header">
+          <span class="typ-badge ${typKlass[v.typ] || 'typ-rott'}">${typLabel[v.typ] || h(v.typ)}</span>
+          <button class="edit-knapp" id="edit-${v.id}" title="Redigera">✎</button>
+        </div>
+        <div class="vinkort-namn">${h(v.namn)}</div>
+        ${meta ? `<div class="vinkort-meta">${meta}</div>` : ''}
+        ${v.hyllplats ? `<div class="hyllplats-tag">📍 ${h(v.hyllplats)}</div>` : ''}
+        ${drinkBadge}
+        <div class="raknar">
+          <button class="raknar-knapp" id="minus-${v.id}"${v.antal <= 0 ? ' disabled' : ''}>−</button>
+          <span class="antal-display${v.antal === 0 ? ' noll' : ''}">${v.antal}</span>
+          <button class="raknar-knapp" id="plus-${v.id}">＋</button>
         </div>
       </div>`;
     }
 
-    /* ── FLIP-LOGIK ─────────────────────────────────────────────── */
-    function vaxlaFlip(event, vinId) {
-      /* Klick på knappar och fileinputs ska inte trigga flip */
-      if (event.target.closest('button, label, input')) return;
-      document.getElementById(`kort-${vinId}`).classList.toggle('flippad');
-    }
+    // ── Antal ±1 med historiklogg ────────────────────────────────────
 
-    /* ── BILDUPPLADDNING ────────────────────────────────────────── */
-    async function laddaUppVinBild(vinId, sida, input) {
-      const fil = input.files[0];
-      if (!fil) return;
-
-      /* Visa laddningsmeddelande – Gemini-analysen kan ta några sekunder */
-      visaToast(sida === 'fram'
-        ? '⏳ Laddar upp och analyserar med AI…'
-        : '⏳ Laddar upp baksida…');
-
-      const form = new FormData();
-      form.append('fil', fil);
-      try {
-        const svar = await fetch(`/api/vinkallare/${vinId}/bild/${sida}`,
-          { method: 'POST', body: form });
-        if (!svar.ok) { alert('Uppladdning misslyckades.'); return; }
-        const data = await svar.json();
-
-        /* Uppdatera lokalt och rendera om utan ny fetch */
-        const v = ALLA_VIN.find(v => v.id === vinId);
-        if (v) {
-          v[`bild_${sida}`] = data.bild;
-          /* Om Gemini returnerade smaknoter, spara dem också */
-          if (data.smaknot) v.smaknot = data.smaknot;
-        }
-        renderVin();
-
-        if (sida === 'fram' && data.smaknot) {
-          visaToast('✓ Bild uppladdad · AI-analys klar – vänd kortet!');
-        } else {
-          visaToast(`✓ ${sida === 'fram' ? 'Framsida' : 'Baksida'} uppladdad!`);
-        }
-      } catch (_) { alert('Serverfel vid uppladdning.'); }
-    }
-
-    /* ── REDIGERA FLASKA ───────────────────────────────────────── */
-    function redigeraVin(vinId) {
-      const v = ALLA_VIN.find(v => v.id === vinId);
+    function andraAntal(id, delta) {
+      const v = viner.find(v => v.id === id);
       if (!v) return;
+      v.antal = Math.max(0, (v.antal || 0) + delta);
+      v.historik = v.historik || [];
+      v.historik.unshift({ datum: idag(), text: delta > 0 ? 'Lade till 1 flaska' : 'Tog ut 1 flaska' });
+      spara();
+      renderAllt();
+    }
 
-      /* Fyll i formuläret med befintliga värden */
-      document.getElementById('f-vin-id').value        = vinId;
-      document.getElementById('f-namn').value          = v.namn          || '';
-      document.getElementById('f-druva').value         = v.druva         || '';
-      document.getElementById('f-typ').value           = v.typ           || 'Rött';
-      document.getElementById('f-land').value          = v.land          || '';
-      document.getElementById('f-region').value        = v.region        || '';
-      document.getElementById('f-arsgang').value       = v.arsgang       || '';
-      document.getElementById('f-anteckningar').value  = v.anteckningar  || '';
+    // ── Modal: öppna för nytt vin ────────────────────────────────────
 
-      /* Anpassa modal-rubrik och knapptext */
-      document.getElementById('modal-rubrik-text').textContent = 'Redigera flaska';
-      document.getElementById('btn-spara').textContent         = 'Spara ändringar';
+    document.getElementById('lagg-till-fab').addEventListener('click', () => {
+      redigerarId = null;
+      document.getElementById('modal-titel').textContent = 'Lägg till vin';
+      document.getElementById('vin-form').reset();
+      document.getElementById('f-antal').value = '1';
+      document.getElementById('ta-bort-btn').style.display = 'none';
+      document.getElementById('historik-sektion').style.display = 'none';
+      oppnaModal();
+    });
 
-      const overlay = document.getElementById('modal-overlay');
-      overlay.classList.add('aktiv');
+    // ── Modal: öppna för redigering ──────────────────────────────────
+
+    function oppnaRedigera(id) {
+      const v = viner.find(v => v.id === id);
+      if (!v) return;
+      redigerarId = id;
+      document.getElementById('modal-titel').textContent = 'Redigera vin';
+      document.getElementById('f-namn').value        = v.namn         || '';
+      document.getElementById('f-typ').value         = v.typ          || 'rött';
+      document.getElementById('f-druva').value       = v.druva        || '';
+      document.getElementById('f-land').value        = v.land         || '';
+      document.getElementById('f-region').value      = v.region       || '';
+      document.getElementById('f-arsgang').value     = v.arsgang      || '';
+      document.getElementById('f-antal').value       = v.antal        ?? 1;
+      document.getElementById('f-hyllplats').value   = v.hyllplats    || '';
+      document.getElementById('f-drinkfran').value   = v.drinkfran    || '';
+      document.getElementById('f-dricktill').value   = v.dricktill    || '';
+      document.getElementById('f-anteckningar').value= v.anteckningar || '';
+
+      const hist = v.historik || [];
+      const histSek = document.getElementById('historik-sektion');
+      if (hist.length) {
+        histSek.style.display = 'block';
+        document.getElementById('historik-lista').innerHTML = hist
+          .map(e => `<li><span class="hist-datum">${h(e.datum)}</span><span>${h(e.text)}</span></li>`)
+          .join('');
+      } else {
+        histSek.style.display = 'none';
+      }
+
+      document.getElementById('ta-bort-btn').style.display = '';
+      oppnaModal();
+    }
+
+    // ── Spara formulär ───────────────────────────────────────────────
+
+    document.getElementById('vin-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const ny = lasForm();
+
+      if (redigerarId) {
+        const idx = viner.findIndex(v => v.id === redigerarId);
+        const gammalt = viner[idx];
+        viner[idx] = { ...gammalt, ...ny };
+        if (ny.antal !== gammalt.antal) {
+          viner[idx].historik = viner[idx].historik || [];
+          viner[idx].historik.unshift({ datum: idag(), text: `Antal ändrat till ${ny.antal}` });
+        }
+      } else {
+        viner.unshift({ id: nyId(), historik: [{ datum: idag(), text: 'Inlagd' }], ...ny });
+      }
+
+      spara();
+      stangModal();
+      renderAllt();
+    });
+
+    function lasForm() {
+      return {
+        namn:         document.getElementById('f-namn').value.trim(),
+        typ:          document.getElementById('f-typ').value,
+        druva:        document.getElementById('f-druva').value.trim(),
+        land:         document.getElementById('f-land').value.trim(),
+        region:       document.getElementById('f-region').value.trim(),
+        arsgang:      parseInt(document.getElementById('f-arsgang').value)   || null,
+        antal:        parseInt(document.getElementById('f-antal').value)     || 0,
+        hyllplats:    document.getElementById('f-hyllplats').value.trim(),
+        drinkfran:    parseInt(document.getElementById('f-drinkfran').value) || null,
+        dricktill:    parseInt(document.getElementById('f-dricktill').value) || null,
+        anteckningar: document.getElementById('f-anteckningar').value.trim()
+      };
+    }
+
+    // ── Ta bort ──────────────────────────────────────────────────────
+
+    document.getElementById('ta-bort-btn').addEventListener('click', () => {
+      const v = viner.find(v => v.id === redigerarId);
+      if (!v || !confirm(`Ta bort "${v.namn}"?`)) return;
+      viner = viner.filter(v => v.id !== redigerarId);
+      spara();
+      stangModal();
+      renderAllt();
+    });
+
+    // ── Modal öppna/stäng ────────────────────────────────────────────
+
+    function oppnaModal() {
+      document.getElementById('modal-overlay').classList.add('oppet');
       document.body.style.overflow = 'hidden';
     }
 
-    /* ── TA BORT FLASKA ─────────────────────────────────────────── */
-    async function taBortVin(vinId, namn) {
-      if (!confirm(`Ta bort "${namn}" ur källaren?\n(Flaskan är drucken – åtgärden går inte att ångra.)`))
-        return;
-      try {
-        const svar = await fetch(`/api/vinkallare/${vinId}`, { method: 'DELETE' });
-        if (svar.ok) {
-          ALLA_VIN = ALLA_VIN.filter(v => v.id !== vinId);
-          renderVin();
-          visaToast('🍷 Skål! Flaskan är borttagen.');
-        }
-      } catch (_) { alert('Kunde inte ta bort flaskan.'); }
+    function stangModal() {
+      document.getElementById('modal-overlay').classList.remove('oppet');
+      document.body.style.overflow = '';
+      redigerarId = null;
     }
 
-    /* ── TOAST ──────────────────────────────────────────────────── */
-    function visaToast(text) {
-      const t = document.getElementById('toast');
-      t.textContent = text;
-      t.classList.add('visa');
-      clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => t.classList.remove('visa'), 2800);
-    }
-
-    /* ── MODAL ──────────────────────────────────────────────────── */
-    function initModal() {
-      const overlay  = document.getElementById('modal-overlay');
-      const openBtn  = document.getElementById('open-modal');
-      const stangBtn = document.getElementById('modal-stang');
-      const avbryt   = document.getElementById('modal-avbryt');
-      const form     = document.getElementById('ny-vin-form');
-
-      const oppna = () => {
-        document.getElementById('modal-rubrik-text').textContent = 'Ny flaska';
-        document.getElementById('btn-spara').textContent = 'Spara flaska';
-        document.getElementById('f-vin-id').value = '';
-        overlay.classList.add('aktiv');
-        document.body.style.overflow = 'hidden';
-      };
-      const stang = () => { overlay.classList.remove('aktiv'); document.body.style.overflow = ''; form.reset(); };
-
-      openBtn.addEventListener('click', oppna);
-      /* Knappen i det tomma läget öppnar samma modal */
-      const tomKnapp = document.getElementById('tom-lagg-till-btn');
-      if (tomKnapp) tomKnapp.addEventListener('click', oppna);
-      stangBtn.addEventListener('click', stang);
-      avbryt.addEventListener('click', stang);
-      overlay.addEventListener('click', e => { if (e.target === overlay) stang(); });
-
-      form.addEventListener('submit', async e => {
-        e.preventDefault();
-        const vinId = document.getElementById('f-vin-id').value;
-        const data = {
-          namn:         document.getElementById('f-namn').value.trim(),
-          druva:        document.getElementById('f-druva').value.trim(),
-          typ:          document.getElementById('f-typ').value,
-          land:         document.getElementById('f-land').value.trim(),
-          region:       document.getElementById('f-region').value.trim(),
-          arsgang:      +document.getElementById('f-arsgang').value || null,
-          anteckningar: document.getElementById('f-anteckningar').value.trim(),
-        };
-        try {
-          /* Redigera befintlig flaska eller lägg till ny */
-          const url    = vinId ? `/api/vinkallare/${vinId}` : '/api/vinkallare';
-          const metod  = vinId ? 'PATCH' : 'POST';
-          const svar   = await fetch(url, {
-            method:  metod,
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify(data),
-          });
-          if (svar.ok) {
-            const sparat = await svar.json();
-            if (vinId) {
-              /* Ersätt den gamla posten i minnet */
-              const idx = ALLA_VIN.findIndex(v => v.id === sparat.id);
-              if (idx !== -1) ALLA_VIN[idx] = sparat;
-              visaToast(`✓ "${sparat.namn}" uppdaterad!`);
-            } else {
-              ALLA_VIN.push(sparat);
-              visaToast(`✓ "${sparat.namn}" tillagd i källaren!`);
-            }
-            stang();
-            renderVin();
-          }
-        } catch (_) { alert('Serverfel – kunde inte spara flaskan.'); }
-      });
-    }
-
-    /* ── SÖK & FILTER ───────────────────────────────────────────── */
-    function initFilter() {
-      document.getElementById('sok').addEventListener('input', renderVin);
-      document.querySelectorAll('.typ-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.typ-btn').forEach(b => b.classList.remove('aktiv'));
-          btn.classList.add('aktiv');
-          AKTIV_TYP = btn.dataset.typ;
-          renderVin();
-        });
-      });
-    }
-
-    /* ── HAMBURGERMENY ──────────────────────────────────────────── */
-    function initHamburger() {
-      const btn   = document.getElementById('hamburger');
-      const links = document.getElementById('nav-links');
-      btn.addEventListener('click', function () {
-        links.classList.toggle('oppet');
-        this.setAttribute('aria-expanded', links.classList.contains('oppet'));
-      });
-    }
-
-    /* ── START ──────────────────────────────────────────────────── */
-    document.addEventListener('DOMContentLoaded', async () => {
-      await laddaVin();
-      initModal();
-      initFilter();
-      initHamburger();
-
-      /* Visa pil-hint mot flytande knappen när källaren är tom */
-      if (ALLA_VIN.length === 0) {
-        setTimeout(() => {
-          document.getElementById('pil-hint').classList.add('visa');
-        }, 800);
-      }
+    document.getElementById('modal-stang').addEventListener('click', stangModal);
+    document.getElementById('avbryt-btn').addEventListener('click', stangModal);
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target.classList.contains('modal-overlay')) stangModal();
     });
+
+    // ── Typfilter ────────────────────────────────────────────────────
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('aktiv'));
+        btn.classList.add('aktiv');
+        filter.typ = btn.dataset.typ;
+        renderGrid();
+      });
+    });
+
+    document.getElementById('land-filter').addEventListener('change', e => {
+      filter.land = e.target.value;
+      renderGrid();
+    });
+
+    document.getElementById('sokruta').addEventListener('input', e => {
+      filter.sok = e.target.value;
+      renderGrid();
+    });
+
+    // ── Export ───────────────────────────────────────────────────────
+
+    document.getElementById('exportera-btn').addEventListener('click', () => {
+      const payload = JSON.stringify({ version: 1, exportdatum: idag(), viner }, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = Object.assign(document.createElement('a'), { href: url, download: `vinkallare-${idag()}.json` });
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // ── Import ───────────────────────────────────────────────────────
+
+    document.getElementById('importera-fil').addEventListener('change', e => {
+      const fil = e.target.files[0];
+      if (!fil) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          const lista  = Array.isArray(parsed) ? parsed : (parsed.viner || []);
+          if (!Array.isArray(lista)) throw new Error();
+          if (!confirm(`Importera ${lista.length} viner? Befintlig data ersätts.`)) return;
+          viner = lista;
+          spara();
+          renderAllt();
+        } catch {
+          alert('Ogiltigt format – kontrollera att filen är en giltig JSON-export.');
+        }
+      };
+      reader.readAsText(fil);
+      e.target.value = '';
+    });
+
+    // ── Hjälpfunktion: HTML-escape ───────────────────────────────────
+
+    function h(s) {
+      return String(s ?? '')
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Start ────────────────────────────────────────────────────────
+    ladda();
+    renderAllt();
   </script>
 
 </body>

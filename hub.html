@@ -198,7 +198,7 @@
       förp i frysen
     </div>
     <div class="overblick-post">
-      <span class="siffra">—</span>
+      <span class="siffra" id="vin-antal">—</span>
       flaskor i källaren
     </div>
     <div class="overblick-post">
@@ -216,11 +216,10 @@
       </div>
     </a>
 
-    <a href="vinkallare-snart.html" class="kort kort-vin">
+    <a href="vinkallare.html" class="kort kort-vin">
       <span class="kort-ikon">🍷</span>
       <div class="kort-text">
         <div class="kort-namn">Vinkällaren</div>
-        <span class="snart">Kommer snart</span>
       </div>
     </a>
 
@@ -252,9 +251,17 @@
         }, 0);
 
         document.getElementById('frys-antal').textContent = totalAntal;
-      } catch (e) {
-        // Parsningsfel eller behörighetsfel – behåll streck
-      }
+      } catch (e) { /* behåll streck */ }
+
+      // Läs vinkällardata från samma origin
+      try {
+        var vinRaw = localStorage.getItem('vinkallare_viner');
+        if (vinRaw) {
+          var viner = JSON.parse(vinRaw);
+          var totalFlaskor = viner.reduce(function (s, v) { return s + (Number(v.antal) || 0); }, 0);
+          document.getElementById('vin-antal').textContent = totalFlaskor;
+        }
+      } catch (e) { /* behåll streck */ }
     }());
   </script>
 
