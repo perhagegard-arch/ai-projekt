@@ -500,6 +500,38 @@
 
     .knapp-slett:hover { background: rgba(90,26,26,0.3); }
 
+    /* ── Etikettmagi ─────────────────────────────────────────────── */
+    .etikett-knapp {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.75rem;
+      margin-bottom: 0.75rem;
+      background: #1c1c2e;
+      border: 1px dashed #4a2a5a;
+      border-radius: 12px;
+      color: #c080e0;
+      font-size: 0.95rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+
+    .etikett-knapp:hover { background: #25253a; }
+    .etikett-knapp:disabled { opacity: 0.5; cursor: default; }
+
+    .etikettmagi-status {
+      font-size: 0.82rem;
+      margin-bottom: 0.75rem;
+      min-height: 1.2em;
+      color: #888;
+      text-align: center;
+    }
+
+    .etikettmagi-status.fel { color: #e05060; }
+
     /* ── Responsivt ──────────────────────────────────────────────── */
     @media (max-width: 520px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -583,6 +615,11 @@
       </div>
 
       <form id="vin-form" autocomplete="off">
+        <!-- Etikettmagi – dold filinput, kameraknapp och statusrad -->
+        <input type="file" accept="image/*" capture="environment" id="etikett-input" style="display:none">
+        <button type="button" class="etikett-knapp" id="etikett-knapp">📷 Fota etikett</button>
+        <div class="etikettmagi-status" id="etikettmagi-status"></div>
+
         <div class="formrad hel">
           <label>Namn *
             <input id="f-namn" type="text" placeholder="t.ex. Barolo del Vecchio Maestro 2018" required>
@@ -977,6 +1014,170 @@
     function h(s) {
       return String(s ?? '')
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── Etikettmagi ──────────────────────────────────────────────────
+
+    // Välj bild (kamera eller filväljare) när knappen klickas
+    document.getElementById('etikett-knapp').addEventListener('click', () => {
+      document.getElementById('etikett-input').click();
+    });
+
+    // Hantera vald bild: skala ned → anropa Claude → förifyll formulär
+    document.getElementById('etikett-input').addEventListener('change', async e => {
+      const fil = e.target.files[0];
+      e.target.value = ''; // tillåt samma fil igen
+      if (!fil) return;
+
+      const knapp  = document.getElementById('etikett-knapp');
+      const status = document.getElementById('etikettmagi-status');
+
+      // Hämta API-nyckel från delad localStorage (frysregistret), annars be om den
+      let apiNyckel = localStorage.getItem('frysregister_apikey_v1') || '';
+      if (!apiNyckel) {
+        apiNyckel = (prompt('Klistra in din Anthropic API-nyckel:') || '').trim();
+        if (!apiNyckel) { visaFel('Ingen API-nyckel angiven.'); return; }
+        localStorage.setItem('frysregister_apikey_v1', apiNyckel);
+      }
+
+      // Hjälpfunktioner för status
+      function visaFel(msg) {
+        status.textContent = msg;
+        status.className   = 'etikettmagi-status fel';
+        knapp.disabled     = false;
+        knapp.textContent  = '📷 Fota etikett';
+      }
+
+      function visaInfo(msg) {
+        status.textContent = msg;
+        status.className   = 'etikettmagi-status';
+      }
+
+      knapp.disabled    = true;
+      knapp.textContent = '⏳ Analyserar etikett…';
+      visaInfo('Komprimerar bild…');
+
+      // Skala ned bilden via Canvas – max 1024px på längsta sidan, JPEG 0.85
+      let base64, mediaType;
+      try {
+        base64    = await skalaOchKodera(fil, 1024, 0.85);
+        mediaType = 'image/jpeg';
+      } catch (err) {
+        visaFel('Kunde inte läsa bilden: ' + err.message); return;
+      }
+
+      visaInfo('Skickar till Claude…');
+
+      // Anthropic API – raw fetch eftersom projektet är vanilla HTML/JS
+      let svar;
+      try {
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key':                             apiNyckel,
+            'anthropic-version':                     '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+            'content-type':                          'application/json'
+          },
+          body: JSON.stringify({
+            model:      'claude-sonnet-4-6',
+            max_tokens: 400,
+            messages: [{
+              role: 'user',
+              content: [
+                {
+                  type: 'image',
+                  source: { type: 'base64', media_type: mediaType, data: base64 }
+                },
+                {
+                  type: 'text',
+                  text: 'Läs vinlabeln i bilden och svara med ENDAST ett JSON-objekt, inget annat:\n' +
+                        '{"namn":"...","typ":"rött|vitt|mousserande|rosé|sött","druva":"...",' +
+                        '"land":"...","region":"...","arsgang":2019,' +
+                        '"smaknot":"2-3 meningar om doft, smak och maträtter, på svenska"}'
+                }
+              ]
+            }]
+          })
+        });
+
+        if (!resp.ok) {
+          const felText = await resp.text();
+          visaFel(`API-fel ${resp.status}: ${felText}`); return;
+        }
+
+        svar = await resp.json();
+      } catch (err) {
+        visaFel('Nätverksfel: ' + err.message); return;
+      }
+
+      // Plocka ut textblocket ur svaret
+      const block = (svar.content || []).find(b => b.type === 'text');
+      if (!block) { visaFel('Oväntat svar – inget textblock från Claude.'); return; }
+
+      // Rensa eventuella ```json-staket och whitespace innan parsning
+      const renText = block.text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+
+      let data;
+      try {
+        data = JSON.parse(renText);
+      } catch {
+        visaFel('Kunde inte tolka svaret som JSON: ' + renText.slice(0, 120));
+        return;
+      }
+
+      // Förifyll formulärfälten med det Claude läst av
+      if (data.namn)    document.getElementById('f-namn').value    = data.namn;
+      if (data.druva)   document.getElementById('f-druva').value   = data.druva;
+      if (data.land)    document.getElementById('f-land').value    = data.land;
+      if (data.region)  document.getElementById('f-region').value  = data.region;
+      if (data.arsgang) document.getElementById('f-arsgang').value = parseInt(data.arsgang) || '';
+      if (data.smaknot) document.getElementById('f-anteckningar').value = data.smaknot;
+
+      // Sätt vintyp – mappa till ett giltigt alternativ om möjligt
+      const gyltigaTyper = ['rött', 'vitt', 'mousserande', 'rosé', 'sött'];
+      const typVal = (data.typ || '').toLowerCase().trim();
+      if (gyltigaTyper.includes(typVal)) {
+        document.getElementById('f-typ').value = typVal;
+      }
+
+      knapp.disabled    = false;
+      knapp.textContent = '📷 Fota etikett';
+      visaInfo('✓ Fälten förfyllda – kontrollera och spara');
+    });
+
+    // Skalar och komprimerar en bild via Canvas API
+    // Returnerar ett Promise med base64-strängen (utan data:-prefix)
+    function skalaOchKodera(fil, maxPx, kvalitet) {
+      return new Promise((resolve, reject) => {
+        const img    = new Image();
+        const objUrl = URL.createObjectURL(fil);
+
+        img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error('Bilden kunde inte laddas')); };
+
+        img.onload = () => {
+          URL.revokeObjectURL(objUrl);
+
+          // Beräkna nytt mått med bibehållen proportion
+          let w = img.naturalWidth;
+          let h = img.naturalHeight;
+          if (w > maxPx || h > maxPx) {
+            if (w >= h) { h = Math.round(h * maxPx / w); w = maxPx; }
+            else        { w = Math.round(w * maxPx / h); h = maxPx; }
+          }
+
+          const canvas    = document.createElement('canvas');
+          canvas.width    = w;
+          canvas.height   = h;
+          canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+          // Hämta base64 utan "data:image/jpeg;base64,"-prefixet
+          const dataUrl = canvas.toDataURL('image/jpeg', kvalitet);
+          resolve(dataUrl.split(',')[1]);
+        };
+
+        img.src = objUrl;
+      });
     }
 
     // ── Start ────────────────────────────────────────────────────────
