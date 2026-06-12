@@ -1,19 +1,39 @@
-# AI-Projekt – Pers Sous Vide & Vin-labb
+# Pers Kök & Vinkällare
 
-En personlig webbapp byggd steg för steg med HTML, CSS, JavaScript och Python.
+En personlig hemmaköksplattform som samlar frys, vinkällare och kök i en enda app – med en inbyggd AI-kock som hjälper till att planera måltider utifrån vad som faktiskt finns hemma.
 
 ---
 
-## Vad är det här?
+## Vision
 
-Tre sammankopplade sidor plus en Python-backend:
+Plattformen löser ett konkret vardagsproblem: vad ska man laga till middag med det man har?
 
-| Fil | Beskrivning |
-|-----|-------------|
-| `index.html` | Färgaruletten – ett litet interaktivt experiment |
-| `sousvide.html` | Pers sous vide-dagbok med statistik, temperaturguide, vinrekommendationer och live-sortiment |
-| `recept.html` | Recept och tips för sous vide-entrecôte |
-| `vaktpost.py` | Python-skript som läser `data/viner.json` och genererar `vin-data.js` |
+- **Frysen** – inventering av vad som ligger i frysen, med datum och mängd
+- **Vinkällaren** – live-sortiment och vinrekommendationer kopplade till måltider
+- **Köket** – sous vide-dagbok, recept och matlagningshistorik
+- **AI-kocken** – föreslår recept och menyer baserat på frysinnehåll, preferenser och säsong
+
+> Detaljer om funktioner och tekniska val finns i [SPEC-PERS-KOK.md](SPEC-PERS-KOK.md).  
+> Planerade faser och prioriteringar finns i [ROADMAP-PERS-KOK.md](ROADMAP-PERS-KOK.md).
+
+---
+
+## Projektprinciper
+
+| Princip | Regel |
+|---------|-------|
+| **Språk** | Alla kommentarer i koden skrivs på **svenska** |
+| **Design** | **Mörkt tema (dark mode)** som standard på alla sidor |
+| **Teknik** | HTML/CSS/JS i frontend, Python i backend – enkelt och utan onödiga beroenden |
+
+Basinställningar för dark mode:
+```css
+body {
+  background-color: #121212;
+  color: #e0e0e0;
+  font-family: sans-serif;
+}
+```
 
 ---
 
@@ -21,84 +41,33 @@ Tre sammankopplade sidor plus en Python-backend:
 
 ### Krav
 - En modern webbläsare (Chrome, Firefox, Edge)
-- Python 3.10+ (för att köra vaktpost.py)
+- Python 3.10+ (för backend-skript)
 
-### 1. Öppna webbsidorna
-Dubbelklicka på valfri HTML-fil. Ingen server behövs – de öppnas direkt i webbläsaren.
+### Öppna appen
+Dubbelklicka på valfri HTML-fil – ingen server behövs för frontenden.
 
-### 2. Uppdatera vinlistan på sidan
+### Uppdatera vinlistan
 ```bash
 python vaktpost.py
 ```
-Ladda sedan om `sousvide.html`. Skriptet genererar två filer automatiskt:
-- `vin-status.json` – rådata (läsbar av människor)
-- `vin-data.js` – laddas in av webbsidan
-
-### 3. Redigera vinlistan
-Öppna `data/viner.json` i valfri textredigerare. Lägg till, ta bort eller ändra viner.
-Kör sedan `python vaktpost.py` igen för att publicera ändringarna till sidan.
+Ladda sedan om `sousvide.html`. Skriptet genererar `vin-status.json` och `vin-data.js`.
 
 ---
 
-## Projektstruktur
+## Nuvarande filer
 
 ```
-AI-Projekt/
+ai-projekt/
 │
-├── index.html          # Färgaruletten
-├── sousvide.html       # Sous vide-dagbok (huvudsida, ~1 200 rader)
-├── recept.html         # Entrecôte-recept med inspiration
-├── vaktpost.py         # Backend-skript – läser data/, skriver vin-data.js
+├── sousvide.html       # Sous vide-dagbok med statistik och vinrekommendationer
+├── recept.html         # Recept och tips för sous vide-entrecôte
+├── vaktpost.py         # Backend-skript – läser data/viner.json, skriver vin-data.js
 │
 ├── data/
 │   └── viner.json      # Vinlistan – redigera den här filen
 │
 ├── CLAUDE.md           # Projektregler för Claude Code
-├── README.md           # Den här filen
-│
-└── (autogenererat – checka inte in dessa)
-    ├── vin-status.json
-    └── vin-data.js
+├── SPEC-PERS-KOK.md    # Funktionsspecifikation för hela plattformen
+├── ROADMAP-PERS-KOK.md # Fasplan och prioriteringar
+└── README.md           # Den här filen
 ```
-
----
-
-## Arbetsflöde – lägga till en sous vide-körning
-
-1. Öppna `sousvide.html` i webbläsaren
-2. Klicka **＋ Lägg till ny körning** (knappen nere till höger)
-3. Fyll i kött, metod, temperatur, tid, betyg och omdöme
-4. Klicka **Spara körning**
-
-> **Obs:** Nya körningar sparas i webbläsarens **localStorage** – de är kopplade
-> till just den webbläsaren på den datorn. En riktig databas planeras i Fas 2.
-
----
-
-## Vinrekommendationer
-
-Sommelier-funktionen i temperaturguiden matchar varje köttkategori med en
-vinrekommendation och öppnar en färdig söklänk på Systembolaget.
-
-Live-vinlistan (sektionen "🍾 Live från Systembolaget") hämtar sina data från
-`vin-data.js` som genereras av `vaktpost.py`. Varje vinkort är en klickbar länk.
-
----
-
-## Roadmap
-
-| Fas | Status | Innehåll |
-|-----|--------|----------|
-| **Fas 1** | ✅ Klar | Grundstruktur, design, dagbok, vinrekommendationer, README, datafiler |
-| **Fas 2** | 🔜 Nästa | Flask-server, JSON-API, spara körningar till fil istället för localStorage |
-| **Fas 3** | 💡 Framtid | SQLite-databas, inloggning, deploy på server (Railway / Raspberry Pi) |
-
----
-
-## Tekniker som används
-
-- **HTML5 / CSS3** – struktur och mörk design (dark mode som standard)
-- **JavaScript (vanilla)** – all interaktivitet, localStorage, Chart.js
-- **Chart.js** – stapel- och cirkeldiagram i dagboken
-- **Python 3** – vaktpost.py för datagenerering
-- **JSON** – datautbyte mellan Python och webbsidan
