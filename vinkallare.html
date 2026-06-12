@@ -424,7 +424,7 @@
 
     input:focus, select:focus, textarea:focus { border-color: #7a1a2a; }
 
-    textarea { resize: vertical; min-height: 70px; }
+    textarea { resize: vertical; min-height: 140px; }
 
     select option { background: #282828; }
 
@@ -501,26 +501,54 @@
     .knapp-slett:hover { background: rgba(90,26,26,0.3); }
 
     /* ── Etikettmagi ─────────────────────────────────────────────── */
+    .etikett-rad {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 0.5rem;
+    }
+
     .etikett-knapp {
+      flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.5rem;
-      width: 100%;
-      padding: 0.75rem;
-      margin-bottom: 0.75rem;
+      gap: 0.45rem;
+      padding: 0.7rem;
       background: #1c1c2e;
       border: 1px dashed #4a2a5a;
       border-radius: 12px;
       color: #c080e0;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       transition: background 0.15s;
     }
 
-    .etikett-knapp:hover { background: #25253a; }
+    .etikett-knapp:hover  { background: #25253a; }
     .etikett-knapp:disabled { opacity: 0.5; cursor: default; }
+
+    .etikett-thumb {
+      width: 48px;
+      height: 48px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #4a2a5a;
+      flex-shrink: 0;
+    }
+
+    /* Analysera-knapp – hel bredd, lila solid */
+    .etikett-analysera {
+      width: 100%;
+      margin-top: 0.25rem;
+      margin-bottom: 0.75rem;
+      border-style: solid;
+      background: #2a1a3e;
+      border-color: #7a3aa0;
+      color: #d090f0;
+    }
+
+    .etikett-analysera:hover { background: #38225a; }
 
     .etikettmagi-status {
       font-size: 0.82rem;
@@ -564,6 +592,37 @@
       margin-bottom: 0.1rem;
     }
 
+    /* ── Platsstats – rad under stats som visar flaskor per plats ── */
+    .platsstats {
+      display: none;
+      background: #181818;
+      border: 1px solid #2a2a2a;
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+      margin-top: -1.25rem;
+    }
+
+    .platsstats-post {
+      flex: 1;
+      text-align: center;
+      padding: 0.45rem 0.5rem;
+      border-right: 1px solid #2a2a2a;
+      font-size: 0.72rem;
+      color: #666;
+    }
+
+    .platsstats-post:last-child { border-right: none; }
+
+    .platsstats-siffra {
+      display: block;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #aaa;
+      line-height: 1.3;
+    }
+
     /* ── Responsivt ──────────────────────────────────────────────── */
     @media (max-width: 520px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -605,6 +664,8 @@
         <span class="stat-siffra" id="stat-lander">0</span>länder
       </div>
     </div>
+    <!-- Platsstats – fylls dynamiskt, döljs om ingen hyllplats finns -->
+    <div id="platsstats" class="platsstats"></div>
 
     <!-- Filterrad -->
     <div class="filterrad">
@@ -647,9 +708,20 @@
       </div>
 
       <form id="vin-form" autocomplete="off">
-        <!-- Etikettmagi – dold filinput, kameraknapp och statusrad -->
-        <input type="file" accept="image/*" capture="environment" id="etikett-input" style="display:none">
-        <button type="button" class="etikett-knapp" id="etikett-knapp">📷 Fota etikett</button>
+        <!-- Etikettmagi – tvåstegs bildval (framsida + valfri baksida) -->
+        <input type="file" accept="image/*" capture="environment" id="etikett-framsida" style="display:none">
+        <input type="file" accept="image/*" capture="environment" id="etikett-baksida"  style="display:none">
+
+        <div class="etikett-rad">
+          <button type="button" class="etikett-knapp" id="knapp-framsida">📷 Fota framsida</button>
+          <img class="etikett-thumb" id="thumb-framsida" style="display:none" alt="Framsida">
+        </div>
+        <div class="etikett-rad" id="etikett-baksida-rad" style="display:none">
+          <button type="button" class="etikett-knapp" id="knapp-baksida">📷 Baksida (valfri)</button>
+          <img class="etikett-thumb" id="thumb-baksida" style="display:none" alt="Baksida">
+        </div>
+        <button type="button" class="etikett-knapp etikett-analysera" id="knapp-analysera" style="display:none">🔍 Analysera</button>
+
         <div class="etikettmagi-status" id="etikettmagi-status"></div>
         <div class="etikett-analys" id="etikett-analys"></div>
 
@@ -689,10 +761,16 @@
           </label>
         </div>
         <div class="formrad">
-          <label>Hyllplats
-            <input id="f-hyllplats" type="text" placeholder="t.ex. A3">
+          <label>Plats
+            <select id="f-plats">
+              <option value="">Välj plats</option>
+            </select>
           </label>
-          <div></div>
+          <label>Hylla
+            <select id="f-hylla" disabled>
+              <option value="">Välj hylla</option>
+            </select>
+          </label>
         </div>
         <div class="formrad">
           <label>Drick från (år)
@@ -704,7 +782,7 @@
         </div>
         <div class="formrad hel">
           <label>Anteckningar
-            <textarea id="f-anteckningar" placeholder="Smaknoter, pris, köpplats…"></textarea>
+            <textarea id="f-anteckningar" rows="6" placeholder="Smaknoter, pris, köpplats…"></textarea>
           </label>
         </div>
 
@@ -728,6 +806,9 @@
     // Datalagring i localStorage med prefix "vinkallare_"
     const LS_NYCKEL = 'vinkallare_viner';
     const AR_NU = new Date().getFullYear();
+
+    // Hyllplatskonfiguration – ändra här för att lägga till platser eller hyllor
+    const PLATSKONFIG = { 'Vinkylen': 7, 'Garaget': 10 };
 
     let viner = [];
     let filter = { typ: '', land: '', sok: '' };
@@ -777,6 +858,27 @@
       document.getElementById('stat-viner').textContent = viner.length;
       document.getElementById('stat-aldst').textContent = artal.length ? Math.min(...artal) : '—';
       document.getElementById('stat-lander').textContent = lander;
+      renderPlatsstats();
+    }
+
+    function renderPlatsstats() {
+      const el = document.getElementById('platsstats');
+      // Räkna flaskor per plats baserat på att hyllplats börjar med platsnamnet
+      const poster = Object.keys(PLATSKONFIG)
+        .map(plats => ({
+          plats,
+          antal: viner
+            .filter(v => (v.hyllplats || '').startsWith(plats))
+            .reduce((s, v) => s + (v.antal || 0), 0)
+        }))
+        .filter(p => p.antal > 0);
+
+      if (!poster.length) { el.style.display = 'none'; return; }
+
+      el.innerHTML = poster
+        .map(p => `<div class="platsstats-post"><span class="platsstats-siffra">${p.antal}</span>📍 ${h(p.plats)}</div>`)
+        .join('');
+      el.style.display = 'flex';
     }
 
     function renderLandFilter() {
@@ -881,10 +983,8 @@
       document.getElementById('f-antal').value = '1';
       document.getElementById('ta-bort-btn').style.display = 'none';
       document.getElementById('historik-sektion').style.display = 'none';
-      // Rensa analysresultatet från föregående skanning
-      const ap = document.getElementById('etikett-analys');
-      ap.innerHTML = ''; ap.classList.remove('synlig');
-      document.getElementById('etikettmagi-status').textContent = '';
+      etikettReset();          // nollställ bildval, tummar och analysresultat
+      uppdateraHyllSelect(''); // töm hylla-select
       oppnaModal();
     });
 
@@ -902,7 +1002,13 @@
       document.getElementById('f-region').value      = v.region       || '';
       document.getElementById('f-arsgang').value     = v.arsgang      || '';
       document.getElementById('f-antal').value       = v.antal        ?? 1;
-      document.getElementById('f-hyllplats').value   = v.hyllplats    || '';
+      // Splitta "Vinkylen · Hylla 3" → plats + hyllnummer för selects
+      const hyllDelar = (v.hyllplats || '').split(' · Hylla ');
+      const hyllPlats = hyllDelar[0] || '';
+      const hyllNr    = hyllDelar[1] || '';
+      document.getElementById('f-plats').value = hyllPlats;
+      uppdateraHyllSelect(hyllPlats);
+      document.getElementById('f-hylla').value = hyllNr;
       document.getElementById('f-drinkfran').value   = v.drinkfran    || '';
       document.getElementById('f-dricktill').value   = v.dricktill    || '';
       document.getElementById('f-anteckningar').value= v.anteckningar || '';
@@ -954,7 +1060,11 @@
         region:       document.getElementById('f-region').value.trim(),
         arsgang:      parseInt(document.getElementById('f-arsgang').value)   || null,
         antal:        parseInt(document.getElementById('f-antal').value)     || 0,
-        hyllplats:    document.getElementById('f-hyllplats').value.trim(),
+        hyllplats:    (() => {
+          const p = document.getElementById('f-plats').value;
+          const hy = document.getElementById('f-hylla').value;
+          return p && hy ? p + ' · Hylla ' + hy : (p || '');
+        })(),
         drinkfran:    parseInt(document.getElementById('f-drinkfran').value) || null,
         dricktill:    parseInt(document.getElementById('f-dricktill').value) || null,
         anteckningar: document.getElementById('f-anteckningar').value.trim()
@@ -1053,21 +1163,106 @@
         .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    // ── Etikettmagi ──────────────────────────────────────────────────
+    // ── Hyllplats: dynamiska selects ────────────────────────────────
 
-    // Välj bild (kamera eller filväljare) när knappen klickas
-    document.getElementById('etikett-knapp').addEventListener('click', () => {
-      document.getElementById('etikett-input').click();
+    // Populera f-plats från PLATSKONFIG
+    Object.keys(PLATSKONFIG).forEach(p => {
+      const opt = document.createElement('option');
+      opt.value = p; opt.textContent = p;
+      document.getElementById('f-plats').appendChild(opt);
     });
 
-    // Hantera vald bild: skala ned → anropa Claude → förifyll formulär
-    document.getElementById('etikett-input').addEventListener('change', async e => {
-      const fil = e.target.files[0];
-      e.target.value = ''; // tillåt samma fil igen
-      if (!fil) return;
+    function uppdateraHyllSelect(plats) {
+      const sel = document.getElementById('f-hylla');
+      sel.innerHTML = '<option value="">Välj hylla</option>';
+      if (plats && PLATSKONFIG[plats]) {
+        for (let i = 1; i <= PLATSKONFIG[plats]; i++) {
+          const opt = document.createElement('option');
+          opt.value = i; opt.textContent = 'Hylla ' + i;
+          sel.appendChild(opt);
+        }
+        sel.disabled = false;
+      } else {
+        sel.disabled = true;
+      }
+    }
 
-      const knapp  = document.getElementById('etikett-knapp');
-      const status = document.getElementById('etikettmagi-status');
+    document.getElementById('f-plats').addEventListener('change', function () {
+      uppdateraHyllSelect(this.value);
+    });
+
+    // ── Etikettmagi ──────────────────────────────────────────────────
+
+    // Lagrar komprimerade base64-bilder inför analys
+    let bildData = { framsida: null, baksida: null };
+
+    // Nollställer all etikettmagi-status och bildval
+    function etikettReset() {
+      bildData = { framsida: null, baksida: null };
+      document.getElementById('etikett-baksida-rad').style.display = 'none';
+      document.getElementById('knapp-analysera').style.display     = 'none';
+      const tf = document.getElementById('thumb-framsida');
+      const tb = document.getElementById('thumb-baksida');
+      tf.style.display = 'none'; tf.src = '';
+      tb.style.display = 'none'; tb.src = '';
+      const st = document.getElementById('etikettmagi-status');
+      st.textContent = ''; st.className = 'etikettmagi-status';
+      const ap = document.getElementById('etikett-analys');
+      ap.innerHTML = ''; ap.classList.remove('synlig');
+    }
+
+    // Öppnar filinput och returnerar komprimerat base64 (eller null)
+    function valjEtikettBild(inputId, thumbId) {
+      return new Promise(resolve => {
+        const inp = document.getElementById(inputId);
+        inp.value = '';
+        inp.onchange = async () => {
+          const fil = inp.files[0];
+          inp.value = '';
+          if (!fil) { resolve(null); return; }
+          try {
+            const b64 = await skalaOchKodera(fil, 1024, 0.85);
+            const thumb = document.getElementById(thumbId);
+            thumb.src          = 'data:image/jpeg;base64,' + b64;
+            thumb.style.display = 'block';
+            resolve(b64);
+          } catch { resolve(null); }
+        };
+        inp.click();
+      });
+    }
+
+    document.getElementById('knapp-framsida').addEventListener('click', async () => {
+      const b64 = await valjEtikettBild('etikett-framsida', 'thumb-framsida');
+      if (!b64) return;
+      bildData.framsida = b64;
+      // Visa baksida-knapp och analysera-knapp
+      document.getElementById('etikett-baksida-rad').style.display = 'flex';
+      document.getElementById('knapp-analysera').style.display     = 'flex';
+    });
+
+    document.getElementById('knapp-baksida').addEventListener('click', async () => {
+      const b64 = await valjEtikettBild('etikett-baksida', 'thumb-baksida');
+      if (b64) bildData.baksida = b64;
+    });
+
+    document.getElementById('knapp-analysera').addEventListener('click', async () => {
+      const status       = document.getElementById('etikettmagi-status');
+      const analysKnapp  = document.getElementById('knapp-analysera');
+
+      function visaFel(msg) {
+        status.textContent = msg;
+        status.className   = 'etikettmagi-status fel';
+        analysKnapp.disabled   = false;
+        analysKnapp.textContent = '🔍 Analysera';
+      }
+
+      function visaInfo(msg) {
+        status.textContent = msg;
+        status.className   = 'etikettmagi-status';
+      }
+
+      if (!bildData.framsida) { visaFel('Fota framsidan först.'); return; }
 
       // Hämta API-nyckel från delad localStorage (frysregistret), annars be om den
       let apiNyckel = localStorage.getItem('frysregister_apikey_v1') || '';
@@ -1077,33 +1272,45 @@
         localStorage.setItem('frysregister_apikey_v1', apiNyckel);
       }
 
-      // Hjälpfunktioner för status
-      function visaFel(msg) {
-        status.textContent = msg;
-        status.className   = 'etikettmagi-status fel';
-        knapp.disabled     = false;
-        knapp.textContent  = '📷 Fota etikett';
-      }
-
-      function visaInfo(msg) {
-        status.textContent = msg;
-        status.className   = 'etikettmagi-status';
-      }
-
-      knapp.disabled    = true;
-      knapp.textContent = '⏳ Analyserar etikett…';
-      visaInfo('Komprimerar bild…');
-
-      // Skala ned bilden via Canvas – max 1024px på längsta sidan, JPEG 0.85
-      let base64, mediaType;
-      try {
-        base64    = await skalaOchKodera(fil, 1024, 0.85);
-        mediaType = 'image/jpeg';
-      } catch (err) {
-        visaFel('Kunde inte läsa bilden: ' + err.message); return;
-      }
-
+      analysKnapp.disabled   = true;
+      analysKnapp.textContent = '⏳ Analyserar…';
       visaInfo('Skickar till Claude…');
+
+      // Bygg content-array: framsida alltid med, baksida om den finns
+      const contentBlock = [
+        { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: bildData.framsida } }
+      ];
+      if (bildData.baksida) {
+        contentBlock.push({ type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: bildData.baksida } });
+      }
+
+      const promptInledning = bildData.baksida
+        ? 'Bild 1 är framsidan på vinlabeln och bild 2 är baksidan – kombinera informationen från båda.\n\n'
+        : 'Bilden är framsidan på vinlabeln.\n\n';
+
+      contentBlock.push({
+        type: 'text',
+        text: promptInledning +
+              'Svara med ENDAST ett JSON-objekt, inget annat.\n\n' +
+              'Format:\n' +
+              '{\n' +
+              '  "namn": "...",\n' +
+              '  "typ": "rött|vitt|mousserande|rosé|sött",\n' +
+              '  "druva": "...",\n' +
+              '  "land": "...",\n' +
+              '  "region": "...",\n' +
+              '  "arsgang": 2019,\n' +
+              '  "doft": "2-3 meningar om doftens karaktär och aromer",\n' +
+              '  "smak": "2-3 meningar om smak, fyllighet, syra, tanniner och eftersmak",\n' +
+              '  "passar_till": "konkreta maträtter, gärna vilt där det passar",\n' +
+              '  "drinkfran": 2022,\n' +
+              '  "dricktill": 2030,\n' +
+              '  "lagring": "1-2 meningar om lagringspotential och när vinet är som bäst"\n' +
+              '}\n\n' +
+              'Bedöm drickfönstret (drinkfran/dricktill) utifrån vintyp, druva, region och årgång. ' +
+              'Om etiketten inte ger tillräcklig information för en säker bedömning, sätt null på drinkfran och dricktill. ' +
+              'Svara ENBART med JSON – inga förklaringar, inga staket, inget annat.'
+      });
 
       // Anthropic API – raw fetch eftersom projektet är vanilla HTML/JS
       let svar;
@@ -1111,45 +1318,15 @@
         const resp = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST',
           headers: {
-            'x-api-key':                             apiNyckel,
-            'anthropic-version':                     '2023-06-01',
+            'x-api-key':                                 apiNyckel,
+            'anthropic-version':                         '2023-06-01',
             'anthropic-dangerous-direct-browser-access': 'true',
-            'content-type':                          'application/json'
+            'content-type':                              'application/json'
           },
           body: JSON.stringify({
-            model:      'claude-sonnet-4-6',
+            model:    'claude-sonnet-4-6',
             max_tokens: 1000,
-            messages: [{
-              role: 'user',
-              content: [
-                {
-                  type: 'image',
-                  source: { type: 'base64', media_type: mediaType, data: base64 }
-                },
-                {
-                  type: 'text',
-                  text: 'Läs vinlabeln i bilden och svara med ENDAST ett JSON-objekt, inget annat.\n\n' +
-                        'Format:\n' +
-                        '{\n' +
-                        '  "namn": "...",\n' +
-                        '  "typ": "rött|vitt|mousserande|rosé|sött",\n' +
-                        '  "druva": "...",\n' +
-                        '  "land": "...",\n' +
-                        '  "region": "...",\n' +
-                        '  "arsgang": 2019,\n' +
-                        '  "doft": "2-3 meningar om doftens karaktär och aromer",\n' +
-                        '  "smak": "2-3 meningar om smak, fyllighet, syra, tanniner och eftersmak",\n' +
-                        '  "passar_till": "konkreta maträtter, gärna vilt där det passar",\n' +
-                        '  "drinkfran": 2022,\n' +
-                        '  "dricktill": 2030,\n' +
-                        '  "lagring": "1-2 meningar om lagringspotential och när vinet är som bäst"\n' +
-                        '}\n\n' +
-                        'Bedöm drickfönstret (drinkfran/dricktill) utifrån vintyp, druva, region och årgång. ' +
-                        'Om etiketten inte ger tillräcklig information för en säker bedömning, sätt null på drinkfran och dricktill. ' +
-                        'Svara ENBART med JSON – inga förklaringar, inga staket, inget annat.'
-                }
-              ]
-            }]
+            messages: [{ role: 'user', content: contentBlock }]
           })
         });
 
@@ -1163,7 +1340,6 @@
         visaFel('Nätverksfel: ' + err.message); return;
       }
 
-      // Plocka ut textblocket ur svaret
       const block = (svar.content || []).find(b => b.type === 'text');
       if (!block) { visaFel('Oväntat svar – inget textblock från Claude.'); return; }
 
@@ -1189,22 +1365,20 @@
       if (data.drinkfran) document.getElementById('f-drinkfran').value = parseInt(data.drinkfran) || '';
       if (data.dricktill) document.getElementById('f-dricktill').value = parseInt(data.dricktill) || '';
 
-      // Sätt vintyp – mappa till ett giltigt alternativ om möjligt
+      // Vintyp – mappa till ett giltigt alternativ om möjligt
       const gyltigaTyper = ['rött', 'vitt', 'mousserande', 'rosé', 'sött'];
       const typVal = (data.typ || '').toLowerCase().trim();
-      if (gyltigaTyper.includes(typVal)) {
-        document.getElementById('f-typ').value = typVal;
-      }
+      if (gyltigaTyper.includes(typVal)) document.getElementById('f-typ').value = typVal;
 
-      // Bygg strukturerad anteckningstext av de fyra textsektionerna
+      // Anteckningar – strukturerad text med emoji-rubriker
       const antDel = [];
-      if (data.doft)       antDel.push('🍷 Doft: '      + data.doft);
-      if (data.smak)       antDel.push('👅 Smak: '      + data.smak);
-      if (data.passar_till) antDel.push('🍽️ Passar till: ' + data.passar_till);
-      if (data.lagring)    antDel.push('🕰️ Lagring: '   + data.lagring);
-      if (antDel.length)   document.getElementById('f-anteckningar').value = antDel.join('\n\n');
+      if (data.doft)        antDel.push('🍷 Doft: '         + data.doft);
+      if (data.smak)        antDel.push('👅 Smak: '         + data.smak);
+      if (data.passar_till) antDel.push('🍽️ Passar till: '  + data.passar_till);
+      if (data.lagring)     antDel.push('🕰️ Lagring: '      + data.lagring);
+      if (antDel.length)    document.getElementById('f-anteckningar').value = antDel.join('\n\n');
 
-      // Visa analysresultatet snyggt formaterat i modalen
+      // Visa analysresultatet i modalen
       const preview = document.getElementById('etikett-analys');
       const arsTxt  = data.arsgang ? ' ' + data.arsgang : '';
       preview.innerHTML =
@@ -1212,8 +1386,8 @@
         byggAnalysHtml(data);
       preview.classList.add('synlig');
 
-      knapp.disabled    = false;
-      knapp.textContent = '📷 Fota etikett';
+      analysKnapp.disabled   = false;
+      analysKnapp.textContent = '🔍 Analysera';
       visaInfo('✓ Fälten förfyllda – kontrollera och spara');
     });
 
