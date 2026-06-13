@@ -239,6 +239,18 @@
       padding: 0.15rem 0.5rem;
     }
 
+    /* Pristagg på vinkort */
+    .pris-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      font-size: 0.75rem;
+      color: #888;
+      background: #1e1e1e;
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+    }
+
     /* Drickfönster */
     .drinkfonstret {
       display: inline-flex;
@@ -623,6 +635,84 @@
       line-height: 1.3;
     }
 
+    /* Källarens värde – toggle och panel */
+    .varde-toggle {
+      display: block;
+      margin: 0 auto 0.7rem;
+      background: none;
+      border: 1px solid #2a2a2a;
+      color: #777;
+      border-radius: 8px;
+      padding: 0.32rem 1rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .varde-toggle:hover { border-color: #7a4020; color: #c08060; }
+
+    .varde-sektion {
+      background: #181818;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .varde-total {
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #d4a84b;
+      line-height: 1.2;
+    }
+
+    .varde-total-label {
+      text-align: center;
+      font-size: 0.78rem;
+      color: #555;
+      margin-top: 0.1rem;
+      margin-bottom: 0.9rem;
+    }
+
+    .varde-rader {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 0.6rem;
+    }
+
+    .varde-rad {
+      flex: 1 1 150px;
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 0.55rem 0.8rem;
+    }
+
+    .varde-rad-rubrik {
+      font-size: 0.68rem;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.35rem;
+    }
+
+    .varde-rad-post {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #999;
+      padding: 0.12rem 0;
+    }
+
+    .varde-rad-post span:last-child { color: #c8a060; font-weight: 600; }
+
+    .varde-disclaimer {
+      font-size: 0.72rem;
+      color: #555;
+      text-align: center;
+      margin-top: 0.4rem;
+    }
+
     /* ── Responsivt ──────────────────────────────────────────────── */
     @media (max-width: 520px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -882,6 +972,10 @@
     <!-- Platsstats – fylls dynamiskt, döljs om ingen hyllplats finns -->
     <div id="platsstats" class="platsstats"></div>
 
+    <!-- Källarens värde – togglas av knappen -->
+    <button class="varde-toggle" id="varde-toggle">💰 Visa källarens värde</button>
+    <div id="varde-sektion" class="varde-sektion" style="display:none"></div>
+
     <!-- Filterrad -->
     <div class="filterrad">
       <input type="search" class="sok-input" id="sokruta"
@@ -1006,9 +1100,14 @@
             <input id="f-dricktill" type="number" placeholder="2032" min="1800" max="2100">
           </label>
         </div>
+        <div class="formrad">
+          <label>Pris (kr/flaska)
+            <input id="f-pris" type="number" placeholder="189" min="0" max="99999">
+          </label>
+        </div>
         <div class="formrad hel">
           <label>Anteckningar
-            <textarea id="f-anteckningar" rows="6" placeholder="Smaknoter, pris, köpplats…"></textarea>
+            <textarea id="f-anteckningar" rows="6" placeholder="Smaknoter, köpplats…"></textarea>
           </label>
         </div>
 
@@ -1105,6 +1204,54 @@
       document.getElementById('stat-aldst').textContent = artal.length ? Math.min(...artal) : '—';
       document.getElementById('stat-lander').textContent = lander;
       renderPlatsstats();
+      renderVarde();
+    }
+
+    // Visar/döljer källarens värdesummering
+    let visaVarde = false;
+
+    function renderVarde() {
+      const el = document.getElementById('varde-sektion');
+      if (!visaVarde) { el.style.display = 'none'; return; }
+
+      // Viner med pris och minst en flaska
+      const medPris   = viner.filter(v => v.pris > 0 && v.antal > 0);
+      const utanPris  = viner.filter(v => !(v.pris > 0) && v.antal > 0);
+      const total     = medPris.reduce((s, v) => s + v.pris * v.antal, 0);
+
+      // Delsummor per plats
+      const platsDel = Object.keys(PLATSKONFIG).map(p => ({
+        namn: p,
+        varde: medPris.filter(v => (v.hyllplats || '').startsWith(p))
+                      .reduce((s, v) => s + v.pris * v.antal, 0)
+      })).filter(p => p.varde > 0);
+
+      // Delsummor per vintyp
+      const typDel = ['rött', 'vitt', 'mousserande', 'rosé', 'sött'].map(t => ({
+        namn: t.charAt(0).toUpperCase() + t.slice(1),
+        varde: medPris.filter(v => v.typ === t).reduce((s, v) => s + v.pris * v.antal, 0)
+      })).filter(t => t.varde > 0);
+
+      const fmt = n => n.toLocaleString('sv-SE') + ' kr';
+
+      el.innerHTML =
+        `<div class="varde-total">${fmt(total)}</div>` +
+        `<div class="varde-total-label">uppskattat källarvärde</div>` +
+        `<div class="varde-rader">` +
+          (platsDel.length ? `<div class="varde-rad">
+            <div class="varde-rad-rubrik">Per plats</div>
+            ${platsDel.map(p => `<div class="varde-rad-post"><span>${h(p.namn)}</span><span>${fmt(p.varde)}</span></div>`).join('')}
+          </div>` : '') +
+          (typDel.length ? `<div class="varde-rad">
+            <div class="varde-rad-rubrik">Per typ</div>
+            ${typDel.map(t => `<div class="varde-rad-post"><span>${h(t.namn)}</span><span>${fmt(t.varde)}</span></div>`).join('')}
+          </div>` : '') +
+        `</div>` +
+        (utanPris.length
+          ? `<div class="varde-disclaimer">⚠ ${utanPris.length} ${utanPris.length === 1 ? 'vin saknar' : 'viner saknar'} pris och ingår inte i summan</div>`
+          : '');
+
+      el.style.display = 'block';
     }
 
     function renderPlatsstats() {
@@ -1194,6 +1341,7 @@
         <div class="vinkort-namn">${h(v.namn)}</div>
         ${meta ? `<div class="vinkort-meta">${meta}</div>` : ''}
         ${v.hyllplats ? `<div class="hyllplats-tag">📍 ${h(v.hyllplats)}${felZon(v) ? ' <span class="felzon-ikon" title="Felzon: vintypen passar inte denna zon">↕</span>' : ''}</div>` : ''}
+        ${v.pris ? `<div class="pris-tag">💰 ${v.pris} kr/fl</div>` : ''}
         ${drinkBadge}
         <div class="raknar">
           <button class="raknar-knapp" id="minus-${v.id}"${v.antal <= 0 ? ' disabled' : ''}>−</button>
@@ -1253,6 +1401,7 @@
       document.getElementById('f-hylla').value = hyllVal;
       document.getElementById('f-drinkfran').value   = v.drinkfran    || '';
       document.getElementById('f-dricktill').value   = v.dricktill    || '';
+      document.getElementById('f-pris').value        = v.pris         || '';
       document.getElementById('f-anteckningar').value= v.anteckningar || '';
 
       const hist = v.historik || [];
@@ -1309,6 +1458,7 @@
         })(),
         drinkfran:    parseInt(document.getElementById('f-drinkfran').value) || null,
         dricktill:    parseInt(document.getElementById('f-dricktill').value) || null,
+        pris:         parseInt(document.getElementById('f-pris').value)      || null,
         anteckningar: document.getElementById('f-anteckningar').value.trim()
       };
     }
@@ -1336,6 +1486,13 @@
       document.body.style.overflow = '';
       redigerarId = null;
     }
+
+    document.getElementById('varde-toggle').addEventListener('click', () => {
+      visaVarde = !visaVarde;
+      document.getElementById('varde-toggle').textContent =
+        visaVarde ? '💰 Dölj källarens värde' : '💰 Visa källarens värde';
+      renderVarde();
+    });
 
     document.getElementById('modal-stang').addEventListener('click', stangModal);
     document.getElementById('avbryt-btn').addEventListener('click', stangModal);
@@ -1565,10 +1722,13 @@
               '  "passar_till": "konkreta maträtter, gärna vilt där det passar",\n' +
               '  "drinkfran": 2022,\n' +
               '  "dricktill": 2030,\n' +
-              '  "lagring": "1-2 meningar om lagringspotential och när vinet är som bäst"\n' +
+              '  "lagring": "1-2 meningar om lagringspotential och när vinet är som bäst",\n' +
+              '  "prisuppskattning": 189\n' +
               '}\n\n' +
               'Bedöm drickfönstret (drinkfran/dricktill) utifrån vintyp, druva, region och årgång. ' +
               'Om etiketten inte ger tillräcklig information för en säker bedömning, sätt null på drinkfran och dricktill. ' +
+              'prisuppskattning ska vara ett ungefärligt marknadspris i SEK avrundat till närmaste 10-tal, ' +
+              'i linje med Systembolagets prisbild för liknande viner. Sätt null om du är osäker. ' +
               'Svara ENBART med JSON – inga förklaringar, inga staket, inget annat.'
       });
 
@@ -1624,6 +1784,10 @@
       // Drickfönster – sätt bara om Claude gav numeriska värden
       if (data.drinkfran) document.getElementById('f-drinkfran').value = parseInt(data.drinkfran) || '';
       if (data.dricktill) document.getElementById('f-dricktill').value = parseInt(data.dricktill) || '';
+
+      // Prisuppskattning från AI – förifyll om ett positivt tal returnerades
+      if (data.prisuppskattning && parseInt(data.prisuppskattning) > 0)
+        document.getElementById('f-pris').value = parseInt(data.prisuppskattning);
 
       // Vintyp – mappa till ett giltigt alternativ om möjligt
       const gyltigaTyper = ['rött', 'vitt', 'mousserande', 'rosé', 'sött'];
