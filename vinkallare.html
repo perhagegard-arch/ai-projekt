@@ -984,6 +984,135 @@
 
     .zon-chip-vitt { background: rgba(12,24,40,0.8); color: #3a6a9a; border: 1px solid #1a3a5a; }
     .zon-chip-rott { background: rgba(24,10,8,0.8);  color: #7a2020; border: 1px solid #4a1010; }
+
+    /* ── Vinarkivet ─────────────────────────────────────────────────── */
+
+    /* Sista-flaskan-dialogens rubrik */
+    #sista-flaskan-overlay .modal-rubrik { color: #e0c06a; }
+
+    .sista-flaskan-text {
+      font-size: 0.9rem;
+      color: #bbb;
+      margin-bottom: 1.25rem;
+      line-height: 1.55;
+    }
+
+    .sista-knappar { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .knapp-arkivera-betyg {
+      padding: 0.85rem;
+      background: #2a1a3e;
+      border: 1px solid #7a3aa0;
+      border-radius: 12px;
+      color: #d090f0;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .knapp-arkivera-betyg:hover { background: #38225a; }
+
+    .knapp-arkivera-bara {
+      padding: 0.85rem;
+      background: #1a2a1a;
+      border: 1px solid #3a6a3a;
+      border-radius: 12px;
+      color: #80b080;
+      font-size: 0.95rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .knapp-arkivera-bara:hover { background: #253525; }
+
+    .knapp-nej-tack {
+      padding: 0.85rem;
+      background: transparent;
+      border: 1px solid #333;
+      border-radius: 12px;
+      color: #666;
+      font-size: 0.95rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .knapp-nej-tack:hover { color: #999; border-color: #555; }
+
+    /* Betygsstjärnor */
+    .betyg-sektion { margin: 0.75rem 0 1rem; }
+
+    .betyg-label { font-size: 0.78rem; color: #888; margin-bottom: 0.5rem; }
+
+    .betyg-stjarnor { display: flex; gap: 0.3rem; margin-bottom: 0.9rem; }
+
+    .stjarna {
+      background: none;
+      border: none;
+      font-size: 2rem;
+      color: #333;
+      cursor: pointer;
+      transition: color 0.1s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+      line-height: 1;
+      padding: 0.1rem;
+    }
+    .stjarna.aktiv { color: #d4a84b; }
+    .stjarna:hover { color: #e0c060; transform: scale(1.15); }
+
+    /* Arkivkort */
+    .arkivkort {
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .arkivkort:hover { border-color: #3a3a3a; }
+
+    .arkiv-betyg { font-size: 0.95rem; color: #d4a84b; letter-spacing: 0.08em; }
+
+    .arkiv-datum { font-size: 0.72rem; color: #555; }
+
+    .arkiv-kommentar-text {
+      font-size: 0.8rem;
+      color: #777;
+      font-style: italic;
+      border-top: 1px solid #242424;
+      padding-top: 0.45rem;
+      margin-top: 0.1rem;
+      line-height: 1.45;
+    }
+
+    .knapp-kop-igen {
+      margin-top: 0.3rem;
+      padding: 0.55rem 0.85rem;
+      background: transparent;
+      border: 1px solid #2a3a2a;
+      border-radius: 10px;
+      color: #6a9a6a;
+      font-size: 0.82rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.12s;
+      align-self: flex-start;
+    }
+    .knapp-kop-igen:hover { background: rgba(40,80,40,0.25); }
+
+    /* Arkivvyns filterfält */
+    .arkiv-filterrad {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+
+    .arkiv-tomt {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: #555;
+    }
   </style>
 </head>
 <body>
@@ -1042,6 +1171,7 @@
       <div class="vy-toggle">
         <button class="vy-knapp aktiv" data-vy="lista">☰ Lista</button>
         <button class="vy-knapp" data-vy="kallare">🏠 Källarvy</button>
+        <button class="vy-knapp" data-vy="arkiv">📚 Arkiv</button>
       </div>
     </div>
 
@@ -1062,6 +1192,21 @@
     <!-- Källarvy -->
     <div id="kallare-container" style="display:none">
       <div class="kallare-grid" id="kallare-grid"></div>
+    </div>
+
+    <!-- Vinarkivet -->
+    <div id="arkiv-container" style="display:none">
+      <div class="arkiv-filterrad">
+        <input type="search" class="sok-input" id="arkiv-sokruta"
+               placeholder="🔍 Sök i arkivet…">
+        <select class="land-select" id="arkiv-sortering">
+          <option value="datum">Senast druckna</option>
+          <option value="betyg">Bäst betyg</option>
+          <option value="namn">Namn A–Ö</option>
+          <option value="arsgang">Årgång</option>
+        </select>
+      </div>
+      <div class="viner-grid" id="arkiv-grid"></div>
     </div>
 
   </div>
@@ -1177,6 +1322,50 @@
     </div>
   </div>
 
+  <!-- Sista-flaskan-dialog (visas när sista flaskan tas ut) -->
+  <div class="modal-overlay" id="sista-flaskan-overlay">
+    <div class="modal">
+      <div class="modal-rubrik">
+        <span>🍾 Sista flaskan!</span>
+        <button class="modal-stang" id="sista-flaskan-stang">✕</button>
+      </div>
+      <p class="sista-flaskan-text">
+        Sista flaskan av <strong id="sista-flaskan-namn"></strong> –<br>
+        spara i Vinarkivet?
+      </p>
+
+      <!-- Steg 1: tre val -->
+      <div class="sista-knappar" id="sista-knappar">
+        <button class="knapp-arkivera-betyg" id="btn-spara-med-betyg">⭐ Spara med betyg</button>
+        <button class="knapp-arkivera-bara"  id="btn-bara-arkivera">📚 Bara arkivera</button>
+        <button class="knapp-nej-tack"       id="btn-nej-tack">✕ Nej tack</button>
+      </div>
+
+      <!-- Steg 2: betyg + kommentar -->
+      <div id="betyg-panel" style="display:none">
+        <div class="betyg-sektion">
+          <div class="betyg-label">Betyg (valfritt)</div>
+          <div class="betyg-stjarnor" id="betyg-stjarnor">
+            <button type="button" class="stjarna" data-val="1">★</button>
+            <button type="button" class="stjarna" data-val="2">★</button>
+            <button type="button" class="stjarna" data-val="3">★</button>
+            <button type="button" class="stjarna" data-val="4">★</button>
+            <button type="button" class="stjarna" data-val="5">★</button>
+          </div>
+          <label>
+            <span style="font-size:0.78rem;color:#888">Anteckning (valfri)</span>
+            <textarea id="arkiv-kommentar-input" rows="4"
+                      placeholder="Smaknoter, tillfälle, vad det passade till…"></textarea>
+          </label>
+        </div>
+        <div class="modal-knappar">
+          <button type="button" class="knapp-avbryt" id="btn-betyg-tillbaka">← Tillbaka</button>
+          <button type="button" class="knapp-spara"  id="btn-betyg-spara">Spara i arkivet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Datalagring i localStorage med prefix "vinkallare_"
     const LS_NYCKEL = 'vinkallare_viner';
@@ -1198,10 +1387,14 @@
     };
 
     let viner = [];
-    let filter = { typ: '', land: '', sok: '' };
-    let redigerarId = null;
-    let vyLage    = 'lista';      // 'lista' | 'kallare'
-    let oppnaRack = new Set();    // rack-namn som är expanderade i källarvyn
+    let arkiv = [];
+    let filter       = { typ: '', land: '', sok: '' };
+    let arkivFilter  = { sok: '' };
+    let arkivSortering = 'datum';
+    let redigerarId      = null;
+    let koparIgenArkivId = null;   // satt när redigera-modalen används för köp-igen
+    let vyLage    = 'lista';       // 'lista' | 'kallare' | 'arkiv'
+    let oppnaRack = new Set();     // rack-namn som är expanderade i källarvyn
 
     // ── Data ────────────────────────────────────────────────────────
 
@@ -1242,7 +1435,8 @@
       renderStats();
       renderLandFilter();
       if (vyLage === 'lista') renderGrid();
-      else renderKallare();
+      else if (vyLage === 'kallare') renderKallare();
+      else if (vyLage === 'arkiv') renderArkiv();
     }
 
     function renderStats() {
@@ -1528,6 +1722,11 @@
     function andraAntal(id, delta) {
       const v = viner.find(v => v.id === id);
       if (!v) return;
+      // Trigga arkiv-dialog när sista flaskan tas ut
+      if (delta === -1 && (v.antal || 0) === 1) {
+        visSistaFlaskaDialog(v);
+        return;
+      }
       v.antal = Math.max(0, (v.antal || 0) + delta);
       v.historik = v.historik || [];
       v.historik.unshift({ datum: idag(), text: delta > 0 ? 'Lade till 1 flaska' : 'Tog ut 1 flaska' });
@@ -1597,6 +1796,25 @@
       e.preventDefault();
       const ny = lasForm();
 
+      // Köp-igen-läge: flytta från arkiv tillbaka till källaren
+      if (koparIgenArkivId) {
+        const arkivPost      = arkiv.find(a => a.arkivId === koparIgenArkivId);
+        const gammalHistorik = arkivPost ? (arkivPost.historik || []) : [];
+        arkiv                = arkiv.filter(a => a.arkivId !== koparIgenArkivId);
+        sparaArkiv();
+        koparIgenArkivId = null;
+        viner.unshift({
+          id:       nyId(),
+          historik: [{ datum: idag(), text: 'Köpt igen / lagd tillbaka från arkivet' }, ...gammalHistorik],
+          ...ny
+        });
+        spara();
+        stangModal();
+        byttVy('lista');
+        renderAllt();
+        return;
+      }
+
       if (redigerarId) {
         const idx = viner.findIndex(v => v.id === redigerarId);
         const gammalt = viner[idx];
@@ -1656,7 +1874,8 @@
     function stangModal() {
       document.getElementById('modal-overlay').classList.remove('oppet');
       document.body.style.overflow = '';
-      redigerarId = null;
+      redigerarId      = null;
+      koparIgenArkivId = null;
     }
 
     document.getElementById('uppskatta-priser-btn').addEventListener('click', uppskattaPriser);
@@ -1702,7 +1921,7 @@
     // ── Export ───────────────────────────────────────────────────────
 
     document.getElementById('exportera-btn').addEventListener('click', () => {
-      const payload = JSON.stringify({ version: 1, exportdatum: idag(), viner }, null, 2);
+      const payload = JSON.stringify({ version: 1, exportdatum: idag(), viner, arkiv }, null, 2);
       const blob = new Blob([payload], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
       const a    = Object.assign(document.createElement('a'), { href: url, download: `vinkallare-${idag()}.json` });
@@ -1719,11 +1938,14 @@
       reader.onload = ev => {
         try {
           const parsed = JSON.parse(ev.target.result);
-          const lista  = Array.isArray(parsed) ? parsed : (parsed.viner || []);
+          const lista      = Array.isArray(parsed) ? parsed : (parsed.viner || []);
+          const arkivLista = parsed.arkiv || [];
           if (!Array.isArray(lista)) throw new Error();
-          if (!confirm(`Importera ${lista.length} viner? Befintlig data ersätts.`)) return;
+          if (!confirm(`Importera ${lista.length} viner och ${arkivLista.length} arkivposter? Befintlig data ersätts.`)) return;
           viner = lista;
+          arkiv = arkivLista;
           spara();
+          sparaArkiv();
           renderAllt();
         } catch {
           alert('Ogiltigt format – kontrollera att filen är en giltig JSON-export.');
@@ -2413,24 +2635,233 @@
       </div>`;
     }
 
+    // ── Vinarkivet – data ────────────────────────────────────────────
+
+    function laddaArkiv() {
+      try { arkiv = JSON.parse(localStorage.getItem('vinkallare_arkiv') || '[]'); }
+      catch { arkiv = []; }
+    }
+
+    function sparaArkiv() {
+      localStorage.setItem('vinkallare_arkiv', JSON.stringify(arkiv));
+    }
+
+    // Arkiverar ett vin: lägger in i arkivet och tar bort från källaren
+    function arkiveraVin(v, betyg, kommentar) {
+      arkiv.unshift({
+        ...v,
+        arkivId:        nyId(),
+        datumUrdrucket: idag(),
+        betyg:          betyg     || null,
+        arkivkommentar: kommentar || ''
+      });
+      sparaArkiv();
+      viner = viner.filter(x => x.id !== v.id);
+      spara();
+      renderAllt();
+    }
+
+    // ── Vinarkivet – render ───────────────────────────────────────────
+
+    function renderArkiv() {
+      const grid = document.getElementById('arkiv-grid');
+      let lista  = [...arkiv];
+
+      const s = (arkivFilter.sok || '').toLowerCase();
+      if (s) lista = lista.filter(v => matcherSok(v, s));
+
+      if (arkivSortering === 'datum') {
+        lista.sort((a, b) => (b.datumUrdrucket || '').localeCompare(a.datumUrdrucket || ''));
+      } else if (arkivSortering === 'betyg') {
+        lista.sort((a, b) => (b.betyg || 0) - (a.betyg || 0));
+      } else if (arkivSortering === 'namn') {
+        lista.sort((a, b) => (a.namn || '').localeCompare(b.namn || '', 'sv'));
+      } else if (arkivSortering === 'arsgang') {
+        lista.sort((a, b) => (b.arsgang || 0) - (a.arsgang || 0));
+      }
+
+      if (lista.length === 0) {
+        grid.innerHTML = `<div class="arkiv-tomt">
+          <div class="tomt-ikon">📚</div>
+          <p>${arkiv.length === 0
+            ? 'Arkivet är tomt – druckna viner hamnar här!'
+            : 'Inga viner matchar sökningen.'}</p>
+        </div>`;
+        return;
+      }
+
+      grid.innerHTML = lista.map(arkivkortHtml).join('');
+      lista.forEach(v => {
+        document.getElementById('kop-igen-' + v.arkivId)
+          .addEventListener('click', () => oppnaKopIgen(v));
+      });
+    }
+
+    function arkivkortHtml(v) {
+      const typKlass = { rött:'typ-rott', vitt:'typ-vitt', mousserande:'typ-mous', rosé:'typ-rose', sött:'typ-sott' };
+      const typLabel = { rött:'Rött', vitt:'Vitt', mousserande:'Mousserande', rosé:'Rosé', sött:'Sött' };
+
+      const stjarnor = v.betyg
+        ? '★'.repeat(v.betyg) + '<span style="color:#2a2a2a">★</span>'.repeat(5 - v.betyg)
+        : '';
+
+      const meta = [
+        v.druva,
+        [v.land, v.region].filter(Boolean).join(' · '),
+        v.arsgang ? String(v.arsgang) : ''
+      ].filter(Boolean).map(s => `<span>${h(s)}</span>`).join('');
+
+      return `<div class="arkivkort">
+        <div class="vinkort-header">
+          <span class="typ-badge ${typKlass[v.typ] || 'typ-rott'}">${typLabel[v.typ] || h(v.typ)}</span>
+          ${v.betyg ? `<span class="arkiv-betyg">${stjarnor}</span>` : ''}
+        </div>
+        <div class="vinkort-namn">${h(v.namn)}</div>
+        ${meta ? `<div class="vinkort-meta">${meta}</div>` : ''}
+        <div class="arkiv-datum">Drucken ${h(v.datumUrdrucket || '—')}</div>
+        ${v.arkivkommentar ? `<div class="arkiv-kommentar-text">${h(v.arkivkommentar)}</div>` : ''}
+        <button class="knapp-kop-igen" id="kop-igen-${v.arkivId}">↩ Köp igen / lägg tillbaka</button>
+      </div>`;
+    }
+
+    // Öppnar redigera-modalen förifylld med data från arkivposten
+    function oppnaKopIgen(arkivVin) {
+      koparIgenArkivId = arkivVin.arkivId;
+      redigerarId      = null;
+      document.getElementById('modal-titel').textContent       = '↩ Köp igen / lägg tillbaka';
+      document.getElementById('vin-form').reset();
+      document.getElementById('f-namn').value         = arkivVin.namn         || '';
+      document.getElementById('f-typ').value          = arkivVin.typ          || 'rött';
+      document.getElementById('f-druva').value        = arkivVin.druva        || '';
+      document.getElementById('f-land').value         = arkivVin.land         || '';
+      document.getElementById('f-region').value       = arkivVin.region       || '';
+      document.getElementById('f-arsgang').value      = arkivVin.arsgang      || '';
+      document.getElementById('f-antal').value        = 1;
+      document.getElementById('f-drinkfran').value    = arkivVin.drinkfran    || '';
+      document.getElementById('f-dricktill').value    = arkivVin.dricktill    || '';
+      document.getElementById('f-pris').value         = arkivVin.pris         || '';
+      document.getElementById('f-anteckningar').value = arkivVin.anteckningar || '';
+      document.getElementById('f-plats').value        = '';
+      uppdateraHyllSelect('');
+      document.getElementById('ta-bort-btn').style.display      = 'none';
+      document.getElementById('historik-sektion').style.display = 'none';
+      etikettReset();
+      oppnaModal();
+    }
+
+    // Byter vy programmatiskt och synkar knappar + containers
+    function byttVy(vy) {
+      vyLage = vy;
+      document.querySelectorAll('.vy-knapp')
+        .forEach(b => b.classList.toggle('aktiv', b.dataset.vy === vy));
+      document.getElementById('lista-container').style.display   = vy === 'lista'   ? '' : 'none';
+      document.getElementById('kallare-container').style.display = vy === 'kallare' ? '' : 'none';
+      document.getElementById('arkiv-container').style.display   = vy === 'arkiv'   ? '' : 'none';
+    }
+
+    // ── Sista-flaskan-dialog ─────────────────────────────────────────
+
+    let sistaFlaskanVin = null;
+    let valtBetyg       = 0;
+
+    function visSistaFlaskaDialog(v) {
+      sistaFlaskanVin = v;
+      valtBetyg       = 0;
+      document.getElementById('sista-flaskan-namn').textContent = v.namn;
+      document.getElementById('sista-knappar').style.display    = '';
+      document.getElementById('betyg-panel').style.display      = 'none';
+      document.getElementById('arkiv-kommentar-input').value    = '';
+      uppdateraBetygStjarnor(0);
+      document.getElementById('sista-flaskan-overlay').classList.add('oppet');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function stangSistaFlaskan() {
+      document.getElementById('sista-flaskan-overlay').classList.remove('oppet');
+      document.body.style.overflow = '';
+      sistaFlaskanVin = null;
+    }
+
+    function uppdateraBetygStjarnor(val) {
+      document.querySelectorAll('.stjarna').forEach((btn, i) => {
+        btn.classList.toggle('aktiv', i < val);
+      });
+    }
+
+    document.getElementById('sista-flaskan-stang').addEventListener('click', stangSistaFlaskan);
+
+    document.getElementById('sista-flaskan-overlay').addEventListener('click', e => {
+      if (e.target.classList.contains('modal-overlay')) stangSistaFlaskan();
+    });
+
+    document.getElementById('btn-spara-med-betyg').addEventListener('click', () => {
+      document.getElementById('sista-knappar').style.display = 'none';
+      document.getElementById('betyg-panel').style.display   = '';
+    });
+
+    document.getElementById('btn-bara-arkivera').addEventListener('click', () => {
+      const v = sistaFlaskanVin;
+      stangSistaFlaskan();
+      arkiveraVin(v, null, '');
+    });
+
+    document.getElementById('btn-nej-tack').addEventListener('click', () => {
+      const v = sistaFlaskanVin;
+      stangSistaFlaskan();
+      // Minska till 0 utan arkivering – vinet stannar kvar i listan som tomt
+      v.antal = 0;
+      v.historik = v.historik || [];
+      v.historik.unshift({ datum: idag(), text: 'Tog ut 1 flaska' });
+      spara();
+      renderAllt();
+    });
+
+    document.getElementById('btn-betyg-tillbaka').addEventListener('click', () => {
+      document.getElementById('betyg-panel').style.display   = 'none';
+      document.getElementById('sista-knappar').style.display = '';
+    });
+
+    document.getElementById('btn-betyg-spara').addEventListener('click', () => {
+      const v         = sistaFlaskanVin;
+      const kommentar = document.getElementById('arkiv-kommentar-input').value.trim();
+      stangSistaFlaskan();
+      arkiveraVin(v, valtBetyg || null, kommentar);
+    });
+
+    // Stjärnhover och klick för betygspanelen
+    document.querySelectorAll('.stjarna').forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        valtBetyg = i + 1;
+        uppdateraBetygStjarnor(valtBetyg);
+      });
+      btn.addEventListener('mouseenter', () => uppdateraBetygStjarnor(i + 1));
+      btn.addEventListener('mouseleave', () => uppdateraBetygStjarnor(valtBetyg));
+    });
+
+    document.getElementById('arkiv-sokruta').addEventListener('input', e => {
+      arkivFilter.sok = e.target.value;
+      renderArkiv();
+    });
+
+    document.getElementById('arkiv-sortering').addEventListener('change', e => {
+      arkivSortering = e.target.value;
+      renderArkiv();
+    });
+
     // ── Vyväxlare ────────────────────────────────────────────────────
 
     document.querySelectorAll('.vy-knapp').forEach(btn => {
       btn.addEventListener('click', () => {
-        vyLage = btn.dataset.vy;
-        document.querySelectorAll('.vy-knapp').forEach(b => b.classList.remove('aktiv'));
-        btn.classList.add('aktiv');
-        const listaCont  = document.getElementById('lista-container');
-        const kallareCont = document.getElementById('kallare-container');
-        listaCont.style.display  = vyLage === 'lista'   ? '' : 'none';
-        kallareCont.style.display = vyLage === 'kallare' ? '' : 'none';
+        byttVy(btn.dataset.vy);
         if (vyLage === 'kallare') renderKallare();
+        else if (vyLage === 'arkiv') renderArkiv();
         else renderGrid();
       });
     });
 
     // ── Start ────────────────────────────────────────────────────────
     ladda();
+    laddaArkiv();
     renderAllt();
   </script>
 
