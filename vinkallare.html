@@ -636,6 +636,193 @@
       .modal-overlay { align-items: center; }
       .modal { border-radius: 20px; margin: 1rem; max-height: 85vh; }
     }
+
+    /* ── Vyväxlare ──────────────────────────────────────────────── */
+    .vy-toggle {
+      display: flex;
+      gap: 0.25rem;
+      margin-left: auto;
+    }
+
+    .vy-knapp {
+      padding: 0.45rem 0.75rem;
+      border-radius: 10px;
+      border: 1px solid #333;
+      background: transparent;
+      color: #777;
+      font-size: 0.8rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vy-knapp.aktiv {
+      background: #2a2a2a;
+      border-color: #555;
+      color: #e0e0e0;
+    }
+
+    /* ── Källarvy – rack-grid ────────────────────────────────────── */
+    .kallare-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .rack-kort {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .rack-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.85rem 1rem;
+      background: #1f1f1f;
+      border-bottom: 1px solid #2a2a2a;
+      gap: 0.75rem;
+    }
+
+    .rack-namn { font-size: 0.95rem; font-weight: 700; color: #e0e0e0; }
+
+    .rack-info { font-size: 0.72rem; color: #666; margin-top: 0.1rem; }
+
+    .rack-toggle-knapp {
+      background: transparent;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #777;
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 0.3rem 0.6rem;
+      transition: all 0.12s;
+      white-space: nowrap;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+
+    .rack-toggle-knapp:hover { border-color: #555; color: #e0e0e0; }
+
+    /* Zon-sektioner */
+    .rack-zon         { padding: 0.5rem 0.75rem 0.65rem; }
+    .zon-vitt         { background: #08121e; border-left: 3px solid #1a3a5a; }
+    .zon-rott         { background: #130707; border-left: 3px solid #4a1010; }
+    .zon-neutral      { background: #131313; border-left: 3px solid #1e1e1e; }
+
+    .rack-zon-header {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      padding: 0.2rem 0 0.35rem;
+      margin-bottom: 0.3rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .zon-vitt .rack-zon-header { color: #2d5a8a; }
+    .zon-rott .rack-zon-header { color: #7a2020; }
+
+    /* Kompakt rad – prickar */
+    .rack-hylla-rad-compact {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-height: 18px;
+      padding: 0.12rem 0;
+    }
+
+    .rack-hylla-nr-compact {
+      font-size: 0.6rem;
+      color: #333;
+      width: 1.3rem;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .rack-dots-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      flex: 1;
+      align-items: center;
+    }
+
+    .rack-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      opacity: 0.8;
+      transition: opacity 0.15s, box-shadow 0.15s;
+      flex-shrink: 0;
+      cursor: default;
+    }
+
+    .rack-dot.zon-fel     { box-shadow: 0 0 0 2px #a08000; }
+    .rack-dot.vin-dim     { opacity: 0.1; }
+    .rack-dot.vin-highlight { opacity: 1; box-shadow: 0 0 0 2px rgba(255,255,255,0.55); }
+
+    .rack-tom-dot { font-size: 0.58rem; color: #252525; }
+
+    /* Expanderad rad – pills */
+    .rack-hylla-rad-oppen {
+      display: flex;
+      gap: 0.4rem;
+      padding: 0.28rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      align-items: flex-start;
+    }
+
+    .rack-hylla-rad-oppen:last-child { border-bottom: none; }
+
+    .rack-hylla-nr-oppen {
+      font-size: 0.68rem;
+      color: #444;
+      width: 1.3rem;
+      flex-shrink: 0;
+      padding-top: 0.2rem;
+    }
+
+    .rack-pills-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.28rem;
+      flex: 1;
+    }
+
+    .rack-pill {
+      font-size: 0.71rem;
+      padding: 0.16rem 0.42rem;
+      border-radius: 6px;
+      transition: opacity 0.15s;
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      cursor: default;
+    }
+
+    /* Återanvänd typ-färgerna */
+    .rack-pill.typ-rott { background: rgba(122,26,42,0.3);  color: #e07a8a; border: 1px solid #7a1a2a; }
+    .rack-pill.typ-vitt { background: rgba(122,95,20,0.3);  color: #e0c06a; border: 1px solid #7a5f14; }
+    .rack-pill.typ-mous { background: rgba(26,122,74,0.3);  color: #6ae0a0; border: 1px solid #1a7a4a; }
+    .rack-pill.typ-rose { background: rgba(122,26,58,0.3);  color: #e07ab0; border: 1px solid #7a1a3a; }
+    .rack-pill.typ-sott { background: rgba(122,74,20,0.3);  color: #e0a06a; border: 1px solid #7a4a14; }
+
+    .rack-pill.pill-dim       { opacity: 0.12; }
+    .rack-pill.pill-highlight { box-shadow: 0 0 0 1px rgba(255,255,255,0.45); opacity: 1; }
+
+    .rack-tom-pill { font-size: 0.67rem; color: #282828; font-style: italic; padding: 0.16rem 0; }
+
+    .felzon-ikon {
+      font-size: 0.6rem;
+      color: #a08000;
+      font-style: normal;
+      cursor: help;
+      flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -680,18 +867,29 @@
       <select class="land-select" id="land-filter">
         <option value="">Alla länder</option>
       </select>
+      <div class="vy-toggle">
+        <button class="vy-knapp aktiv" data-vy="lista">☰ Lista</button>
+        <button class="vy-knapp" data-vy="kallare">🏠 Källarvy</button>
+      </div>
     </div>
 
-    <!-- Vinkort -->
-    <div class="viner-grid" id="viner-grid"></div>
+    <!-- Vinkort (lista-läge) -->
+    <div id="lista-container">
+      <div class="viner-grid" id="viner-grid"></div>
 
-    <!-- Verktyg -->
-    <div class="verktygsrad">
+      <!-- Verktyg -->
+      <div class="verktygsrad">
       <button class="verktygknapp" id="exportera-btn">↓ Säkerhetskopia</button>
       <label class="verktygknapp">
         ↑ Importera
         <input type="file" accept=".json" id="importera-fil" style="display:none">
       </label>
+    </div>
+    </div><!-- /lista-container -->
+
+    <!-- Källarvy -->
+    <div id="kallare-container" style="display:none">
+      <div class="kallare-grid" id="kallare-grid"></div>
     </div>
 
   </div>
@@ -807,12 +1005,26 @@
     const LS_NYCKEL = 'vinkallare_viner';
     const AR_NU = new Date().getFullYear();
 
-    // Hyllplatskonfiguration – ändra här för att lägga till platser eller hyllor
-    const PLATSKONFIG = { 'Vinkylen': 7, 'Garaget': 10 };
+    // Hyllplatskonfiguration – Vinkylen har zoner Vitt (H1–3) och Rött (H1–8)
+    const PLATSKONFIG = {
+      Vinkylen: {
+        zoner: [
+          { namn: 'Vitt', hyllor: 3, css: 'zon-vitt' },
+          { namn: 'Rött', hyllor: 8, css: 'zon-rott' }
+        ]
+      },
+      Garaget: {
+        zoner: [
+          { namn: '', hyllor: 10, css: 'zon-neutral' }
+        ]
+      }
+    };
 
     let viner = [];
     let filter = { typ: '', land: '', sok: '' };
     let redigerarId = null;
+    let vyLage    = 'lista';      // 'lista' | 'kallare'
+    let oppnaRack = new Set();    // rack-namn som är expanderade i källarvyn
 
     // ── Data ────────────────────────────────────────────────────────
 
@@ -844,10 +1056,16 @@
 
     // ── Render ──────────────────────────────────────────────────────
 
+    // Returnerar true om vinet matchar söktermen s (lowercase)
+    function matcherSok(v, s) {
+      return [v.namn, v.druva, v.land, v.region].some(f => (f || '').toLowerCase().includes(s));
+    }
+
     function renderAllt() {
       renderStats();
       renderLandFilter();
-      renderGrid();
+      if (vyLage === 'lista') renderGrid();
+      else renderKallare();
     }
 
     function renderStats() {
@@ -895,12 +1113,7 @@
 
       if (filter.typ) lista = lista.filter(v => v.typ === filter.typ);
       if (filter.land) lista = lista.filter(v => v.land === filter.land);
-      if (filter.sok) {
-        const s = filter.sok.toLowerCase();
-        lista = lista.filter(v =>
-          [v.namn, v.druva, v.land, v.region].some(f => (f || '').toLowerCase().includes(s))
-        );
-      }
+      if (filter.sok) lista = lista.filter(v => matcherSok(v, filter.sok.toLowerCase()));
 
       if (lista.length === 0) {
         grid.innerHTML = `<div class="tomt-state">
@@ -952,7 +1165,7 @@
         </div>
         <div class="vinkort-namn">${h(v.namn)}</div>
         ${meta ? `<div class="vinkort-meta">${meta}</div>` : ''}
-        ${v.hyllplats ? `<div class="hyllplats-tag">📍 ${h(v.hyllplats)}</div>` : ''}
+        ${v.hyllplats ? `<div class="hyllplats-tag">📍 ${h(v.hyllplats)}${felZon(v) ? ' <span class="felzon-ikon" title="Felzon: vintypen passar inte denna zon">↕</span>' : ''}</div>` : ''}
         ${drinkBadge}
         <div class="raknar">
           <button class="raknar-knapp" id="minus-${v.id}"${v.antal <= 0 ? ' disabled' : ''}>−</button>
@@ -1002,13 +1215,14 @@
       document.getElementById('f-region').value      = v.region       || '';
       document.getElementById('f-arsgang').value     = v.arsgang      || '';
       document.getElementById('f-antal').value       = v.antal        ?? 1;
-      // Splitta "Vinkylen · Hylla 3" → plats + hyllnummer för selects
-      const hyllDelar = (v.hyllplats || '').split(' · Hylla ');
-      const hyllPlats = hyllDelar[0] || '';
-      const hyllNr    = hyllDelar[1] || '';
+      // Splitta "Vinkylen · Vitt · Hylla 2" eller "Garaget · Hylla 5" för selects
+      const hp      = v.hyllplats || '';
+      const sepIdx  = hp.indexOf(' · ');
+      const hyllPlats = sepIdx >= 0 ? hp.slice(0, sepIdx) : hp;
+      const hyllVal   = sepIdx >= 0 ? hp.slice(sepIdx + 3) : '';
       document.getElementById('f-plats').value = hyllPlats;
       uppdateraHyllSelect(hyllPlats);
-      document.getElementById('f-hylla').value = hyllNr;
+      document.getElementById('f-hylla').value = hyllVal;
       document.getElementById('f-drinkfran').value   = v.drinkfran    || '';
       document.getElementById('f-dricktill').value   = v.dricktill    || '';
       document.getElementById('f-anteckningar').value= v.anteckningar || '';
@@ -1061,9 +1275,9 @@
         arsgang:      parseInt(document.getElementById('f-arsgang').value)   || null,
         antal:        parseInt(document.getElementById('f-antal').value)     || 0,
         hyllplats:    (() => {
-          const p = document.getElementById('f-plats').value;
-          const hy = document.getElementById('f-hylla').value;
-          return p && hy ? p + ' · Hylla ' + hy : (p || '');
+          const p  = document.getElementById('f-plats').value;
+          const hy = document.getElementById('f-hylla').value; // t.ex. "Vitt · Hylla 2" eller "Hylla 5"
+          return p && hy ? p + ' · ' + hy : (p || '');
         })(),
         drinkfran:    parseInt(document.getElementById('f-drinkfran').value) || null,
         dricktill:    parseInt(document.getElementById('f-dricktill').value) || null,
@@ -1175,12 +1389,30 @@
     function uppdateraHyllSelect(plats) {
       const sel = document.getElementById('f-hylla');
       sel.innerHTML = '<option value="">Välj hylla</option>';
-      if (plats && PLATSKONFIG[plats]) {
-        for (let i = 1; i <= PLATSKONFIG[plats]; i++) {
-          const opt = document.createElement('option');
-          opt.value = i; opt.textContent = 'Hylla ' + i;
-          sel.appendChild(opt);
-        }
+      const konfig = PLATSKONFIG[plats];
+      if (plats && konfig) {
+        konfig.zoner.forEach(zon => {
+          if (zon.namn) {
+            // Vinkylen: en optgroup per zon
+            const grp = document.createElement('optgroup');
+            grp.label = zon.namn + '-zonen';
+            for (let i = 1; i <= zon.hyllor; i++) {
+              const opt = document.createElement('option');
+              opt.value = zon.namn + ' · Hylla ' + i;
+              opt.textContent = 'Hylla ' + i + ' (' + zon.namn + ')';
+              grp.appendChild(opt);
+            }
+            sel.appendChild(grp);
+          } else {
+            // Garaget: platt lista utan zon
+            for (let i = 1; i <= zon.hyllor; i++) {
+              const opt = document.createElement('option');
+              opt.value = 'Hylla ' + i;
+              opt.textContent = 'Hylla ' + i;
+              sel.appendChild(opt);
+            }
+          }
+        });
         sel.disabled = false;
       } else {
         sel.disabled = true;
@@ -1439,6 +1671,137 @@
         img.src = objUrl;
       });
     }
+
+    // ── Källarvy ─────────────────────────────────────────────────────
+
+    // Avgör om ett vin ligger i fel zon i Vinkylen
+    function felZon(v) {
+      if (!v.hyllplats) return false;
+      const delar = v.hyllplats.split(' · ');
+      if (delar[0] !== 'Vinkylen' || delar.length < 3) return false;
+      const zon = delar[1];
+      if (zon === 'Vitt' && ['rött', 'sött'].includes(v.typ)) return true;
+      if (zon === 'Rött' && ['vitt', 'mousserande', 'rosé'].includes(v.typ)) return true;
+      return false;
+    }
+
+    function renderKallare() {
+      const grid = document.getElementById('kallare-grid');
+      const sok  = filter.sok.toLowerCase().trim();
+      grid.innerHTML = Object.entries(PLATSKONFIG)
+        .map(([namn, konfig]) => rackKortHtml(namn, konfig, sok))
+        .join('');
+      // Koppla toggle-knappar efter att HTML skrivits
+      Object.keys(PLATSKONFIG).forEach(platsNamn => {
+        const btn = document.getElementById('rack-toggle-' + platsNamn);
+        if (btn) btn.addEventListener('click', () => {
+          if (oppnaRack.has(platsNamn)) oppnaRack.delete(platsNamn);
+          else oppnaRack.add(platsNamn);
+          renderKallare();
+        });
+      });
+    }
+
+    function rackKortHtml(platsNamn, konfig, sok) {
+      const erOppen     = oppnaRack.has(platsNamn);
+      const totalFlaskor = viner
+        .filter(v => (v.hyllplats || '').startsWith(platsNamn))
+        .reduce((s, v) => s + (v.antal || 0), 0);
+      const totalHyllor  = konfig.zoner.reduce((s, z) => s + z.hyllor, 0);
+
+      const typFarg = {
+        rött: '#b03040', vitt: '#c0a030', mousserande: '#30a060',
+        rosé: '#c04080', sött: '#c07030'
+      };
+      const typKlass = {
+        rött: 'rott', vitt: 'vitt', mousserande: 'mous', rosé: 'rose', sött: 'sott'
+      };
+
+      const zonSektioner = konfig.zoner.map(zon => {
+        const hyllRadar = [];
+        for (let nr = 1; nr <= zon.hyllor; nr++) {
+          const hyllStr = zon.namn
+            ? `${platsNamn} · ${zon.namn} · Hylla ${nr}`
+            : `${platsNamn} · Hylla ${nr}`;
+
+          // Matchar ny format + gammalt format utan zon (bakåtkompatibilitet)
+          const hyllViner = viner.filter(v => {
+            if (!v.hyllplats) return false;
+            if (v.hyllplats === hyllStr) return true;
+            if (!zon.namn && v.hyllplats === `${platsNamn} · Hylla ${nr}`) return true;
+            return false;
+          });
+
+          if (erOppen) {
+            const pillsHtml = hyllViner.length === 0
+              ? '<span class="rack-tom-pill">Tom</span>'
+              : hyllViner.map(v => {
+                  const klass   = typKlass[v.typ] || 'rott';
+                  const hl      = sok ? (matcherSok(v, sok) ? ' pill-highlight' : ' pill-dim') : '';
+                  const ar      = v.arsgang ? ' ' + v.arsgang : '';
+                  const ant     = v.antal !== 1 ? ` ×${v.antal}` : '';
+                  const felMark = felZon(v) ? ' <span class="felzon-ikon" title="Felzon: vintypen passar inte denna zon">↕</span>' : '';
+                  return `<span class="rack-pill typ-${klass}${hl}">${h(v.namn + ar + ant)}${felMark}</span>`;
+                }).join('');
+
+            hyllRadar.push(`<div class="rack-hylla-rad-oppen">
+              <span class="rack-hylla-nr-oppen">H${nr}</span>
+              <div class="rack-pills-wrap">${pillsHtml}</div>
+            </div>`);
+          } else {
+            const dotsHtml = hyllViner.length === 0
+              ? '<span class="rack-tom-dot">—</span>'
+              : hyllViner.map(v => {
+                  const farg    = typFarg[v.typ] || '#666';
+                  const hl      = sok ? (matcherSok(v, sok) ? ' vin-highlight' : ' vin-dim') : '';
+                  const felKl   = felZon(v) ? ' zon-fel' : '';
+                  const tooltip = h(v.namn) + (v.arsgang ? ' ' + v.arsgang : '') + (v.antal > 1 ? ' ×' + v.antal : '');
+                  return `<span class="rack-dot${felKl}${hl}" style="background:${farg}" title="${tooltip}"></span>`;
+                }).join('');
+
+            hyllRadar.push(`<div class="rack-hylla-rad-compact">
+              <span class="rack-hylla-nr-compact">H${nr}</span>
+              <div class="rack-dots-wrap">${dotsHtml}</div>
+            </div>`);
+          }
+        }
+
+        const zonHeaderHtml = zon.namn
+          ? `<div class="rack-zon-header">${zon.namn.toUpperCase()}</div>`
+          : '';
+
+        return `<div class="rack-zon ${zon.css}">${zonHeaderHtml}${hyllRadar.join('')}</div>`;
+      }).join('');
+
+      const toggleTxt = erOppen ? '▲ Stäng' : '▼ Öppna';
+
+      return `<div class="rack-kort">
+        <div class="rack-header">
+          <div>
+            <div class="rack-namn">${h(platsNamn)}</div>
+            <div class="rack-info">${totalFlaskor} flaskor · ${totalHyllor} hyllor</div>
+          </div>
+          <button class="rack-toggle-knapp" id="rack-toggle-${h(platsNamn)}">${toggleTxt}</button>
+        </div>
+        ${zonSektioner}
+      </div>`;
+    }
+
+    // ── Vyväxlare ────────────────────────────────────────────────────
+
+    document.querySelectorAll('.vy-knapp').forEach(btn => {
+      btn.addEventListener('click', () => {
+        vyLage = btn.dataset.vy;
+        document.querySelectorAll('.vy-knapp').forEach(b => b.classList.remove('aktiv'));
+        btn.classList.add('aktiv');
+        const listaCont  = document.getElementById('lista-container');
+        const kallareCont = document.getElementById('kallare-container');
+        listaCont.style.display  = vyLage === 'lista'   ? '' : 'none';
+        kallareCont.style.display = vyLage === 'kallare' ? '' : 'none';
+        if (vyLage === 'kallare') renderKallare();
+        else renderGrid();
+      });
+    });
 
     // ── Start ────────────────────────────────────────────────────────
     ladda();
