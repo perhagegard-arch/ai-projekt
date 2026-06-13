@@ -2,6 +2,20 @@
 
 ## [Opublicerad] – 2026-06-13
 
+### Vinkällaren – prisfält och källarvärde
+- Nytt fält "Pris (kr/flaska)" i lägg till/redigera-modalen
+- Etikettanalysen föreslår nu ett ungefärligt marknadspris i SEK (Systembolaget-nivå, avrundat till närmaste 10-tal) och förifylls automatiskt
+- Priset visas som etikett (💰 189 kr/fl) på vinkorten i listvyn
+- Ny knapp "💰 Visa källarens värde" under statistikraden togglar en panel med:
+  - Totalt uppskattat källarvärde (i guld)
+  - Delsummor per plats (Vinkylen / Garaget)
+  - Delsummor per vintyp (rött / vitt / mousserande etc.)
+  - Disclaimer med antal viner som saknar pris och därmed inte räknas in
+
+---
+
+## [Opublicerad] – 2026-06-13
+
 ### Vinkällaren – visuell källarvy
 - Ny vy "🏠 Källarvy" (toggle i filterraden bredvid "☰ Lista")
 - **Vinkylen** visas med två tydliga zoner: VITT (H1–3, blå ton) och RÖTT (H1–8, röd ton) – totalt 11 hyllor
