@@ -2,6 +2,18 @@
 
 ## [Opublicerad] – 2026-06-13
 
+### Vinkällaren – bulk-prisuppskattning via AI
+- Ny knapp "🤖 Uppskatta pris för viner utan pris" i statistiksektionen
+- Loopar sekventiellt genom alla viner utan pris och frågar Claude Haiku om ungefärligt marknadspris i SEK (avrundat till närmaste 10-tal)
+- Live-progressindikator: "Uppskattar 3 av 12: Château Margaux…"
+- Sparar och uppdaterar UI efter varje vin – inget tappas om sidan stängs halvvägs
+- Fel per vin visas i rött men avbryter inte körningen – nästa vin testas ändå
+- Avbryt-knapp syns under pågående körning
+- Sammanfattning när klart: "✓ Klart – 8 priser ifyllda, 2 misslyckades"
+- Befintliga priser rörs aldrig
+
+---
+
 ### Vinkällaren – prisfält och källarvärde
 - Nytt fält "Pris (kr/flaska)" i lägg till/redigera-modalen
 - Etikettanalysen föreslår nu ett ungefärligt marknadspris i SEK (Systembolaget-nivå, avrundat till närmaste 10-tal) och förifylls automatiskt
