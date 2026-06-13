@@ -823,6 +823,34 @@
       cursor: help;
       flex-shrink: 0;
     }
+
+    /* ── SVG-vinkyl (Vinkylen illustration) ─────────────────────── */
+    .rack-kort-svg .rack-header {
+      padding: 0.75rem 1rem 0.6rem;
+    }
+
+    .rack-svg-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 0.85rem 1rem 1rem;
+      background: #111;
+    }
+
+    .vk-flaska:hover {
+      filter: brightness(1.4);
+    }
+
+    /* Zon-chips i info-raden */
+    .zon-chip {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+    }
+
+    .zon-chip-vitt { background: rgba(12,24,40,0.8); color: #3a6a9a; border: 1px solid #1a3a5a; }
+    .zon-chip-rott { background: rgba(24,10,8,0.8);  color: #7a2020; border: 1px solid #4a1010; }
   </style>
 </head>
 <body>
@@ -1672,6 +1700,217 @@
       });
     }
 
+    // ── Källarvy: SVG-illustration för Vinkylen ──────────────────────
+
+    function vinkylenSvgKort(sok) {
+      const platsNamn = 'Vinkylen';
+
+      const totalFlaskor = viner
+        .filter(v => (v.hyllplats || '').startsWith(platsNamn))
+        .reduce((s, v) => s + (v.antal || 0), 0);
+
+      // Viner exakt på given hyllplats
+      function hyllViner(zon, nr) {
+        const str = `${platsNamn} · ${zon} · Hylla ${nr}`;
+        return viner.filter(v => v.hyllplats === str);
+      }
+
+      // Bottenfärg per typ
+      const bFarg = {
+        rött: '#8a1a28', vitt: '#c4a030', mousserande: '#3a7a2a',
+        rosé: '#c44070', sött: '#9a6010'
+      };
+
+      // Y-position för ovansidan av varje hylla
+      const vittY = [72, 105, 138];
+      const rottY = [200, 231, 262, 293, 324, 355, 386, 417];
+
+      // Generera SVG för flaskor på en hylla
+      function flaskorSvg(zon, nr, sy) {
+        let s = '';
+        hyllViner(zon, nr).forEach((v, i) => {
+          if (i >= 5) return;
+          const bx = 18 + i * 31;
+          const by = sy - 9;
+          const fc = bFarg[v.typ] || '#666';
+          const ds = drinkStatus(v);
+          const sokMatch = sok ? matcherSok(v, sok) : null;
+          const opac = sokMatch === false ? 0.14 : 0.9;
+          const stroke = sokMatch ? ' stroke="rgba(255,255,255,0.65)" stroke-width="1"' : '';
+          // Drick-snart/passerat-glöd bakom flaskan
+          if (ds === 'snart')
+            s += `<ellipse cx="${bx+12}" cy="${by+3.5}" rx="14" ry="5.5" fill="rgba(255,185,0,0.28)"/>`;
+          else if (ds === 'passerat')
+            s += `<ellipse cx="${bx+12}" cy="${by+3.5}" rx="14" ry="5.5" fill="rgba(190,50,50,0.22)"/>`;
+          const tip = h(v.namn) + (v.arsgang ? ' ' + v.arsgang : '') + (v.antal !== 1 ? ' ×' + v.antal : '');
+          s += `<rect class="vk-flaska" x="${bx}" y="${by}" width="24" height="7" rx="3.5" `
+             + `fill="${fc}" opacity="${opac}"${stroke} `
+             + `onclick="oppnaRedigera('${h(v.id)}')" style="cursor:pointer">`
+             + `<title>${tip}</title></rect>`;
+          // Felzon-prick ovanpå flaskan
+          if (felZon(v))
+            s += `<circle cx="${bx+21}" cy="${by}" r="2.5" fill="#b09000" opacity="0.85" pointer-events="none"/>`;
+        });
+        return s;
+      }
+
+      // Samla alla flaskor
+      let bottleSvg = '';
+      vittY.forEach((sy, i) => { bottleSvg += flaskorSvg('Vitt', i + 1, sy); });
+      rottY.forEach((sy, i) => { bottleSvg += flaskorSvg('Rött', i + 1, sy); });
+
+      // Lamellhylla (ekfärgade träribbor)
+      function hylla(y) {
+        return `<rect x="14" y="${y}" width="172" height="6" fill="url(#vk-shelf)" rx="1"/>`
+             + `<line x1="14" y1="${y+1.5}" x2="186" y2="${y+1.5}" stroke="#7a5020" stroke-width="0.4" opacity="0.5"/>`
+             + `<line x1="14" y1="${y+3}"   x2="186" y2="${y+3}"   stroke="#7a5020" stroke-width="0.4" opacity="0.5"/>`
+             + `<line x1="14" y1="${y+4.5}" x2="186" y2="${y+4.5}" stroke="#7a5020" stroke-width="0.4" opacity="0.5"/>`;
+      }
+
+      const vittHyllSvg = vittY.map(hylla).join('');
+      const rottHyllSvg = rottY.map(hylla).join('');
+
+      const svg = `<svg viewBox="0 0 200 456" style="width:100%;max-width:200px;display:block">
+  <defs>
+    <linearGradient id="vk-kab" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="#282828"/>
+      <stop offset="6%"   stop-color="#1a1a1a"/>
+      <stop offset="94%"  stop-color="#0d0d0d"/>
+      <stop offset="100%" stop-color="#111"/>
+    </linearGradient>
+    <linearGradient id="vk-hl" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.1)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <linearGradient id="vk-oak" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="#7a4e2a"/>
+      <stop offset="25%"  stop-color="#a06830"/>
+      <stop offset="55%"  stop-color="#8c5c2c"/>
+      <stop offset="78%"  stop-color="#9e6a34"/>
+      <stop offset="100%" stop-color="#7a4e2a"/>
+    </linearGradient>
+    <linearGradient id="vk-shelf" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%"   stop-color="#c89850"/>
+      <stop offset="100%" stop-color="#a07838"/>
+    </linearGradient>
+    <linearGradient id="vk-handle" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="#363636"/>
+      <stop offset="35%"  stop-color="#909090"/>
+      <stop offset="55%"  stop-color="#b4b4b4"/>
+      <stop offset="100%" stop-color="#363636"/>
+    </linearGradient>
+    <linearGradient id="vk-led" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="rgba(150,195,255,0.3)"/>
+      <stop offset="30%"  stop-color="rgba(195,220,255,0.85)"/>
+      <stop offset="50%"  stop-color="rgba(215,235,255,1)"/>
+      <stop offset="70%"  stop-color="rgba(195,220,255,0.85)"/>
+      <stop offset="100%" stop-color="rgba(150,195,255,0.3)"/>
+    </linearGradient>
+    <linearGradient id="vk-vbg" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="#0c1828"/>
+      <stop offset="100%" stop-color="#0a1422"/>
+    </linearGradient>
+    <linearGradient id="vk-rbg" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%"   stop-color="#180a08"/>
+      <stop offset="100%" stop-color="#100605"/>
+    </linearGradient>
+    <linearGradient id="vk-reflect" x1="0" x2="0.6" y1="0" y2="1">
+      <stop offset="0%"   stop-color="rgba(255,255,255,0.09)"/>
+      <stop offset="40%"  stop-color="rgba(255,255,255,0.03)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+    <filter id="vk-led-glow" x="-5%" y="-200%" width="110%" height="700%">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="vk-clip">
+      <rect x="10" y="32" width="180" height="405" rx="6"/>
+    </clipPath>
+  </defs>
+
+  <!-- Ekskiva ovanpå -->
+  <rect x="-3" y="0" width="206" height="14" rx="3" fill="url(#vk-oak)"/>
+  <line x1="15"  y1="3"  x2="185" y2="3"  stroke="#c49040" stroke-width="0.4" opacity="0.3"/>
+  <line x1="22"  y1="6"  x2="178" y2="6"  stroke="#7a4a28" stroke-width="0.5" opacity="0.25"/>
+  <line x1="10"  y1="9"  x2="190" y2="9"  stroke="#c49040" stroke-width="0.3" opacity="0.2"/>
+  <line x1="30"  y1="12" x2="168" y2="12" stroke="#7a4a28" stroke-width="0.4" opacity="0.2"/>
+
+  <!-- Kabinett – blank svart med kantljus -->
+  <rect x="0" y="11" width="200" height="445" rx="10" fill="url(#vk-kab)"/>
+  <rect x="0" y="11" width="16"  height="445" rx="10" fill="url(#vk-hl)"/>
+
+  <!-- Glasdörrens metallram -->
+  <rect x="9.5"  y="27.5" width="181"  height="409" rx="7.5" fill="none" stroke="#4a4a4a" stroke-width="1.5"/>
+  <rect x="10.5" y="28.5" width="179"  height="407" rx="7"   fill="none" stroke="#1e1e1e" stroke-width="0.5"/>
+
+  <!-- Glasinterior (klippad) -->
+  <g clip-path="url(#vk-clip)">
+    <rect x="10" y="32" width="180" height="405" fill="#080808"/>
+
+    <!-- Vitt-zon: kall blågrå bakgrund -->
+    <rect x="10" y="32" width="180" height="122" fill="url(#vk-vbg)"/>
+
+    <!-- LED-list – kallvitt sken -->
+    <rect x="10" y="32" width="180" height="7" fill="url(#vk-led)" filter="url(#vk-led-glow)"/>
+    <!-- Ljussken som faller nedåt från LED -->
+    <rect x="10" y="39" width="180" height="24" fill="rgba(155,205,255,0.05)" pointer-events="none"/>
+
+    <!-- Vitt-zon label -->
+    <text x="16" y="50" font-family="system-ui,sans-serif" font-size="5.5" fill="rgba(70,120,175,0.6)" letter-spacing="1.5">VITT</text>
+
+    <!-- Vitt-zon hyllor -->
+    ${vittHyllSvg}
+
+    <!-- Kontrollpanel -->
+    <rect x="10" y="154" width="180" height="24" fill="#0b0b0b"/>
+    <rect x="10" y="154" width="180" height="0.5" fill="#3a3a3a"/>
+    <rect x="10" y="177" width="180" height="0.5" fill="#1e1e1e"/>
+    <text x="18" y="168" font-family="system-ui,sans-serif" font-size="5.5" fill="#343434" letter-spacing="2">TEMPTECH</text>
+    <!-- Temperatur-display -->
+    <rect x="86" y="157" width="54" height="14" rx="2" fill="#040810" stroke="#162030" stroke-width="0.5"/>
+    <text x="90" y="167.5" font-family="'Courier New',Courier,monospace" font-size="8.5" fill="#5880cc" letter-spacing="1.5">10°  16°</text>
+    <!-- Touch-knappar -->
+    <circle cx="152" cy="165" r="2.5" fill="#141414" stroke="#282828" stroke-width="0.5"/>
+    <circle cx="160" cy="165" r="2.5" fill="#141414" stroke="#282828" stroke-width="0.5"/>
+    <circle cx="168" cy="165" r="2.5" fill="#141414" stroke="#282828" stroke-width="0.5"/>
+
+    <!-- Rött-zon: varm rödbrun bakgrund -->
+    <rect x="10" y="178" width="180" height="259" fill="url(#vk-rbg)"/>
+
+    <!-- Rött-zon label -->
+    <text x="16" y="192" font-family="system-ui,sans-serif" font-size="5.5" fill="rgba(140,55,55,0.6)" letter-spacing="1.5">RÖTT</text>
+
+    <!-- Rött-zon hyllor -->
+    ${rottHyllSvg}
+
+    <!-- Alla flaskor -->
+    ${bottleSvg}
+
+    <!-- Rökfärgat glas – halvtransparent mörk overlay -->
+    <rect x="10" y="32" width="180" height="405" fill="rgba(0,3,8,0.3)" pointer-events="none"/>
+    <!-- Diagonal glasreflektion uppifrån vänster -->
+    <rect x="10" y="32" width="180" height="405" fill="url(#vk-reflect)" pointer-events="none"/>
+  </g>
+
+  <!-- Handtag – vertikalt borstat stål, vänster sida -->
+  <rect x="3.5" y="115" width="5.5" height="240" rx="2.75" fill="url(#vk-handle)"/>
+  <ellipse cx="6.25" cy="115" rx="2.75" ry="3.5" fill="#888"/>
+  <ellipse cx="6.25" cy="355" rx="2.75" ry="3.5" fill="#888"/>
+  <circle  cx="6.25" cy="122" r="0.9"  fill="#333"/>
+  <circle  cx="6.25" cy="348" r="0.9"  fill="#333"/>
+</svg>`;
+
+      return `<div class="rack-kort rack-kort-svg">
+        <div class="rack-header">
+          <div>
+            <div class="rack-namn">Vinkylen</div>
+            <div class="rack-info">${totalFlaskor} flaskor &nbsp;·&nbsp; <span class="zon-chip zon-chip-vitt">VITT H1–3</span> <span class="zon-chip zon-chip-rott">RÖTT H1–8</span></div>
+          </div>
+        </div>
+        <div class="rack-svg-wrap">${svg}</div>
+      </div>`;
+    }
+
     // ── Källarvy ─────────────────────────────────────────────────────
 
     // Avgör om ett vin ligger i fel zon i Vinkylen
@@ -1703,6 +1942,7 @@
     }
 
     function rackKortHtml(platsNamn, konfig, sok) {
+      if (platsNamn === 'Vinkylen') return vinkylenSvgKort(sok);
       const erOppen     = oppnaRack.has(platsNamn);
       const totalFlaskor = viner
         .filter(v => (v.hyllplats || '').startsWith(platsNamn))
