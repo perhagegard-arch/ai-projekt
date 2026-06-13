@@ -202,8 +202,8 @@
       flaskor i källaren
     </div>
     <div class="overblick-post">
-      <span class="siffra">—</span>
-      loggade körningar
+      <span class="siffra" id="sv-antal">—</span>
+      sous vide-körningar
     </div>
   </div>
 
@@ -223,11 +223,10 @@
       </div>
     </a>
 
-    <a href="kok-snart.html" class="kort kort-kok">
+    <a href="sousvide-dagbok.html" class="kort kort-kok">
       <span class="kort-ikon">🍽️</span>
       <div class="kort-text">
         <div class="kort-namn">Köket</div>
-        <span class="snart">Kommer snart</span>
       </div>
     </a>
 
@@ -253,13 +252,22 @@
         document.getElementById('frys-antal').textContent = totalAntal;
       } catch (e) { /* behåll streck */ }
 
-      // Läs vinkällardata från samma origin
+      // Läs vinkällardata
       try {
         var vinRaw = localStorage.getItem('vinkallare_viner');
         if (vinRaw) {
           var viner = JSON.parse(vinRaw);
           var totalFlaskor = viner.reduce(function (s, v) { return s + (Number(v.antal) || 0); }, 0);
           document.getElementById('vin-antal').textContent = totalFlaskor;
+        }
+      } catch (e) { /* behåll streck */ }
+
+      // Läs sous vide-körningar
+      try {
+        var svRaw = localStorage.getItem('sousvide_koningar');
+        if (svRaw) {
+          var koningar = JSON.parse(svRaw);
+          document.getElementById('sv-antal').textContent = koningar.length;
         }
       } catch (e) { /* behåll streck */ }
     }());

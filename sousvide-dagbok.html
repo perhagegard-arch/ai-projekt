@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sous Vide-dagboken – Pers Kök</title>
+  <style>
+    /* Mörkt tema per CLAUDE.md */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #121212;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 6rem;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-emblem {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .header-titel {
+      font-size: 1.05rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .tillbaka {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid #333;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .tillbaka:hover { color: #e0e0e0; border-color: #555; }
+
+    /* ── Innehållsbredd ── */
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem;
+    }
+
+    /* ── Stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat-post {
+      text-align: center;
+      padding: 0.85rem 0.5rem;
+      border-right: 1px solid #2a2a2a;
+      font-size: 0.75rem;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    .stat-post:last-child { border-right: none; }
+
+    .stat-siffra {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      line-height: 1.25;
+    }
+
+    /* ── Filterrad ── */
+    .filterrad { margin-bottom: 1rem; }
+
+    .sok-input {
+      width: 100%;
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #e0e0e0;
+      padding: 0.65rem 0.9rem;
+      font-size: 0.9rem;
+      outline: none;
+      margin-bottom: 0.6rem;
+    }
+
+    .sok-input::placeholder { color: #555; }
+    .sok-input:focus { border-color: #555; }
+
+    /* Kategori-knappar – vågrätt scrollbar */
+    .kat-filter-rad {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      padding-bottom: 0.3rem;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .kat-filter-rad::-webkit-scrollbar { display: none; }
+
+    .filter-btn {
+      padding: 0.42rem 0.75rem;
+      border-radius: 20px;
+      border: 1px solid #333;
+      background: transparent;
+      color: #888;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .filter-btn.aktiv {
+      background: #2a2a2a;
+      border-color: #555;
+      color: #e0e0e0;
+    }
+
+    /* Metod- och sorteringsrad */
+    .filter-rad2 {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .metod-select, .sort-select {
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #888;
+      padding: 0.45rem 0.75rem;
+      font-size: 0.8rem;
+      outline: none;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+
+    /* ── Körningsgrid ── */
+    .korar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1rem;
+    }
+
+    .tomt-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: #555;
+      font-size: 0.9rem;
+      line-height: 1.7;
+    }
+
+    .tomt-ikon { font-size: 3.5rem; display: block; margin-bottom: 0.85rem; }
+
+    /* ── Körningskort ── */
+    .korningskort {
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.42rem;
+      cursor: pointer;
+      transition: border-color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .korningskort:hover { border-color: #3a3a3a; }
+    .korningskort.hl-fame  { border-color: #3a2a14; }
+    .korningskort.hl-shame { border-color: #3a1414; }
+
+    /* Korthuvud: badge + HL-ikon */
+    .kort-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    /* Kategori-badges */
+    .kat-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.55rem;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+
+    .kat-not    { background: rgba(100,20,30,0.3);  color: #e07080; border: 1px solid #6a1020; }
+    .kat-vilt   { background: rgba(80,50,20,0.3);   color: #c09060; border: 1px solid #5a3a14; }
+    .kat-fisk   { background: rgba(20,60,120,0.3);  color: #6090e0; border: 1px solid #1a3a7a; }
+    .kat-fagel  { background: rgba(20,80,60,0.3);   color: #60c090; border: 1px solid #1a5a40; }
+    .kat-gris   { background: rgba(80,40,80,0.3);   color: #c080c0; border: 1px solid #5a285a; }
+    .kat-ovrigt { background: rgba(50,50,50,0.3);   color: #999;    border: 1px solid #444; }
+
+    /* HL-ikon (fame/shame) */
+    .hl-ikon { font-size: 0.9rem; flex-shrink: 0; }
+
+    /* Kortets namn */
+    .kort-namn {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #f0f0f0;
+      line-height: 1.3;
+    }
+
+    /* Metod-chip + temp + tid */
+    .kort-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 0.4rem;
+      font-size: 0.75rem;
+      color: #777;
+      align-items: center;
+    }
+
+    .metod-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.72rem;
+      color: #888;
+      background: #232323;
+      border-radius: 6px;
+      padding: 0.15rem 0.45rem;
+    }
+
+    /* Betyg-pills */
+    .betyg-pill {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.18rem 0.55rem;
+      border-radius: 20px;
+      align-self: flex-start;
+    }
+
+    .bp-haveri      { background: rgba(120,20,20,0.35);  color: #e06060; border: 1px solid #7a1010; }
+    .bp-dalig       { background: rgba(120,60,20,0.35);  color: #e09060; border: 1px solid #7a3a10; }
+    .bp-ok          { background: rgba(60,60,60,0.35);   color: #aaa;    border: 1px solid #444; }
+    .bp-bra         { background: rgba(20,80,40,0.35);   color: #70c090; border: 1px solid #1a5a30; }
+    .bp-riktigt-bra { background: rgba(20,100,50,0.35);  color: #55d07a; border: 1px solid #1a6a38; }
+    .bp-mycket-bra  { background: rgba(20,110,60,0.35);  color: #40e070; border: 1px solid #1a7040; }
+    .bp-jattebra    { background: rgba(20,100,120,0.35); color: #50d0e0; border: 1px solid #1a6a7a; }
+    .bp-superbra    { background: rgba(120,90,10,0.35);  color: #e0c040; border: 1px solid #7a5a10; }
+    .bp-perfekt     { background: rgba(150,115,0,0.4);   color: #f5d030; border: 1px solid #9a7200; }
+
+    /* Omdömetext (max 3 rader) */
+    .kort-omdome {
+      font-size: 0.78rem;
+      color: #777;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ×n gånger */
+    .kort-n { font-size: 0.7rem; color: #555; margin-top: 0.05rem; }
+
+    /* ── Verktygsrad ── */
+    .verktygsrad {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .verktygknapp {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.6rem 1rem;
+      background: #1c1c1c;
+      border: 1px solid #333;
+      border-radius: 10px;
+      color: #888;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .verktygknapp:hover { background: #252525; color: #e0e0e0; }
+
+    /* ── Temperaturguide ── */
+    .temp-guide-sektion {
+      margin-top: 2rem;
+      border-top: 1px solid #2a2a2a;
+      padding-top: 1.25rem;
+    }
+
+    .temp-guide-rubrik {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .temp-guide-titel {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .temp-toggle-btn {
+      background: none;
+      border: 1px solid #2a2a2a;
+      color: #777;
+      border-radius: 8px;
+      padding: 0.3rem 0.7rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: border-color 0.12s, color 0.12s;
+    }
+
+    .temp-toggle-btn:hover { border-color: #555; color: #ccc; }
+
+    .temp-guide-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 0.85rem;
+    }
+
+    .temp-kort {
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    .temp-kort-top {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .temp-ikon { font-size: 1.4rem; }
+
+    .temp-kat-namn {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #f0f0f0;
+    }
+
+    .temp-badge {
+      display: inline-block;
+      background: rgba(90,60,10,0.4);
+      color: #d4a84b;
+      border: 1px solid #7a5020;
+      border-radius: 6px;
+      padding: 0.15rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      align-self: flex-start;
+    }
+
+    .temp-note {
+      font-size: 0.76rem;
+      color: #666;
+      line-height: 1.5;
+      margin-top: 0.2rem;
+    }
+
+    /* ── FAB ── */
+    .fab {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      width: 58px;
+      height: 58px;
+      border-radius: 17px;
+      background: #3a4a1a;
+      border: none;
+      color: #fff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.55);
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 0.12s, background 0.12s;
+      z-index: 50;
+    }
+
+    .fab:hover  { background: #4a5a22; }
+    .fab:active { transform: scale(0.93); }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.72);
+      z-index: 200;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.18s;
+    }
+
+    .modal-overlay.oppet { opacity: 1; pointer-events: all; }
+
+    .modal {
+      background: #1e1e1e;
+      border-radius: 20px 20px 0 0;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 1.5rem 1.25rem 2.5rem;
+      transform: translateY(100%);
+      transition: transform 0.22s ease;
+    }
+
+    .modal-overlay.oppet .modal { transform: translateY(0); }
+
+    .modal-rubrik {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-stang {
+      background: none;
+      border: none;
+      color: #555;
+      font-size: 1.4rem;
+      cursor: pointer;
+      padding: 0.2rem 0.4rem;
+      line-height: 1;
+    }
+
+    .modal-stang:hover { color: #aaa; }
+
+    .formrad {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .formrad.hel { grid-template-columns: 1fr; }
+
+    label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      color: #888;
+    }
+
+    input, select, textarea {
+      background: #282828;
+      border: 1px solid #383838;
+      border-radius: 8px;
+      color: #e0e0e0;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    input:focus, select:focus, textarea:focus { border-color: #4a6a1a; }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    select option { background: #282828; }
+
+    .modal-knappar {
+      display: flex;
+      gap: 0.6rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .knapp-spara {
+      flex: 1;
+      min-width: 100px;
+      padding: 0.85rem;
+      background: #4a6a1a;
+      border: none;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .knapp-spara:hover { background: #5a7a22; }
+
+    .knapp-avbryt {
+      padding: 0.85rem 1.25rem;
+      background: #252525;
+      border: 1px solid #333;
+      border-radius: 12px;
+      color: #aaa;
+      font-size: 0.95rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .knapp-slett {
+      padding: 0.85rem 1rem;
+      background: transparent;
+      border: 1px solid #4a1a1a;
+      border-radius: 12px;
+      color: #9a5050;
+      font-size: 0.95rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .knapp-slett:hover { background: rgba(90,26,26,0.3); }
+
+    /* ── Responsivt ── */
+    @media (max-width: 520px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .stat-post:nth-child(2) { border-right: none; }
+      .stat-post:nth-child(3),
+      .stat-post:nth-child(4) { border-top: 1px solid #2a2a2a; }
+      .formrad { grid-template-columns: 1fr; }
+    }
+
+    @media (min-width: 600px) {
+      .modal-overlay { align-items: center; }
+      .modal { border-radius: 20px; margin: 1rem; max-height: 85vh; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <img src="Logga.png" alt="" class="header-emblem"
+         onerror="this.style.display='none'">
+    <span class="header-titel">🌡️ Sous Vide-dagboken</span>
+    <a href="hub.html" class="tillbaka">← Hub</a>
+  </header>
+
+  <div class="container">
+
+    <!-- Statistikrad -->
+    <div class="stats">
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-total">0</span>körningar
+      </div>
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-kategorier">0</span>kategorier
+      </div>
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-fame">0</span>Hall of Fame
+      </div>
+      <div class="stat-post">
+        <span class="stat-siffra" id="stat-metod">—</span>vanligast
+      </div>
+    </div>
+
+    <!-- Sök + kategorifilter + metod/sort -->
+    <div class="filterrad">
+      <input type="search" class="sok-input" id="sokruta"
+             placeholder="🔍  Sök körning, omdöme, tagg…">
+
+      <div class="kat-filter-rad" id="kat-filter-rad">
+        <button class="filter-btn aktiv" data-kat="">Alla</button>
+        <button class="filter-btn" data-kat="entrecote">🥩 Entrecote</button>
+        <button class="filter-btn" data-kat="oxfile">🥩 Oxfilé</button>
+        <button class="filter-btn" data-kat="rawdjur">🦌 Rådjur</button>
+        <button class="filter-btn" data-kat="vildsvin">🐗 Vildsvin</button>
+        <button class="filter-btn" data-kat="alg">🫎 Älg</button>
+        <button class="filter-btn" data-kat="dovhjort">🦌 Dovhjort</button>
+        <button class="filter-btn" data-kat="fisk">🐟 Fisk</button>
+        <button class="filter-btn" data-kat="kyckling">🍗 Kyckling</button>
+        <button class="filter-btn" data-kat="flaskfile">🥩 Fläskfilé</button>
+        <button class="filter-btn" data-kat="ovrigt">🍽️ Övrigt</button>
+      </div>
+
+      <div class="filter-rad2">
+        <select class="metod-select" id="metod-filter">
+          <option value="">Alla metoder</option>
+          <option value="Sous vide">Sous vide</option>
+          <option value="Stekpanna">Stekpanna</option>
+          <option value="Ugn">Ugn</option>
+          <option value="Stekning">Stekning</option>
+          <option value="Grill">Grill</option>
+        </select>
+        <select class="sort-select" id="sort-val">
+          <option value="default">Ordning: Original</option>
+          <option value="betyg-hog">Betyg: högt → lågt</option>
+          <option value="betyg-lag">Betyg: lågt → högt</option>
+          <option value="namn">Namn A–Ö</option>
+          <option value="temp">Temperatur</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Körningsgrid -->
+    <div class="korar-grid" id="korar-grid"></div>
+
+    <!-- Verktygsrad: export / import -->
+    <div class="verktygsrad">
+      <button class="verktygknapp" id="exportera-btn">↓ Säkerhetskopia</button>
+      <label class="verktygknapp" style="cursor:pointer">
+        ↑ Importera
+        <input type="file" accept=".json" id="importera-fil" style="display:none">
+      </label>
+    </div>
+
+    <!-- Temperaturguide -->
+    <div class="temp-guide-sektion">
+      <div class="temp-guide-rubrik">
+        <span class="temp-guide-titel">🌡️ Temperaturguide</span>
+        <button class="temp-toggle-btn" id="temp-toggle-btn">▲ Dölj</button>
+      </div>
+      <div class="temp-guide-grid" id="temp-guide-grid"></div>
+    </div>
+
+  </div><!-- /container -->
+
+  <!-- FAB – logga ny körning -->
+  <button class="fab" id="fab" title="Logga körning">＋</button>
+
+  <!-- Modal – ny / redigera körning -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-rubrik">
+        <span id="modal-titel">Logga körning</span>
+        <button class="modal-stang" id="modal-stang">✕</button>
+      </div>
+
+      <form id="korning-form" autocomplete="off">
+
+        <div class="formrad hel">
+          <label>Namn *
+            <input id="f-namn" type="text" placeholder="t.ex. Entrecote filé" required>
+          </label>
+        </div>
+
+        <div class="formrad">
+          <label>Kategori
+            <select id="f-kat">
+              <option value="entrecote">Entrecote</option>
+              <option value="oxfile">Oxfilé</option>
+              <option value="rawdjur">Rådjur</option>
+              <option value="vildsvin">Vildsvin</option>
+              <option value="alg">Älg</option>
+              <option value="dovhjort">Dovhjort</option>
+              <option value="fisk">Fisk</option>
+              <option value="kyckling">Kyckling</option>
+              <option value="flaskfile">Fläskfilé</option>
+              <option value="ovrigt">Övrigt</option>
+            </select>
+          </label>
+          <label>Metod
+            <select id="f-metod">
+              <option value="Sous vide">Sous vide</option>
+              <option value="Stekpanna">Stekpanna</option>
+              <option value="Ugn">Ugn</option>
+              <option value="Stekning">Stekning</option>
+              <option value="Grill">Grill</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="formrad">
+          <label>Temperatur (°C)
+            <input id="f-temp" type="number" placeholder="54" min="20" max="120">
+          </label>
+          <label>Tid
+            <input id="f-tid" type="text" placeholder="t.ex. 1 tim 30 min">
+          </label>
+        </div>
+
+        <div class="formrad">
+          <label>Antal gånger (n)
+            <input id="f-n" type="number" value="1" min="0" max="999">
+          </label>
+          <label>Betyg
+            <select id="f-betyg">
+              <option value="">— välj —</option>
+              <option value="Perfekt">Perfekt 🏆</option>
+              <option value="Superbra">Superbra ⭐⭐⭐</option>
+              <option value="Jättebra">Jättebra ⭐⭐</option>
+              <option value="Mycket bra">Mycket bra ⭐</option>
+              <option value="Riktigt bra">Riktigt bra 👍</option>
+              <option value="Bra">Bra</option>
+              <option value="Ok">Ok</option>
+              <option value="Dålig">Dålig 👎</option>
+              <option value="Haveri">Haveri ❌</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="formrad hel">
+          <label>Omdöme
+            <textarea id="f-omdome"
+              placeholder="Anteckningar, tips, vad som funkade eller inte…"></textarea>
+          </label>
+        </div>
+
+        <div class="formrad">
+          <label>Datum
+            <input id="f-datum" type="text" placeholder="t.ex. 15 jan 2024">
+          </label>
+          <label>Utmärkelse
+            <select id="f-hl">
+              <option value="">—</option>
+              <option value="fame">⭐ Hall of Fame</option>
+              <option value="shame">⚠️ Hall of Shame</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="formrad hel">
+          <label>Taggar
+            <input id="f-tags" type="text"
+                   placeholder="t.ex. vilt nöt grill jakt">
+          </label>
+        </div>
+
+        <div class="modal-knappar">
+          <button type="button" class="knapp-slett" id="ta-bort-btn"
+                  style="display:none">Ta bort</button>
+          <button type="button" class="knapp-avbryt" id="avbryt-btn">Avbryt</button>
+          <button type="submit" class="knapp-spara">Spara</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const LS_NYCKEL = 'sousvide_koningar';
+
+    /* ── Konfigurationsdata ── */
+
+    const KAT_LABEL = {
+      entrecote: 'Entrecote', oxfile: 'Oxfilé',   rawdjur: 'Rådjur',
+      vildsvin:  'Vildsvin',  alg:    'Älg',       dovhjort:'Dovhjort',
+      fisk:      'Fisk',      kyckling:'Kyckling', flaskfile:'Fläskfilé',
+      ovrigt:    'Övrigt'
+    };
+
+    const KAT_CSS = {
+      entrecote: 'kat-not', oxfile: 'kat-not',
+      rawdjur: 'kat-vilt',  vildsvin: 'kat-vilt', alg: 'kat-vilt', dovhjort: 'kat-vilt',
+      fisk: 'kat-fisk',     kyckling: 'kat-fagel',
+      flaskfile: 'kat-gris', ovrigt: 'kat-ovrigt'
+    };
+
+    const METOD_IKON = {
+      'Sous vide':'♨️', 'Stekpanna':'🍳', 'Ugn':'🔥', 'Stekning':'🍳', 'Grill':'🔥'
+    };
+
+    const BETYG_VIKT = {
+      'Haveri':0,'Dålig':1,'Ok':2,'Bra':3,'Riktigt bra':4,
+      'Mycket bra':5,'Jättebra':6,'Superbra':7,'Perfekt':8
+    };
+
+    const BETYG_CSS = {
+      'Haveri':'bp-haveri','Dålig':'bp-dalig','Ok':'bp-ok','Bra':'bp-bra',
+      'Riktigt bra':'bp-riktigt-bra','Mycket bra':'bp-mycket-bra',
+      'Jättebra':'bp-jattebra','Superbra':'bp-superbra','Perfekt':'bp-perfekt'
+    };
+
+    const TEMP_GUIDE = [
+      { icon:'🥩', namn:'Entrecote',           tempLabel:'52–54°C',
+        note:'1,5–2 tim. Undvik 56° om du vill ha det rött. "Jättebra" på 52°C/2 tim.' },
+      { icon:'🦌', namn:'Rådjur (sadel/filé)', tempLabel:'56°C',
+        note:'40–60 min. Gärna utan ben. Ytterlår max 45 min – 1:45 gav pastej!' },
+      { icon:'🐗', namn:'Vildsvin',            tempLabel:'58–60°C',
+        note:'Ryggbiff 40 min. Fransyska vill ha 1,5 tim. Innanlår: "Jättebra".' },
+      { icon:'🍗', namn:'Kyckling',            tempLabel:'58–62°C',
+        note:'1,5 tim. Färsk >> fryst. 58°C verkar vara sweet spot.' },
+      { icon:'🐟', namn:'Fisk (lax, gös)',     tempLabel:'48–50°C',
+        note:'40–48 min. Gös fick "Superbra" – testa 30 min socker-saltlag innan!' },
+      { icon:'🥩', namn:'Fläskfilé',           tempLabel:'56–58°C',
+        note:'2 tim. Krydda ordentligt – msg, vitlökspulver, grillkrydda. "Riktigt bra".' },
+      { icon:'🫎', namn:'Älg',                 tempLabel:'56°C',
+        note:'40 min ryggbiff. Resultat: "Perfekt." Inget mer att säga.' },
+      { icon:'🥩', namn:'Oxfilé',              tempLabel:'49–54°C',
+        note:'2 tim. Steka först, majo på, steka igen = "Mycket bra" på 4 cm-bit.' },
+      { icon:'🦌', namn:'Dovhjort',            tempLabel:'55–58°C',
+        note:'1,5 tim. "Riktigt bra." Vitlökspulver och msg i påsen. Ugn till 50°C = "Superbra".' },
+    ];
+
+    /* ── State ── */
+    let koningar   = [];
+    let filter     = { kat: '', metod: '', sok: '', sort: 'default' };
+    let redigerarId   = null;
+    let visaTempGuide = true;
+
+    /* ── Persistens ── */
+    function ladda() {
+      try { koningar = JSON.parse(localStorage.getItem(LS_NYCKEL) || '[]'); }
+      catch { koningar = []; }
+    }
+
+    function spara() {
+      localStorage.setItem(LS_NYCKEL, JSON.stringify(koningar));
+    }
+
+    /* ── Hjälpfunktioner ── */
+    function nyId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function idag() {
+      return new Date().toISOString().slice(0, 10);
+    }
+
+    function h(s) {
+      return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /* ── Stats ── */
+    function renderStats() {
+      const total = koningar.length;
+      const kats  = new Set(koningar.map(k => k.kat).filter(Boolean)).size;
+      const fame  = koningar.filter(k => k.hl === 'fame').length;
+
+      const metodCount = {};
+      koningar.forEach(k => { if (k.metod) metodCount[k.metod] = (metodCount[k.metod]||0) + 1; });
+      const toppMetod = Object.entries(metodCount).sort((a,b) => b[1]-a[1])[0];
+
+      document.getElementById('stat-total').textContent      = total;
+      document.getElementById('stat-kategorier').textContent = kats || '—';
+      document.getElementById('stat-fame').textContent       = fame;
+      document.getElementById('stat-metod').textContent      = toppMetod ? toppMetod[0] : '—';
+    }
+
+    /* ── Filterknappars aktiv-klass ── */
+    function synkKatBtns() {
+      document.querySelectorAll('[data-kat]').forEach(btn => {
+        btn.classList.toggle('aktiv', btn.dataset.kat === filter.kat);
+      });
+    }
+
+    /* ── Grid ── */
+    function renderGrid() {
+      const grid = document.getElementById('korar-grid');
+      let lista = [...koningar];
+
+      if (filter.kat)   lista = lista.filter(k => k.kat === filter.kat);
+      if (filter.metod) lista = lista.filter(k => k.metod === filter.metod);
+      if (filter.sok) {
+        const s = filter.sok.toLowerCase();
+        lista = lista.filter(k =>
+          [k.namn, k.omdome, k.tags, k.kat, k.metod, KAT_LABEL[k.kat]||'']
+            .some(f => (f||'').toLowerCase().includes(s))
+        );
+      }
+
+      if (filter.sort === 'betyg-hog') {
+        lista.sort((a,b) => (BETYG_VIKT[b.betyg]??-1) - (BETYG_VIKT[a.betyg]??-1));
+      } else if (filter.sort === 'betyg-lag') {
+        lista.sort((a,b) => (BETYG_VIKT[a.betyg]??9)  - (BETYG_VIKT[b.betyg]??9));
+      } else if (filter.sort === 'namn') {
+        lista.sort((a,b) => (a.namn||'').localeCompare(b.namn||'', 'sv'));
+      } else if (filter.sort === 'temp') {
+        lista.sort((a,b) => (b.temp||0) - (a.temp||0));
+      }
+
+      if (lista.length === 0) {
+        grid.innerHTML = `<div class="tomt-state">
+          <span class="tomt-ikon">🌡️</span>
+          ${koningar.length === 0
+            ? 'Dagboken är tom.<br>Importera JSON-filen via <strong>↑ Importera</strong> eller logga en ny körning med <strong>＋</strong>.'
+            : 'Inga körningar matchar filtret.'}
+        </div>`;
+        return;
+      }
+
+      grid.innerHTML = lista.map(kortHtml).join('');
+      lista.forEach(k => {
+        document.getElementById('kort-' + k.id)
+          .addEventListener('click', () => oppnaRedigera(k.id));
+      });
+    }
+
+    function kortHtml(k) {
+      const katKlass = KAT_CSS[k.kat]   || 'kat-ovrigt';
+      const katLabel = KAT_LABEL[k.kat] || h(k.kat || '');
+      const hlKlass  = k.hl ? 'hl-' + k.hl : '';
+      const hlIkon   = k.hl === 'fame' ? '⭐' : k.hl === 'shame' ? '⚠️' : '';
+
+      const metodBitar = [
+        k.metod ? `${METOD_IKON[k.metod]||''} ${h(k.metod)}` : '',
+        k.temp  ? `${k.temp}°C` : '',
+        k.tid   ? h(k.tid) : ''
+      ].filter(Boolean);
+
+      const betygHtml = k.betyg
+        ? `<span class="betyg-pill ${BETYG_CSS[k.betyg]||'bp-ok'}">${h(k.betyg)}</span>`
+        : '';
+
+      const nHtml = (k.n > 0)
+        ? `<div class="kort-n">×${k.n} gånger kört</div>` : '';
+
+      return `<div class="korningskort ${hlKlass}" id="kort-${k.id}">
+        <div class="kort-header">
+          <span class="kat-badge ${katKlass}">${h(katLabel)}</span>
+          ${hlIkon ? `<span class="hl-ikon">${hlIkon}</span>` : ''}
+        </div>
+        <div class="kort-namn">${h(k.namn)}</div>
+        ${metodBitar.length ? `<div class="kort-meta"><span class="metod-chip">${metodBitar.join(' · ')}</span></div>` : ''}
+        ${betygHtml}
+        ${k.omdome ? `<div class="kort-omdome">${h(k.omdome)}</div>` : ''}
+        ${nHtml}
+      </div>`;
+    }
+
+    /* ── Temperaturguide ── */
+    function renderTempGuide() {
+      document.getElementById('temp-guide-grid').innerHTML = TEMP_GUIDE.map(t => `
+        <div class="temp-kort">
+          <div class="temp-kort-top">
+            <span class="temp-ikon">${t.icon}</span>
+            <span class="temp-kat-namn">${h(t.namn)}</span>
+          </div>
+          <span class="temp-badge">🌡️ ${h(t.tempLabel)}</span>
+          <div class="temp-note">${h(t.note)}</div>
+        </div>`).join('');
+    }
+
+    /* ── Modal ── */
+    function oppnaModal() {
+      document.getElementById('modal-overlay').classList.add('oppet');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function stangModal() {
+      document.getElementById('modal-overlay').classList.remove('oppet');
+      document.body.style.overflow = '';
+      redigerarId = null;
+    }
+
+    function oppnaRedigera(id) {
+      const k = koningar.find(k => k.id === id);
+      if (!k) return;
+      redigerarId = id;
+      document.getElementById('modal-titel').textContent = 'Redigera körning';
+      document.getElementById('f-namn').value   = k.namn   || '';
+      document.getElementById('f-kat').value    = k.kat    || 'entrecote';
+      document.getElementById('f-metod').value  = k.metod  || 'Sous vide';
+      document.getElementById('f-temp').value   = k.temp   ?? '';
+      document.getElementById('f-tid').value    = k.tid    || '';
+      document.getElementById('f-n').value      = k.n      ?? 1;
+      document.getElementById('f-betyg').value  = k.betyg  || '';
+      document.getElementById('f-omdome').value = k.omdome || '';
+      document.getElementById('f-datum').value  = k.datum  || '';
+      document.getElementById('f-hl').value     = k.hl     || '';
+      document.getElementById('f-tags').value   = k.tags   || '';
+      document.getElementById('ta-bort-btn').style.display = '';
+      oppnaModal();
+    }
+
+    function lasForm() {
+      return {
+        namn:   document.getElementById('f-namn').value.trim(),
+        kat:    document.getElementById('f-kat').value,
+        metod:  document.getElementById('f-metod').value,
+        temp:   parseFloat(document.getElementById('f-temp').value) || null,
+        tid:    document.getElementById('f-tid').value.trim()   || null,
+        n:      parseInt(document.getElementById('f-n').value)  || 0,
+        betyg:  document.getElementById('f-betyg').value        || null,
+        omdome: document.getElementById('f-omdome').value.trim(),
+        datum:  document.getElementById('f-datum').value.trim() || null,
+        hl:     document.getElementById('f-hl').value           || null,
+        tags:   document.getElementById('f-tags').value.trim(),
+        eget:   true,
+        bild:   null,
+      };
+    }
+
+    /* ── Rendera allt ── */
+    function renderAllt() {
+      renderStats();
+      renderGrid();
+    }
+
+    /* ── Händelselyssnare ── */
+
+    // FAB: öppna tomt formulär
+    document.getElementById('fab').addEventListener('click', () => {
+      redigerarId = null;
+      document.getElementById('modal-titel').textContent = 'Logga körning';
+      document.getElementById('korning-form').reset();
+      document.getElementById('f-n').value = '1';
+      document.getElementById('ta-bort-btn').style.display = 'none';
+      oppnaModal();
+    });
+
+    // Formulärspara
+    document.getElementById('korning-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const ny = lasForm();
+      if (redigerarId) {
+        const idx = koningar.findIndex(k => k.id === redigerarId);
+        koningar[idx] = { ...koningar[idx], ...ny };
+      } else {
+        koningar.unshift({ id: nyId(), ...ny });
+      }
+      spara();
+      stangModal();
+      renderAllt();
+    });
+
+    // Ta bort
+    document.getElementById('ta-bort-btn').addEventListener('click', () => {
+      const k = koningar.find(k => k.id === redigerarId);
+      if (!k || !confirm(`Ta bort "${k.namn}"?`)) return;
+      koningar = koningar.filter(k => k.id !== redigerarId);
+      spara();
+      stangModal();
+      renderAllt();
+    });
+
+    // Stäng modal
+    document.getElementById('modal-stang').addEventListener('click', stangModal);
+    document.getElementById('avbryt-btn').addEventListener('click', stangModal);
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target.id === 'modal-overlay') stangModal();
+    });
+
+    // Kategorifilter
+    document.querySelectorAll('[data-kat]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filter.kat = btn.dataset.kat;
+        synkKatBtns();
+        renderGrid();
+      });
+    });
+
+    // Sökning
+    document.getElementById('sokruta').addEventListener('input', e => {
+      filter.sok = e.target.value;
+      renderGrid();
+    });
+
+    // Metod
+    document.getElementById('metod-filter').addEventListener('change', e => {
+      filter.metod = e.target.value;
+      renderGrid();
+    });
+
+    // Sortering
+    document.getElementById('sort-val').addEventListener('change', e => {
+      filter.sort = e.target.value;
+      renderGrid();
+    });
+
+    // Export
+    document.getElementById('exportera-btn').addEventListener('click', () => {
+      const payload = JSON.stringify({ version: 1, exportdatum: idag(), koningar }, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url  = URL.createObjectURL(blob);
+      const a    = Object.assign(document.createElement('a'), {
+        href: url, download: `sousvide-${idag()}.json`
+      });
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Import
+    document.getElementById('importera-fil').addEventListener('change', e => {
+      const fil = e.target.files[0];
+      if (!fil) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          const lista  = Array.isArray(parsed) ? parsed : (parsed.koningar || []);
+          if (!Array.isArray(lista)) throw new Error('Ogiltig struktur');
+          if (!confirm(`Importera ${lista.length} körningar?\nBefintlig data i dagboken ersätts.`)) return;
+          koningar = lista;
+          spara();
+          renderAllt();
+        } catch {
+          alert('Ogiltigt format – kontrollera att filen är en giltig JSON-export.');
+        }
+      };
+      reader.readAsText(fil);
+      e.target.value = '';
+    });
+
+    // Temperaturguide-toggle
+    document.getElementById('temp-toggle-btn').addEventListener('click', () => {
+      visaTempGuide = !visaTempGuide;
+      document.getElementById('temp-guide-grid').style.display = visaTempGuide ? '' : 'none';
+      document.getElementById('temp-toggle-btn').textContent = visaTempGuide ? '▲ Dölj' : '▼ Visa';
+    });
+
+    /* ── Start ── */
+    ladda();
+    renderTempGuide();
+    renderAllt();
+  </script>
+
+</body>
+</html>
