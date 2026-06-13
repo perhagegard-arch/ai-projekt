@@ -713,6 +713,49 @@
       margin-top: 0.4rem;
     }
 
+    /* Bulk-prisuppskattning */
+    .uppskatta-rad {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .uppskatta-knapp {
+      background: none;
+      border: 1px solid #2a2a2a;
+      color: #777;
+      border-radius: 8px;
+      padding: 0.32rem 1rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .uppskatta-knapp:hover:not(:disabled) { border-color: #3a5a3a; color: #80b080; }
+    .uppskatta-knapp:disabled { opacity: 0.45; cursor: default; }
+
+    .uppskatta-avbryt {
+      background: none;
+      border: 1px solid #4a1a1a;
+      color: #c06060;
+      border-radius: 8px;
+      padding: 0.32rem 0.7rem;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .uppskatta-avbryt:hover { border-color: #903030; color: #e08080; }
+
+    .uppskatta-status {
+      font-size: 0.78rem;
+      color: #888;
+      text-align: center;
+      margin-bottom: 0.9rem;
+      white-space: pre-wrap;
+      line-height: 1.6;
+    }
+    .uppskatta-status .upp-fel { color: #c07070; }
+
     /* ── Responsivt ──────────────────────────────────────────────── */
     @media (max-width: 520px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -975,6 +1018,13 @@
     <!-- Källarens värde – togglas av knappen -->
     <button class="varde-toggle" id="varde-toggle">💰 Visa källarens värde</button>
     <div id="varde-sektion" class="varde-sektion" style="display:none"></div>
+
+    <!-- Bulk-prisuppskattning -->
+    <div class="uppskatta-rad">
+      <button class="uppskatta-knapp" id="uppskatta-priser-btn">🤖 Uppskatta pris för viner utan pris</button>
+      <button class="uppskatta-avbryt" id="uppskatta-avbryt-btn" style="display:none">✕ Avbryt</button>
+    </div>
+    <div id="uppskatta-status" class="uppskatta-status" style="display:none"></div>
 
     <!-- Filterrad -->
     <div class="filterrad">
@@ -1254,6 +1304,128 @@
       el.style.display = 'block';
     }
 
+    // ── Bulk-prisuppskattning via Claude Haiku ───────────────────────
+
+    let avbrytUppskattning = false;
+
+    async function uppskattaPriser() {
+      const statusEl  = document.getElementById('uppskatta-status');
+      const knapp     = document.getElementById('uppskatta-priser-btn');
+      const avbrytBtn = document.getElementById('uppskatta-avbryt-btn');
+
+      function visaStatus(html) {
+        statusEl.innerHTML = html;
+        statusEl.style.display = html ? 'block' : 'none';
+      }
+
+      // Hämta eller be om API-nyckel
+      let apiNyckel = localStorage.getItem('frysregister_apikey_v1') || '';
+      if (!apiNyckel) {
+        apiNyckel = (prompt('Klistra in din Anthropic API-nyckel:') || '').trim();
+        if (!apiNyckel) { visaStatus('Ingen API-nyckel angiven.'); return; }
+        localStorage.setItem('frysregister_apikey_v1', apiNyckel);
+      }
+
+      // Viner som saknar pris
+      const utan = viner.filter(v => !(v.pris > 0));
+      if (!utan.length) {
+        visaStatus('Alla viner har redan ett pris – ingenting att uppskatta.');
+        return;
+      }
+
+      // Starta körning
+      avbrytUppskattning = false;
+      knapp.disabled          = true;
+      avbrytBtn.style.display = '';
+      const totalt  = utan.length;
+      let ifyllda   = 0;
+      let misslyckade = 0;
+      const felRader = [];
+
+      for (let i = 0; i < utan.length; i++) {
+        if (avbrytUppskattning) break;
+
+        const v = utan[i];
+        visaStatus(
+          `Uppskattar ${i + 1} av ${totalt}: <em>${h(v.namn)}</em>…` +
+          (felRader.length ? '\n\n' + felRader.map(r => `<span class="upp-fel">${r}</span>`).join('\n') : '')
+        );
+
+        // Bygg en kortfattad text-prompt
+        const delar = [
+          v.namn    ? `Namn: ${v.namn}`     : null,
+          v.druva   ? `Druva: ${v.druva}`   : null,
+          v.region  ? `Region: ${v.region}` : null,
+          v.land    ? `Land: ${v.land}`     : null,
+          v.arsgang ? `Årgång: ${v.arsgang}` : null,
+        ].filter(Boolean).join('\n');
+
+        const prompt =
+          'Vilket är ett ungefärligt marknadspris i Sverige (SEK) för följande vin?\n\n' +
+          delar + '\n\n' +
+          'Svara med ENBART ett JSON-objekt: {"prisuppskattning": 189}\n' +
+          'Avrunda till närmaste 10-tal. Sätt null om du verkligen inte vet.';
+
+        try {
+          const resp = await fetch('https://api.anthropic.com/v1/messages', {
+            method: 'POST',
+            headers: {
+              'x-api-key':                                 apiNyckel,
+              'anthropic-version':                         '2023-06-01',
+              'anthropic-dangerous-direct-browser-access': 'true',
+              'content-type':                              'application/json'
+            },
+            body: JSON.stringify({
+              model:      'claude-haiku-4-5-20251001',
+              max_tokens: 64,
+              messages:   [{ role: 'user', content: prompt }]
+            })
+          });
+
+          if (!resp.ok) {
+            const felText = await resp.text();
+            throw new Error(`API ${resp.status}: ${felText.slice(0, 120)}`);
+          }
+
+          const svar  = await resp.json();
+          const block = (svar.content || []).find(b => b.type === 'text');
+          if (!block) throw new Error('Tomt svar från Claude');
+
+          const renText = block.text.replace(/^```(?:json)?\s*/i, '').replace(/```\s*$/, '').trim();
+          const data    = JSON.parse(renText);
+
+          if (data.prisuppskattning && parseInt(data.prisuppskattning) > 0) {
+            // Hitta vinet i live-arrayen (kan ha ändrats under körningen)
+            const live = viner.find(x => x.id === v.id);
+            if (live) {
+              live.pris = parseInt(data.prisuppskattning);
+              spara();
+              renderAllt();
+              ifyllda++;
+            }
+          } else {
+            felRader.push(`⚠ ${v.namn}: AI svarade null – hoppar över`);
+            misslyckade++;
+          }
+        } catch (err) {
+          felRader.push(`⚠ ${h(v.namn)}: ${err.message}`);
+          misslyckade++;
+        }
+      }
+
+      // Avslutningsstatus
+      knapp.disabled          = false;
+      avbrytBtn.style.display = 'none';
+
+      const avbrots = avbrytUppskattning ? ' (avbruten)' : '';
+      let sammanfattning = `✓ Klart${avbrots} – ${ifyllda} priser ifyllda`;
+      if (misslyckade) sammanfattning += `, ${misslyckade} misslyckades`;
+      visaStatus(
+        sammanfattning +
+        (felRader.length ? '\n\n' + felRader.map(r => `<span class="upp-fel">${r}</span>`).join('\n') : '')
+      );
+    }
+
     function renderPlatsstats() {
       const el = document.getElementById('platsstats');
       // Räkna flaskor per plats baserat på att hyllplats börjar med platsnamnet
@@ -1486,6 +1658,12 @@
       document.body.style.overflow = '';
       redigerarId = null;
     }
+
+    document.getElementById('uppskatta-priser-btn').addEventListener('click', uppskattaPriser);
+
+    document.getElementById('uppskatta-avbryt-btn').addEventListener('click', () => {
+      avbrytUppskattning = true;
+    });
 
     document.getElementById('varde-toggle').addEventListener('click', () => {
       visaVarde = !visaVarde;
