@@ -2057,63 +2057,80 @@
         return viner.filter(v => v.hyllplats === str);
       }
 
-      // Kropp- och kapsylfärger per vintyp
-      const bFarg = {
-        rött: '#7a1820', vitt: '#5a8018', mousserande: '#1a4218',
-        rosé: '#cc6080', sött: '#885010'
+      // Glasfärger per typ (flaskbotten sedd rakt framifrån)
+      const glasYttre = {
+        rött: '#1a0408', vitt: '#18280a', mousserande: '#061208',
+        rosé: '#2e0e1a', sött: '#241008'
       };
-      const kFarg = {
-        rött: '#280810', vitt: '#384808', mousserande: '#b8a428',
-        rosé: '#a03058', sött: '#583008'
+      const glasInre = {
+        rött: '#5a1428', vitt: '#3a5c0e', mousserande: '#0e2c10',
+        rosé: '#7a2a48', sött: '#5a2c0c'
+      };
+      const glasPunt = {
+        rött: '#0d0206', vitt: '#0c1604', mousserande: '#030804',
+        rosé: '#18080e', sött: '#120804'
       };
 
       // Y-position för ovansidan av varje hylla
       const vittY = [72, 105, 138];
       const rottY = [200, 231, 262, 293, 324, 355, 386, 417];
 
-      // SVG-path för liggande flaska: kropp + hals + kapsyl (23px × 7px)
-      function botPath(bx, by) {
-        return `M ${bx+2},${by} L ${bx+15},${by} L ${bx+17},${by+1.5} L ${bx+19},${by+1} L ${bx+22},${by+1}`
-             + ` Q ${bx+23},${by+1} ${bx+23},${by+3.5} Q ${bx+23},${by+6} ${bx+22},${by+6}`
-             + ` L ${bx+19},${by+6} L ${bx+17},${by+5.5} L ${bx+15},${by+7} L ${bx+2},${by+7}`
-             + ` Q ${bx},${by+7} ${bx},${by+3.5} Q ${bx},${by} ${bx+2},${by} Z`;
-      }
-      // Kapsyl (ritas ovanpå kroppen med annan nyans)
-      function capPath(bx, by) {
-        return `M ${bx+19},${by+1} L ${bx+22},${by+1} Q ${bx+23},${by+1} ${bx+23},${by+3.5}`
-             + ` Q ${bx+23},${by+6} ${bx+22},${by+6} L ${bx+19},${by+6} Z`;
-      }
+      const r = 11;  // Flaskbottens radie i px
 
-      // Generera SVG för flaskor på en hylla (max 7 st, 24px mellanrum, startar x=16)
+      // Rita 7 flaskbottnar (cirklar) per hylla – tomma platser visas som konturer
       function flaskorSvg(zon, nr, sy) {
         let s = '';
-        hyllViner(zon, nr).forEach((v, i) => {
-          if (i >= 7) return;
-          const bx = 16 + i * 24;
-          const by = sy - 8;
-          const fc = bFarg[v.typ] || '#505050';
-          const kc = kFarg[v.typ] || '#303030';
-          const ds = drinkStatus(v);
-          const sokMatch = sok ? matcherSok(v, sok) : null;
-          const opac = sokMatch === false ? 0.13 : 0.9;
-          const stroke = sokMatch ? ' stroke="rgba(255,255,255,0.65)" stroke-width="1"' : '';
-          // Drick-snart/passerat-glöd bakom flaskan
-          if (ds === 'snart')
-            s += `<ellipse cx="${bx+11}" cy="${by+3.5}" rx="14" ry="5" fill="rgba(255,185,0,0.28)"/>`;
-          else if (ds === 'passerat')
-            s += `<ellipse cx="${bx+11}" cy="${by+3.5}" rx="14" ry="5" fill="rgba(190,50,50,0.22)"/>`;
-          const tip = h(v.namn) + (v.arsgang ? ' ' + v.arsgang : '') + (v.antal !== 1 ? ' ×' + v.antal : '');
-          // Flaskans kropp som SVG-path
-          s += `<path class="vk-flaska" d="${botPath(bx,by)}" fill="${fc}" opacity="${opac}"${stroke}`
-             + ` onclick="oppnaRedigera('${h(v.id)}')" style="cursor:pointer"><title>${tip}</title></path>`;
-          // Kapsyl ovanpå kroppen (annan nyans)
-          s += `<path d="${capPath(bx,by)}" fill="${kc}" opacity="${opac}" pointer-events="none"/>`;
-          // Ljusreflektion längs flaskans överdel
-          s += `<ellipse cx="${bx+9}" cy="${by+1.3}" rx="5" ry="0.55" fill="rgba(255,255,255,0.2)" pointer-events="none" opacity="${opac}"/>`;
-          // Felzon-markering
-          if (felZon(v))
-            s += `<circle cx="${bx+21.5}" cy="${by}" r="2.5" fill="#b09000" opacity="0.9" pointer-events="none"/>`;
-        });
+        const vinLista = hyllViner(zon, nr);
+        const cy = sy - 14;   // Centrum Y: 14px ovanför hyllans ovansida
+
+        for (let slot = 0; slot < 7; slot++) {
+          const cx = 25 + slot * 25;   // Jämna 25px-steg: 25,50,75,100,125,150,175
+          const v  = vinLista[slot];
+
+          if (!v) {
+            // Tom plats – diskret konturcirkel
+            s += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#2a2a2a" stroke-width="0.7" opacity="0.55"/>`;
+            s += `<circle cx="${cx}" cy="${cy}" r="2.2" fill="none" stroke="#252525" stroke-width="0.5" opacity="0.4"/>`;
+          } else {
+            const ds       = drinkStatus(v);
+            const sokMatch = sok ? matcherSok(v, sok) : null;
+            const opac     = sokMatch === false ? 0.14 : 1;
+            const oc       = glasYttre[v.typ] || '#181818';
+            const ic       = glasInre[v.typ]  || '#303030';
+            const pc       = glasPunt[v.typ]  || '#0a0a0a';
+            const tip      = h(v.namn) + (v.arsgang ? ' ' + v.arsgang : '') + (v.antal !== 1 ? ' ×' + v.antal : '');
+
+            // Glöd för drickfönsterstatus
+            if (ds === 'snart')
+              s += `<circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="rgba(255,185,0,0.22)"/>`;
+            else if (ds === 'passerat')
+              s += `<circle cx="${cx}" cy="${cy}" r="${r + 3}" fill="rgba(190,50,50,0.22)"/>`;
+
+            // Yttre mörk glasring (klickbar)
+            s += `<circle class="vk-flaska" cx="${cx}" cy="${cy}" r="${r}" fill="${oc}" opacity="${opac}" onclick="oppnaRedigera('${h(v.id)}')" style="cursor:pointer"><title>${tip}</title></circle>`;
+            // Inre vinglans
+            s += `<circle cx="${cx}" cy="${cy}" r="${r - 2}" fill="${ic}" opacity="${opac}" pointer-events="none"/>`;
+            // Tunn glasväggsglans
+            s += `<circle cx="${cx}" cy="${cy}" r="${r - 1}" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.8" opacity="${opac}" pointer-events="none"/>`;
+            // Punt – den insjunkna punkten i flaskbottens mitt
+            s += `<circle cx="${cx}" cy="${cy}" r="2.8" fill="${pc}" opacity="${+(opac * 0.85).toFixed(2)}" pointer-events="none"/>`;
+            // Svag ring runt punten
+            s += `<circle cx="${cx}" cy="${cy}" r="3.6" fill="none" stroke="${oc}" stroke-width="0.7" opacity="${+(opac * 0.6).toFixed(2)}" pointer-events="none"/>`;
+            // Ljusreflex uppåt till vänster
+            s += `<ellipse cx="${+(cx - 2.8).toFixed(1)}" cy="${cy - 4.2}" rx="2.2" ry="1.2" fill="rgba(255,255,255,0.32)" opacity="${opac}" pointer-events="none"/>`;
+            // Sekundär svag reflex nedtill
+            s += `<ellipse cx="${+(cx + 4).toFixed(1)}" cy="${cy + 5.5}" rx="1.5" ry="0.7" fill="rgba(255,255,255,0.12)" opacity="${opac}" pointer-events="none"/>`;
+
+            // Felzon-markering
+            if (felZon(v))
+              s += `<circle cx="${+(cx + 6.5).toFixed(1)}" cy="${cy - 6.5}" r="2.5" fill="#b09000" opacity="0.9" pointer-events="none"/>`;
+
+            // Sökhighlight-ring
+            if (sokMatch)
+              s += `<circle cx="${cx}" cy="${cy}" r="${r + 1}" fill="none" stroke="rgba(255,255,255,0.65)" stroke-width="1.2" pointer-events="none"/>`;
+          }
+        }
+
         return s;
       }
 
@@ -2133,7 +2150,7 @@
       const vittHyllSvg = vittY.map(hylla).join('');
       const rottHyllSvg = rottY.map(hylla).join('');
 
-      const svg = `<svg viewBox="0 0 200 456" style="width:100%;max-width:200px;display:block">
+      const svg = `<svg viewBox="0 0 200 456" style="width:100%;max-width:260px;display:block">
   <defs>
     <linearGradient id="vk-kab" x1="0" x2="1" y1="0" y2="0">
       <stop offset="0%"   stop-color="#282828"/>
