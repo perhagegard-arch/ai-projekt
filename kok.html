@@ -636,6 +636,111 @@
     .sekundar-btn:hover { color: #999; border-color: #3a3a3a; background: #1e1e1e; }
 
     .sekundar-btn.inaktiv { opacity: 0.38; cursor: default; pointer-events: none; }
+
+    /* ── Kockens viskning ── */
+    .viskning-wrap { margin: 0.4rem 0 1rem; }
+
+    .viskning-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.45rem 0.8rem;
+      background: #1a1a12;
+      border: 1px solid #2a2a18;
+      border-radius: 10px;
+      color: #6a5a28;
+      font-size: 0.76rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .viskning-toggle:hover { background: #1e1e14; border-color: #3a3a18; color: #a08840; }
+
+    .viskning-toggle.oppet {
+      background: #1e1a0a;
+      border-color: #4a3a10;
+      color: #c8a040;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .viskning-pil { margin-left: auto; transition: transform 0.15s; }
+    .viskning-toggle.oppet .viskning-pil { transform: rotate(90deg); }
+
+    .viskning-panel {
+      display: none;
+      background: #161410;
+      border: 1px solid #4a3a10;
+      border-top: none;
+      border-radius: 0 0 10px 10px;
+      padding: 0.75rem;
+    }
+
+    .viskning-panel.synlig { display: block; }
+
+    .viskning-lage-rad {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.75rem;
+    }
+
+    .viskning-lage-btn {
+      padding: 0.35rem 0.75rem;
+      background: #1e1e1e;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      color: #666;
+      font-size: 0.76rem;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .viskning-lage-btn:hover { color: #aaa; border-color: #444; }
+    .viskning-lage-btn.aktiv { background: #2e2410; border-color: #7a5a1a; color: #d4a84b; }
+
+    .viskning-svar {
+      font-size: 0.83rem;
+      color: #b8a878;
+      line-height: 1.75;
+      min-height: 1.5rem;
+    }
+
+    .viskning-svar p        { margin: 0.3rem 0; }
+    .viskning-svar strong   { color: #e0d0a0; }
+
+    .viskning-spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #2a2a2a;
+      border-top-color: #7a5a1a;
+      border-radius: 50%;
+      animation: snurra 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.4rem;
+    }
+
+    .viskning-mer-btn {
+      display: none;
+      margin-top: 0.65rem;
+      padding: 0.32rem 0.8rem;
+      background: none;
+      border: 1px solid #3a3a1a;
+      border-radius: 20px;
+      color: #7a6a30;
+      font-size: 0.74rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .viskning-mer-btn:hover { color: #c8a040; border-color: #6a5a20; }
   </style>
 </head>
 <body>
@@ -1403,6 +1508,148 @@
       return rader.length ? rader : null;
     }
 
+    /* ══════════════════════════════════════════
+       KOCKENS VISKNING
+       ══════════════════════════════════════════ */
+
+    /* Delar upp raw markdown på ### rubriker – en post per rätt */
+    function extraherapRatter(text) {
+      return text.split(/(?=^### )/m)
+        .filter(d => d.startsWith('### '))
+        .map(d => {
+          const m = d.match(/^### (.+)/);
+          return { namn: m ? m[1].trim() : 'Rätten', text: d.trim() };
+        });
+    }
+
+    /* Injectar viskning-knapp + panel direkt efter varje h3 i resultatet */
+    function injicerapViskning() {
+      const container = document.getElementById('resultat-innehall');
+      const ratter    = extraherapRatter(senastSvar);
+
+      container.querySelectorAll('h3').forEach((h3, idx) => {
+        const ratt = ratter[idx];
+        if (!ratt) return;
+
+        const wrap   = document.createElement('div');
+        wrap.className = 'viskning-wrap';
+
+        const toggle = document.createElement('button');
+        toggle.className = 'viskning-toggle';
+        toggle.innerHTML = '👨‍🍳 Kockens viskning <span class="viskning-pil">▶</span>';
+
+        const panel = document.createElement('div');
+        panel.className = 'viskning-panel';
+        panel.innerHTML = `
+          <div class="viskning-lage-rad">
+            <button class="viskning-lage-btn" data-lage="varfor">🤔 Varför?</button>
+            <button class="viskning-lage-btn" data-lage="vaga">🎲 Våga prova</button>
+            <button class="viskning-lage-btn" data-lage="lar">💡 Lär mig</button>
+          </div>
+          <div class="viskning-svar" id="viskning-svar-${idx}"></div>
+          <button class="viskning-mer-btn" id="viskning-mer-${idx}">🎲 Ge mig ett till</button>`;
+
+        toggle.addEventListener('click', () => {
+          toggle.classList.toggle('oppet');
+          panel.classList.toggle('synlig');
+        });
+
+        panel.querySelectorAll('.viskning-lage-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            panel.querySelectorAll('.viskning-lage-btn').forEach(b => b.classList.remove('aktiv'));
+            btn.classList.add('aktiv');
+            anropaViskning(idx, btn.dataset.lage, ratt.namn, ratt.text, false);
+          });
+        });
+
+        document.getElementById && panel.querySelector('.viskning-mer-btn')
+          .addEventListener('click', () => anropaViskning(idx, 'vaga', ratt.namn, ratt.text, true));
+
+        wrap.appendChild(toggle);
+        wrap.appendChild(panel);
+        h3.insertAdjacentElement('afterend', wrap);
+      });
+    }
+
+    /* Anropar Claude för ett viskning-läge */
+    async function anropaViskning(idx, lage, rattNamn, rattText, alternativt) {
+      const svarEl = document.getElementById(`viskning-svar-${idx}`);
+      const merBtn = document.getElementById(`viskning-mer-${idx}`);
+      svarEl.innerHTML = '<span class="viskning-spinner"></span> Kocken tänker…';
+      merBtn.style.display = 'none';
+
+      const frysText = hamtaFrysdata().length
+        ? hamtaFrysdata().map(v => `${getNamn(v)} (${getQty(v)} ${getUnit(v)})`).join(', ')
+        : '(tomt)';
+
+      let prompt;
+      if (lage === 'varfor') {
+        prompt = `Du är en Michelin-kock som viskar råd bredvid hemkocken. Förklara VARFÖR ett centralt och intressant steg eller val i just den här rätten görs – specifikt för det här receptet, inte generellt. 2–3 meningar. Varm, pedagogisk ton.
+
+Rätt: ${rattNamn}
+
+${rattText}`;
+      } else if (lage === 'vaga') {
+        prompt = `Du är en uppmuntrande Michelin-kock som vill inspirera hemkocken att våga lämna receptet. Ge ETT konkret och spännande förslag på hur man kan avvika från receptet ikväll – ofarligt men djärvt. Koppla gärna till frysens innehåll om det tillför något. Uppmuntrande, varm ton – inga varningar, bara inspiration. 2–3 meningar, ett enda förslag.${alternativt ? '\nGe ett ANNAT förslag än tidigare.' : ''}
+
+Frysens innehåll: ${frysText}
+
+Rätt: ${rattNamn}
+
+${rattText}`;
+      } else {
+        prompt = `Du är en Michelin-kock som lär ut köksteknik. Ge en konkret kökstekniklärdom direkt relevant för den här rätten – syra/salt/fett/umami, bryning, att vila kött, reducera eller annat. Specifikt för den här rätten och dess ingredienser, inte generellt. 2–4 meningar.
+
+Rätt: ${rattNamn}
+
+${rattText}`;
+      }
+
+      try {
+        let apiNyckel = localStorage.getItem('frysregister_apikey_v1') || '';
+        if (!apiNyckel) {
+          apiNyckel = (window.prompt('Klistra in din Anthropic API-nyckel:') || '').trim();
+          if (!apiNyckel) throw new Error('Ingen API-nyckel angiven.');
+          localStorage.setItem('frysregister_apikey_v1', apiNyckel);
+        }
+
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'x-api-key': apiNyckel,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true',
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 500,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+
+        if (!resp.ok) {
+          const fel = await resp.text();
+          if (resp.status === 401) localStorage.removeItem('frysregister_apikey_v1');
+          throw new Error(`API-fel ${resp.status}: ${fel.slice(0, 200)}`);
+        }
+
+        const svar  = await resp.json();
+        const block = (svar.content || []).find(b => b.type === 'text');
+        if (!block?.text) throw new Error('Tomt svar från Claude.');
+        const text = block.text.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '').trim();
+
+        svarEl.innerHTML = text.split('\n').filter(r => r.trim())
+          .map(r => `<p>${r.trim().replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')}</p>`)
+          .join('');
+
+        if (lage === 'vaga') merBtn.style.display = '';
+
+      } catch (fel) {
+        svarEl.innerHTML = `<span style="color:#e07070">⚠️ ${fel.message || String(fel)}</span>`;
+      }
+    }
+
     /* ── Bygg prompt ── */
     function byggPrompt(alternativt) {
       const rattOrdning = ['forratt', 'varmratt', 'efterratt'];
@@ -1596,6 +1843,7 @@ Var ärlig: Hitta aldrig på viner, hyllplatser eller sous vide-körningar som i
 
         const utanInkop = text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim();
         document.getElementById('resultat-innehall').innerHTML = renderMarkdown(utanInkop);
+        injicerapViskning();
 
         const inkopRader = extraherapInkoplista(text);
         const inkopSekt  = document.getElementById('inkop-sektion');
