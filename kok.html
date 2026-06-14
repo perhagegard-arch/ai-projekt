@@ -703,6 +703,7 @@
           <input type="search" class="valjare-sok" id="vin-sok"
                  placeholder="🔍 Sök i vinkällaren…" autocomplete="off">
           <div class="valjare-filter-rad" id="vin-filter-rad" style="display:none"></div>
+          <div class="valjare-filter-rad" id="vin-land-rad" style="display:none"></div>
           <div class="valjare-lista-wrap">
             <div class="valjare-lista" id="vin-lista"></div>
           </div>
@@ -822,8 +823,9 @@
 
     function normaliseraVintyp(typ) {
       const t = (typ || '').toLowerCase().replace(/\s+/g, '');
-      if (/^r[öo]d|^red/.test(t))                                  return 'rod';
-      if (/^vit|^white/.test(t))                                    return 'vit';
+      /* "rött" (neutrum) och "röd/röda" ska båda ge 'rod' */
+      if (/^r[öo][dt]|^red/.test(t))                               return 'rod';
+      if (/^vi[t]|^white/.test(t))                                  return 'vit';
       if (/^(mous|bubb|cham|pros|cava|sekt|friz|spark)/.test(t))   return 'mousserande';
       if (/^ros[eé]?$/.test(t))                                     return 'rose';
       if (/^(s[öo]t|des|port|sher|lik[öo]r)/.test(t))              return 'sott';
@@ -857,7 +859,8 @@
     }
 
     /* Filter-state för väljarna */
-    let vinTypFilter = 'alla';
+    let vinTypFilter  = 'alla';
+    let vinLandFilter = 'alla';
     let frysKatFilter = 'alla';
 
     /* ── Hjälp: om ett vin är nära slutet av drickfönstret ── */
@@ -1007,74 +1010,96 @@
       </div>`;
     }
 
-    /* ── Bygg vinväljare med typgrupper och snabbfilter ── */
+    /* ── Bygg vinväljare med typ- och landgrupper ── */
     function byggVinlista(sok) {
       const viner     = hamtaVinkallare();
       const filter    = (sok || '').toLowerCase().trim();
       const lista     = document.getElementById('vin-lista');
       const filterRad = document.getElementById('vin-filter-rad');
+      const landRad   = document.getElementById('vin-land-rad');
 
-      const tillgangliga = viner.filter(v => (Number(v.antal) || 0) > 0);
+      const tillgangliga  = viner.filter(v => (Number(v.antal) || 0) > 0);
+      const totalFlaskor  = tillgangliga.reduce((s, v) => s + (Number(v.antal) || 1), 0);
 
-      /* Räkna flaskor per normaliserad typ */
+      /* ── Rad 1: TYP-filter (räknat på hela källaren) ── */
       const perTyp = {};
       tillgangliga.forEach(v => {
         const t = normaliseraVintyp(v.typ) || 'okand';
         perTyp[t] = (perTyp[t] || 0) + (Number(v.antal) || 1);
       });
-
-      const totalFlaskor = tillgangliga.reduce((s, v) => s + (Number(v.antal) || 1), 0);
       const befintligaTyper = VIN_TYP_ORDNING.filter(t => perTyp[t]);
 
-      /* Bygg filterpills om fler än en typ finns */
       filterRad.innerHTML = '';
       if (befintligaTyper.length > 1) {
         filterRad.style.display = '';
-        const allaBtn = document.createElement('button');
-        allaBtn.className = 'valjare-fpill' + (vinTypFilter === 'alla' ? ' aktiv' : '');
-        allaBtn.textContent = `Alla · ${totalFlaskor}`;
-        allaBtn.addEventListener('click', () => {
-          vinTypFilter = 'alla';
-          byggVinlista(document.getElementById('vin-sok').value);
+        byggFilterPill(filterRad, `Alla · ${totalFlaskor}`, vinTypFilter === 'alla', () => {
+          vinTypFilter = 'alla'; byggVinlista(document.getElementById('vin-sok').value);
         });
-        filterRad.appendChild(allaBtn);
-
         befintligaTyper.forEach(t => {
           const meta = VIN_TYPER[t];
-          const btn  = document.createElement('button');
-          btn.className = 'valjare-fpill' + (vinTypFilter === t ? ' aktiv' : '');
-          btn.textContent = `${meta.emoji} ${meta.label} · ${perTyp[t]}`;
-          btn.addEventListener('click', () => {
-            vinTypFilter = t;
-            byggVinlista(document.getElementById('vin-sok').value);
+          byggFilterPill(filterRad, `${meta.emoji} ${meta.label} · ${perTyp[t]}`, vinTypFilter === t, () => {
+            vinTypFilter = t; byggVinlista(document.getElementById('vin-sok').value);
           });
-          filterRad.appendChild(btn);
         });
       } else {
         filterRad.style.display = 'none';
       }
 
-      /* Filtrera på sökning + aktiv typfilter */
+      /* ── Rad 2: LAND-filter (räknat på typ-filtrerad mängd) ── */
+      const typFilterad = tillgangliga.filter(v =>
+        vinTypFilter === 'alla' || normaliseraVintyp(v.typ) === vinTypFilter
+      );
+      const perLand = {};
+      typFilterad.forEach(v => {
+        const l = (v.land || '').trim();
+        if (l) perLand[l] = (perLand[l] || 0) + (Number(v.antal) || 1);
+      });
+      /* Sortera länder på flaskantal, visa max 7 */
+      const landerSorterade = Object.entries(perLand)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 7)
+        .map(([land]) => land);
+
+      landRad.innerHTML = '';
+      if (landerSorterade.length > 1) {
+        landRad.style.display = '';
+        byggFilterPill(landRad, 'Alla länder', vinLandFilter === 'alla', () => {
+          vinLandFilter = 'alla'; byggVinlista(document.getElementById('vin-sok').value);
+        });
+        landerSorterade.forEach(land => {
+          byggFilterPill(landRad, `${land} · ${perLand[land]}`, vinLandFilter === land, () => {
+            vinLandFilter = land; byggVinlista(document.getElementById('vin-sok').value);
+          });
+        });
+      } else {
+        landRad.style.display = 'none';
+        /* Om landet vi filtrerade på försvann (bytte typ-filter) → återställ */
+        if (vinLandFilter !== 'alla' && !landerSorterade.includes(vinLandFilter)) {
+          vinLandFilter = 'alla';
+        }
+      }
+
+      /* ── Filtrering: sökning + typ + land (AND) ── */
       const matchade = tillgangliga.filter(v => {
         const text   = [v.namn, v.druva, v.land, v.region, v.typ].join(' ').toLowerCase();
         const textOk = !filter || text.includes(filter);
         const typOk  = vinTypFilter === 'alla' || normaliseraVintyp(v.typ) === vinTypFilter;
-        return textOk && typOk;
+        const landOk = vinLandFilter === 'alla' || (v.land || '').trim() === vinLandFilter;
+        return textOk && typOk && landOk;
       });
 
-      /* Räknare i header */
+      /* ── Header-räknare ── */
       const matchadeFlaskor = matchade.reduce((s, v) => s + (Number(v.antal) || 1), 0);
+      const aktivFilter     = filter || vinTypFilter !== 'alla' || vinLandFilter !== 'alla';
       document.getElementById('vin-header-antal').textContent =
-        (filter || vinTypFilter !== 'alla')
-          ? `${matchadeFlaskor} av ${totalFlaskor} fl`
-          : `${totalFlaskor} fl`;
+        aktivFilter ? `${matchadeFlaskor} av ${totalFlaskor} fl` : `${totalFlaskor} fl`;
 
       if (!matchade.length) {
         lista.innerHTML = '<div class="valjare-tom">Inga viner matchar</div>';
         return;
       }
 
-      /* Gruppera per normaliserad typ */
+      /* ── Gruppera per typ och rendera ── */
       const grupper = {};
       matchade.forEach(v => {
         const t = normaliseraVintyp(v.typ) || 'okand';
@@ -1082,7 +1107,8 @@
         grupper[t].push(v);
       });
 
-      const visaGrupper = befintligaTyper.length > 1 && vinTypFilter === 'alla';
+      /* Sektionsrubriker bara när fler typer finns bland resultaten och inget typfilter är aktivt */
+      const visaGrupper = Object.keys(grupper).length > 1 && vinTypFilter === 'alla';
 
       let html = '';
       [...VIN_TYP_ORDNING, 'okand'].forEach(t => {
@@ -1095,17 +1121,16 @@
           html += `<div class="valjare-sektion-rubrik">${meta.emoji} ${meta.label} · ${total}</div>`;
         }
 
-        /* Drick-snart-viner överst inom gruppen */
         gr.sort((a, b) => (isDrickSnart(b) ? 1 : 0) - (isDrickSnart(a) ? 1 : 0));
 
         gr.forEach(v => {
-          const valdNu   = valdVin && String(valdVin.id || valdVin.namn) === String(v.id || v.namn);
-          const drSnart  = isDrickSnart(v);
-          const etik     = [v.namn, v.årgång || v.argarg || ''].filter(Boolean).join(' ');
-          const detalj   = [v.druva, v.land].filter(Boolean).join(' · ');
+          const valdNu     = valdVin && String(valdVin.id || valdVin.namn) === String(v.id || v.namn);
+          const drSnart    = isDrickSnart(v);
+          const etik       = [v.namn, v.årgång || v.argarg || ''].filter(Boolean).join(' ');
+          const detalj     = [v.druva, v.land].filter(Boolean).join(' · ');
           const drickBadge = drSnart ? '<span class="drick-badge">DRICK NU</span>' : '';
-          const klasser  = ['valjare-item', drSnart ? 'drick-snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
-          const normTyp  = normaliseraVintyp(v.typ);
+          const klasser    = ['valjare-item', drSnart ? 'drick-snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
+          const normTyp    = normaliseraVintyp(v.typ);
 
           html += `<div class="${klasser}" data-id="${escHtml(String(v.id || v.namn))}" data-vintyp="${normTyp}">
             <span>${escHtml(etik)}${drickBadge}</span>
@@ -1129,6 +1154,15 @@
           byggVinlista(document.getElementById('vin-sok').value);
         });
       });
+    }
+
+    /* Hjälp: skapa en filterpill-knapp och lägg till i behållaren */
+    function byggFilterPill(container, text, aktiv, onClick) {
+      const btn = document.createElement('button');
+      btn.className = 'valjare-fpill' + (aktiv ? ' aktiv' : '');
+      btn.textContent = text;
+      btn.addEventListener('click', onClick);
+      container.appendChild(btn);
     }
 
     /* ── Escape HTML för säker injektion i data-attribut ── */
@@ -1252,7 +1286,8 @@
           byggFryslista('');
         }
         if (startVal === 'vin') {
-          vinTypFilter = 'alla';
+          vinTypFilter  = 'alla';
+          vinLandFilter = 'alla';
           document.getElementById('vin-sok').value = '';
           byggVinlista('');
         }
