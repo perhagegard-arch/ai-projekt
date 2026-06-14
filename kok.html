@@ -35,11 +35,7 @@
       border-radius: 50%;
     }
 
-    .header-titel {
-      font-size: 1.05rem;
-      font-weight: 700;
-      flex: 1;
-    }
+    .header-titel { font-size: 1.05rem; font-weight: 700; flex: 1; }
 
     .tillbaka {
       color: #888;
@@ -61,10 +57,10 @@
       padding: 2rem 1rem 3rem;
     }
 
-    /* ── Rubrik ── */
+    /* ── Sidorubrik ── */
     .startvy-rubrik {
       text-align: center;
-      margin-bottom: 1.75rem;
+      margin-bottom: 1.5rem;
     }
 
     .startvy-rubrik h1 {
@@ -73,6 +69,53 @@
       color: #f0f0f0;
       letter-spacing: -0.01em;
     }
+
+    /* ── Köksanden: förslagsruta ── */
+    .koksan-kort {
+      background: #161410;
+      border: 1px solid #3a2e10;
+      border-radius: 14px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+    }
+
+    .koksan-ikon { font-size: 1.05rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+    .koksan-kropp { flex: 1; min-width: 0; }
+
+    .koksan-rubrik {
+      font-size: 0.62rem;
+      font-weight: 700;
+      color: #7a5a20;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.25rem;
+    }
+
+    .koksan-tips {
+      font-size: 0.83rem;
+      color: #b8a060;
+      line-height: 1.5;
+    }
+
+    .koksan-nav {
+      flex-shrink: 0;
+      background: none;
+      border: 1px solid #3a2a10;
+      border-radius: 8px;
+      color: #5a4a20;
+      font-size: 0.9rem;
+      padding: 0.25rem 0.6rem;
+      cursor: pointer;
+      align-self: center;
+      transition: color 0.12s, border-color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .koksan-nav:hover { color: #d4a84b; border-color: #7a5a1a; }
 
     /* ── Primärkort: Planera middag ── */
     .planera-kort {
@@ -90,13 +133,8 @@
       margin-bottom: 1.5rem;
     }
 
-    .kort-ikon { font-size: 1.5rem; }
-
-    .kort-namn {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #e8d090;
-    }
+    .kort-ikon  { font-size: 1.5rem; }
+    .kort-namn  { font-size: 1.1rem; font-weight: 700; color: #e8d090; }
 
     /* ── Formulärsektioner ── */
     .formsektion { margin-bottom: 1.25rem; }
@@ -110,14 +148,9 @@
       margin-bottom: 0.6rem;
     }
 
-    /* Pill-rad (gemensam layout för toggle och radio) */
-    .pill-rad {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
+    .pill-rad { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
-    /* Toggle-pills: rätter (fler kan väljas) */
+    /* Toggle-pills */
     .toggle-pill {
       padding: 0.5rem 1rem;
       border-radius: 20px;
@@ -131,13 +164,9 @@
       user-select: none;
     }
 
-    .toggle-pill.aktiv {
-      background: #2e2410;
-      border-color: #7a5a1a;
-      color: #d4a84b;
-    }
+    .toggle-pill.aktiv { background: #2e2410; border-color: #7a5a1a; color: #d4a84b; }
 
-    /* Radio-pills: tonläge (ett val) */
+    /* Radio-pills */
     .radio-pill {
       padding: 0.5rem 1rem;
       border-radius: 20px;
@@ -151,13 +180,142 @@
       user-select: none;
     }
 
-    .radio-pill.aktiv {
-      background: #2e2410;
-      border-color: #7a5a1a;
-      color: #d4a84b;
+    .radio-pill.aktiv { background: #2e2410; border-color: #7a5a1a; color: #d4a84b; }
+
+    /* ── Inline-väljare (frys / vin) ── */
+    .inline-valjare {
+      margin-top: 0.75rem;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      overflow: hidden;
+      display: none;
     }
 
-    /* ── Stepper: antal personer ── */
+    .inline-valjare.synlig { display: block; }
+
+    /* Räknarrad ovanför sökrutan */
+    .valjare-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.45rem 0.85rem;
+      background: #111;
+      border-bottom: 1px solid #1e1e1e;
+      font-size: 0.7rem;
+      color: #4a4a4a;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .valjare-header-antal { color: #3a3a3a; }
+
+    .valjare-sok {
+      width: 100%;
+      padding: 0.6rem 0.85rem;
+      background: #1a1a1a;
+      border: none;
+      border-bottom: 1px solid #222;
+      color: #e0e0e0;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .valjare-sok::placeholder { color: #3a3a3a; }
+
+    /* Omsluter listan + fade-gradient */
+    .valjare-lista-wrap { position: relative; }
+
+    .valjare-lista-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: linear-gradient(to bottom, transparent, #141414);
+      pointer-events: none;
+    }
+
+    .valjare-lista {
+      max-height: 240px;
+      overflow-y: auto;
+    }
+
+    .valjare-item {
+      padding: 0.55rem 0.85rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      color: #aaa;
+      border-bottom: 1px solid #1a1a1a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: background 0.1s;
+    }
+
+    .valjare-item:last-child { border-bottom: none; }
+    .valjare-item:hover      { background: #1e1e1e; }
+
+    /* Vald: guld vänsterkant */
+    .valjare-item.vald {
+      background: #2e2410;
+      color: #d4a84b;
+      border-left: 3px solid #7a5a1a;
+      padding-left: calc(0.85rem - 3px);
+    }
+
+    .valjare-item.vald .valjare-meta { color: #8a6a20; }
+
+    /* Ät snart: röd vänsterkant (om ej vald) */
+    .valjare-item.snart:not(.vald) {
+      border-left: 3px solid #7a2a2a;
+      padding-left: calc(0.85rem - 3px);
+    }
+
+    /* Drick snart: guld vänsterkant (om ej vald) */
+    .valjare-item.drick-snart:not(.vald) {
+      border-left: 3px solid #8a6a10;
+      padding-left: calc(0.85rem - 3px);
+    }
+
+    .valjare-meta { font-size: 0.72rem; color: #555; }
+
+    /* ÄT NU-badge (röd) */
+    .snart-badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      background: #4a1f1f;
+      color: #e07070;
+      border-radius: 4px;
+      padding: 0.1rem 0.35rem;
+      margin-left: 0.4rem;
+      letter-spacing: 0.04em;
+      vertical-align: middle;
+    }
+
+    /* DRICK NU-badge (guld) */
+    .drick-badge {
+      font-size: 0.58rem;
+      font-weight: 700;
+      background: #2a1e05;
+      color: #d4a84b;
+      border: 1px solid #5a4a10;
+      border-radius: 4px;
+      padding: 0.1rem 0.35rem;
+      margin-left: 0.4rem;
+      letter-spacing: 0.04em;
+      vertical-align: middle;
+    }
+
+    .valjare-tom {
+      padding: 0.85rem;
+      font-size: 0.82rem;
+      color: #3a3a3a;
+      text-align: center;
+    }
+
+    /* ── Stepper ── */
     .stepper {
       display: flex;
       align-items: center;
@@ -183,7 +341,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .stepper-btn:hover { color: #d4a84b; background: #2a2010; }
+    .stepper-btn:hover    { color: #d4a84b; background: #2a2010; }
     .stepper-btn:disabled { color: #3a3a3a; cursor: default; background: none; }
 
     .stepper-tal {
@@ -215,60 +373,182 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    .planera-btn:hover  { opacity: 0.88; }
-    .planera-btn:active { transform: scale(0.98); }
+    .planera-btn:hover   { opacity: 0.88; }
+    .planera-btn:active  { transform: scale(0.98); }
+    .planera-btn:disabled { opacity: 0.45; cursor: default; transform: none; }
 
-    /* ── Resultatkort (platshållare) ── */
-    .resultat-kort {
-      background: #181818;
-      border: 1px dashed #2e2e2e;
-      border-radius: 16px;
-      padding: 1.75rem 1.25rem;
-      text-align: center;
-      margin-bottom: 2rem;
+    /* ── Laddningsindikator ── */
+    #laddning {
       display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding: 2.5rem 1rem;
+      text-align: center;
     }
 
-    .resultat-kort.synlig { display: block; }
+    #laddning.synlig { display: flex; }
 
-    .resultat-meta {
+    .laddning-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #2a2a2a;
+      border-top-color: #7a5a1a;
+      border-radius: 50%;
+      animation: snurra 0.8s linear infinite;
+    }
+
+    @keyframes snurra { to { transform: rotate(360deg); } }
+
+    .laddning-text { font-size: 0.88rem; color: #666; line-height: 1.6; }
+
+    /* ── Felruta ── */
+    #felruta {
+      display: none;
+      background: #1e0a0a;
+      border: 1px solid #5a1a1a;
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1rem;
+      font-size: 0.85rem;
+      color: #e07070;
+      line-height: 1.6;
+    }
+
+    #felruta.synlig { display: block; }
+
+    /* ── Resultatsektionen ── */
+    #resultat-sektion { display: none; margin-bottom: 1rem; }
+    #resultat-sektion.synlig { display: block; }
+
+    .resultat-meta-rad { display: flex; justify-content: center; margin-bottom: 1.25rem; }
+
+    .resultat-meta-chip {
       display: inline-block;
       font-size: 0.72rem;
       font-weight: 700;
       color: #8a6a20;
       letter-spacing: 0.07em;
       text-transform: uppercase;
-      margin-bottom: 1rem;
       background: #2a1e08;
       border: 1px solid #4a3a10;
       border-radius: 20px;
       padding: 0.25rem 0.75rem;
     }
 
-    .resultat-ikon {
-      display: block;
-      font-size: 2.8rem;
-      margin-bottom: 0.65rem;
+    /* Markdown-renderat innehåll */
+    #resultat-innehall {
+      background: #181818;
+      border: 1px solid #2a2a2a;
+      border-radius: 16px;
+      padding: 1.5rem 1.25rem;
+      margin-bottom: 1rem;
+      line-height: 1.7;
+      font-size: 0.88rem;
     }
 
-    .resultat-rubrik {
+    #resultat-innehall h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e8d090;
+      margin: 1.25rem 0 0.6rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    #resultat-innehall h2:first-child { margin-top: 0; }
+
+    #resultat-innehall h3 {
       font-size: 0.95rem;
       font-weight: 700;
-      color: #888;
-      margin-bottom: 0.4rem;
+      color: #c8b060;
+      margin: 1rem 0 0.4rem;
     }
 
-    .resultat-text {
-      font-size: 0.82rem;
-      color: #4a4a4a;
-      line-height: 1.6;
+    #resultat-innehall ul { padding-left: 1.25rem; margin: 0.4rem 0; }
+    #resultat-innehall li { margin-bottom: 0.25rem; color: #c0c0c0; }
+    #resultat-innehall p  { margin: 0.5rem 0; color: #c0c0c0; }
+
+    #resultat-innehall hr {
+      border: none;
+      border-top: 1px solid #2a2a2a;
+      margin: 1.25rem 0;
     }
+
+    #resultat-innehall strong { color: #e0e0e0; }
+
+    /* FRYS-badge */
+    .frys-badge {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      background: #0d2a35;
+      color: #70c0e0;
+      border: 1px solid #1a5f7a;
+      border-radius: 6px;
+      padding: 0.1rem 0.4rem;
+      margin: 0 0.15rem;
+      vertical-align: middle;
+    }
+
+    /* ── Inköpslista ── */
+    .inkop-sektion {
+      display: none;
+      background: #161616;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .inkop-sektion.synlig { display: block; }
+
+    .inkop-rubrik {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.85rem;
+    }
+
+    .inkop-rubrik h3 { font-size: 0.95rem; font-weight: 700; color: #c8b060; }
+
+    .kopiera-btn {
+      padding: 0.35rem 0.85rem;
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      border-radius: 8px;
+      color: #888;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .kopiera-btn:hover    { color: #d4a84b; border-color: #5a4a20; }
+    .kopiera-btn.kopierat { color: #70c070; border-color: #2a5a2a; }
+
+    .inkop-lista { font-size: 0.85rem; color: #c0c0c0; line-height: 1.7; }
+
+    /* ── Resultatknappar ── */
+    .resultat-knappar { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+
+    .resultat-btn {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.7rem 1rem;
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      border-radius: 12px;
+      color: #888;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .resultat-btn:hover { color: #d4a84b; border-color: #5a4a20; background: #2a1e08; }
 
     /* ── Sekundär sektion ── */
-    .sekundar-sektion {
-      border-top: 1px solid #1e1e1e;
-      padding-top: 1.5rem;
-    }
+    .sekundar-sektion { border-top: 1px solid #1e1e1e; padding-top: 1.5rem; }
 
     .sekundar-rubrik {
       font-size: 0.68rem;
@@ -280,12 +560,7 @@
       margin-bottom: 0.85rem;
     }
 
-    .sekundar-knappar {
-      display: flex;
-      gap: 0.6rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
+    .sekundar-knappar { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; }
 
     .sekundar-btn {
       display: inline-flex;
@@ -304,11 +579,7 @@
 
     .sekundar-btn:hover { color: #999; border-color: #3a3a3a; background: #1e1e1e; }
 
-    .sekundar-btn.inaktiv {
-      opacity: 0.38;
-      cursor: default;
-      pointer-events: none;
-    }
+    .sekundar-btn.inaktiv { opacity: 0.38; cursor: default; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -326,12 +597,58 @@
       <h1>Vad vill du laga ikväll?</h1>
     </div>
 
+    <!-- Köksanden: smarta datadrivna tips (göms om inga tips finns) -->
+    <div class="koksan-kort" id="koksan-kort" style="display:none">
+      <span class="koksan-ikon">💡</span>
+      <div class="koksan-kropp">
+        <div class="koksan-rubrik">Köksanden</div>
+        <div class="koksan-tips" id="koksan-tips"></div>
+      </div>
+      <button class="koksan-nav" id="koksan-nasta" title="Nästa tips">→</button>
+    </div>
+
     <!-- Primärkort: Planera middag -->
     <div class="planera-kort">
 
       <div class="kort-titelrad">
         <span class="kort-ikon">🍽️</span>
         <span class="kort-namn">Planera middag</span>
+      </div>
+
+      <!-- Startpunkt: tre vägar in -->
+      <div class="formsektion">
+        <div class="sektion-label">Startpunkt</div>
+        <div class="pill-rad">
+          <button class="radio-pill aktiv" data-start="slump">🎲 Överraska mig</button>
+          <button class="radio-pill" data-start="ravara">🥩 Råvara</button>
+          <button class="radio-pill" data-start="vin">🍷 Vin</button>
+        </div>
+
+        <!-- Frysväljare: visas när "råvara" är vald -->
+        <div class="inline-valjare" id="frys-valjare">
+          <div class="valjare-header">
+            <span id="frys-header-text">🧊 Frysen</span>
+            <span class="valjare-header-antal" id="frys-header-antal"></span>
+          </div>
+          <input type="search" class="valjare-sok" id="frys-sok"
+                 placeholder="🔍 Sök i frysen…" autocomplete="off">
+          <div class="valjare-lista-wrap">
+            <div class="valjare-lista" id="frys-lista"></div>
+          </div>
+        </div>
+
+        <!-- Vinväljare: visas när "vin" är valt -->
+        <div class="inline-valjare" id="vin-valjare">
+          <div class="valjare-header">
+            <span id="vin-header-text">🍷 Vinkällaren</span>
+            <span class="valjare-header-antal" id="vin-header-antal"></span>
+          </div>
+          <input type="search" class="valjare-sok" id="vin-sok"
+                 placeholder="🔍 Sök i vinkällaren…" autocomplete="off">
+          <div class="valjare-lista-wrap">
+            <div class="valjare-lista" id="vin-lista"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Rätter -->
@@ -368,18 +685,35 @@
 
     </div><!-- /planera-kort -->
 
-    <!-- Platshållare: visas efter att man tryckt Planera -->
-    <div class="resultat-kort" id="resultat-kort">
-      <span class="resultat-meta" id="resultat-meta"></span>
-      <span class="resultat-ikon">🧑‍🍳</span>
-      <div class="resultat-rubrik">AI-kocken komponerar menyn</div>
-      <div class="resultat-text">
-        Middagskomponören byggs i nästa steg.<br>
-        Här visas färdig meny, tillagning och vinval.
+    <!-- Laddningsindikator -->
+    <div id="laddning">
+      <div class="laddning-spinner"></div>
+      <div class="laddning-text"><strong>AI-kocken tänker…</strong><br>Komponerar din meny – ett ögonblick.</div>
+    </div>
+
+    <!-- Felruta -->
+    <div id="felruta"></div>
+
+    <!-- Resultatsektionen -->
+    <div id="resultat-sektion">
+      <div class="resultat-meta-rad">
+        <span class="resultat-meta-chip" id="resultat-meta"></span>
+      </div>
+      <div id="resultat-innehall"></div>
+      <div class="inkop-sektion" id="inkop-sektion">
+        <div class="inkop-rubrik">
+          <h3>🛒 Inköpslista</h3>
+          <button class="kopiera-btn" id="kopiera-btn">📋 Kopiera</button>
+        </div>
+        <div class="inkop-lista" id="inkop-lista"></div>
+      </div>
+      <div class="resultat-knappar">
+        <button class="resultat-btn" id="nytt-btn">🔄 Ge mig ett annat upplägg</button>
+        <button class="resultat-btn" id="spara-btn">📋 Spara i receptbanken</button>
       </div>
     </div>
 
-    <!-- Sekundär sektion: dagbok och receptbank -->
+    <!-- Sekundär sektion -->
     <div class="sekundar-sektion">
       <div class="sekundar-rubrik">Dagbok &amp; recept</div>
       <div class="sekundar-knappar">
@@ -395,11 +729,276 @@
     let valtaRatter = new Set(['varmratt']);
     let tonlage     = 'vardag';
     let antal       = 2;
+    let startVal    = 'slump';
+    let valdRavara  = null; // { namn, qty, unit, atSnart }
+    let valdVin     = null; // vinobj från vinkallare
+    let senastSvar  = '';   // sparat för receptbank
 
-    const RATT_LABEL = { forratt:'Förrätt', varmratt:'Varmrätt', efterratt:'Efterrätt' };
-    const TON_LABEL  = { vardag:'Vardag', 'lite-extra':'Lite extra', 'full-michelin':'Full Michelin' };
+    const RATT_LABEL = { forratt: 'Förrätt', varmratt: 'Varmrätt', efterratt: 'Efterrätt' };
+    const TON_LABEL  = { vardag: 'Vardag', 'lite-extra': 'Lite extra', 'full-michelin': 'Full Michelin' };
 
-    /* ── Rätter: toggle (fler kan väljas, minst en måste vara vald) ── */
+    /* ── Defensiv fälthantering för frysregister ── */
+    function getNamn(v)   { return v.namn || v.name || v.kategori || v.category || 'Okänd vara'; }
+    function getQty(v)    { return Number(v.qty) || Number(v.antal) || Number(v.count) || 1; }
+    function getUnit(v)   { return v.unit || v.enhet || 'förp.'; }
+    function isAtSnart(v) {
+      return !!(v.eatSoon || v.eat_soon || v.atSnart || v.at_snart ||
+                v.prio === 'snart' || v.priority === 'soon' || v.priority === 'snart');
+    }
+
+    /* ── Data från localStorage ── */
+    function hamtaFrysdata()   { try { return JSON.parse(localStorage.getItem('frysregister_v1') || '[]'); } catch(e) { return []; } }
+    function hamtaVinkallare() { try { return JSON.parse(localStorage.getItem('vinkallare_viner') || '[]'); } catch(e) { return []; } }
+    function hamtaSousvide()   { try { return JSON.parse(localStorage.getItem('sousvide_koningar') || '[]'); } catch(e) { return []; } }
+
+    /* ── Hjälp: om ett vin är nära slutet av drickfönstret ── */
+    function isDrickSnart(v) {
+      const till = v.dricktill || v.drinkTill || v.drinkfran_till;
+      if (!till) return false;
+      let tillDatum;
+      if (/^\d{4}$/.test(String(till))) {
+        /* Bara ett år angivet – sätt till sista december */
+        tillDatum = new Date(Number(till), 11, 31);
+      } else {
+        tillDatum = new Date(till);
+      }
+      if (isNaN(tillDatum)) return false;
+      const dagarKvar = (tillDatum - new Date()) / 86400000;
+      return dagarKvar >= 0 && dagarKvar <= 120;
+    }
+
+    /* ── Bygg frysväljare ── */
+    function byggFryslista(sok) {
+      const varor  = hamtaFrysdata();
+      const filter = (sok || '').toLowerCase().trim();
+      const lista  = document.getElementById('frys-lista');
+
+      const matchade = varor.filter(v => {
+        const namn = getNamn(v).toLowerCase();
+        return !filter || namn.includes(filter);
+      });
+
+      /* Ät-snart-varor överst, sedan resten */
+      matchade.sort((a, b) => (isAtSnart(b) ? 1 : 0) - (isAtSnart(a) ? 1 : 0));
+
+      /* Uppdatera räknaren i headern */
+      const totalAntal = varor.length;
+      document.getElementById('frys-header-antal').textContent =
+        filter ? `${matchade.length} av ${totalAntal}` : `${totalAntal} varor`;
+
+      if (!matchade.length) {
+        lista.innerHTML = '<div class="valjare-tom">Inga varor hittades</div>';
+        return;
+      }
+
+      lista.innerHTML = matchade.map(v => {
+        const namn  = getNamn(v);
+        const qty   = getQty(v);
+        const unit  = getUnit(v);
+        const snart = isAtSnart(v);
+        const valdNu = valdRavara && valdRavara.namn === namn;
+
+        const snartBadge = snart ? '<span class="snart-badge">ÄT NU</span>' : '';
+        const klasser    = ['valjare-item', snart ? 'snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
+
+        return `<div class="${klasser}" data-namn="${escHtml(namn)}" data-qty="${qty}" data-unit="${escHtml(unit)}" data-snart="${snart}">
+          <span>${escHtml(namn)}${snartBadge}</span>
+          <span class="valjare-meta">${qty} ${escHtml(unit)}</span>
+        </div>`;
+      }).join('');
+
+      lista.querySelectorAll('.valjare-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const namn  = el.dataset.namn;
+          const snart = el.dataset.snart === 'true';
+          if (valdRavara && valdRavara.namn === namn) {
+            valdRavara = null;
+          } else {
+            valdRavara = { namn, qty: Number(el.dataset.qty), unit: el.dataset.unit, atSnart: snart };
+          }
+          byggFryslista(document.getElementById('frys-sok').value);
+        });
+      });
+    }
+
+    /* ── Bygg vinväljare ── */
+    function byggVinlista(sok) {
+      const viner  = hamtaVinkallare();
+      const filter = (sok || '').toLowerCase().trim();
+      const lista  = document.getElementById('vin-lista');
+
+      const tillgangliga = viner.filter(v => (Number(v.antal) || 0) > 0);
+      const matchade = tillgangliga.filter(v => {
+        const text = [v.namn, v.druva, v.land, v.region, v.typ].join(' ').toLowerCase();
+        return !filter || text.includes(filter);
+      });
+
+      /* Drick-snart-viner överst */
+      matchade.sort((a, b) => (isDrickSnart(b) ? 1 : 0) - (isDrickSnart(a) ? 1 : 0));
+
+      /* Räknare */
+      document.getElementById('vin-header-antal').textContent =
+        filter ? `${matchade.length} av ${tillgangliga.length}` : `${tillgangliga.length} fl`;
+
+      if (!matchade.length) {
+        lista.innerHTML = '<div class="valjare-tom">Inga viner i källaren</div>';
+        return;
+      }
+
+      lista.innerHTML = matchade.map(v => {
+        const valdNu    = valdVin && (valdVin.id || valdVin.namn) == (v.id || v.namn);
+        const drSnart   = isDrickSnart(v);
+        const etik      = [v.namn, v.årgång || v.argarg || ''].filter(Boolean).join(' ');
+        const detalj    = [v.druva, v.land].filter(Boolean).join(' · ');
+        const drickBadge = drSnart ? '<span class="drick-badge">DRICK NU</span>' : '';
+        const klasser   = ['valjare-item', drSnart ? 'drick-snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
+
+        return `<div class="${klasser}" data-id="${escHtml(String(v.id || v.namn))}">
+          <span>${escHtml(etik)}${drickBadge}</span>
+          <span class="valjare-meta">${escHtml(detalj)} · ${v.antal} fl</span>
+        </div>`;
+      }).join('');
+
+      lista.querySelectorAll('.valjare-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const id     = el.dataset.id;
+          const vinObj = matchade.find(v => String(v.id || v.namn) === id);
+          if (!vinObj) return;
+          if (valdVin && String(valdVin.id || valdVin.namn) === id) {
+            valdVin = null;
+          } else {
+            valdVin = vinObj;
+          }
+          byggVinlista(document.getElementById('vin-sok').value);
+        });
+      });
+    }
+
+    /* ── Escape HTML för säker injektion i data-attribut ── */
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    /* ══════════════════════════════════════════
+       KÖKSANDEN – smarta tips utan AI-anrop
+       ══════════════════════════════════════════ */
+
+    function genereraKoksTips() {
+      const tips = [];
+      const idag = new Date();
+
+      /* 1. Frys: varor märkta som ät-snart */
+      const frysVaror   = hamtaFrysdata();
+      const snartVaror  = frysVaror.filter(isAtSnart);
+      if (snartVaror.length) {
+        const namn = snartVaror.slice(0, 2).map(v => getNamn(v));
+        if (namn.length === 1) {
+          tips.push(`${namn[0]} i frysen bör ätas snart – perfekt tillfälle att planera en middag kring det.`);
+        } else {
+          tips.push(`${namn[0]} och ${namn[1]} i frysen bör ätas snart – passa på nu.`);
+        }
+      }
+
+      /* 2. Vin: nära slutet av drickfönstret (inom 120 dagar) */
+      const viner         = hamtaVinkallare().filter(v => (Number(v.antal) || 0) > 0);
+      const drickSnartVin = viner.find(isDrickSnart);
+      if (drickSnartVin) {
+        const ar = drickSnartVin.årgång || drickSnartVin.argarg || '';
+        tips.push(`Din ${drickSnartVin.namn || 'vinkällarvinet'}${ar ? ' ' + ar : ''} är inom sitt drickfönster – passa på att njuta av den nu.`);
+      }
+
+      /* 3. Sous vide-historik: kategori inte lagad på >45 dagar */
+      const svKorningar = hamtaSousvide();
+      if (svKorningar.length) {
+        const senastePerKat = {};
+        svKorningar.forEach(k => {
+          const kat   = (k.kat || k.kategori || '').trim();
+          const datum = k.datum ? new Date(k.datum) : null;
+          if (!kat || !datum || isNaN(datum)) return;
+          if (!senastePerKat[kat] || datum > senastePerKat[kat]) {
+            senastePerKat[kat] = datum;
+          }
+        });
+
+        /* Äldst lagad kategori, minst 45 dagar sedan */
+        const gamlaKat = Object.entries(senastePerKat)
+          .filter(([, d]) => (idag - d) / 86400000 > 45)
+          .sort((a, b) => a[1] - b[1]);
+
+        if (gamlaKat.length) {
+          const [kat, datum] = gamlaKat[0];
+          const veckor = Math.round((idag - datum) / (86400000 * 7));
+          tips.push(`Det är ${veckor} veckor sedan du sous vide-lagade ${kat.toLowerCase()} senast – kanske dags igen?`);
+        }
+      }
+
+      return tips;
+    }
+
+    /* Köksanden-state */
+    let koksTipsLista = [];
+    let koksTipsIndex = 0;
+    let koksTipsTimer = null;
+
+    function visaKoksTip(index) {
+      if (!koksTipsLista.length) return;
+      koksTipsIndex = ((index % koksTipsLista.length) + koksTipsLista.length) % koksTipsLista.length;
+      document.getElementById('koksan-tips').textContent = koksTipsLista[koksTipsIndex];
+
+      /* Göm navigationsknappen om bara ett tips */
+      document.getElementById('koksan-nasta').style.display =
+        koksTipsLista.length > 1 ? '' : 'none';
+    }
+
+    function initKoksan() {
+      koksTipsLista = genereraKoksTips();
+      const kort = document.getElementById('koksan-kort');
+      if (!koksTipsLista.length) { kort.style.display = 'none'; return; }
+
+      kort.style.display = '';
+      visaKoksTip(0);
+
+      /* Rotera automatiskt var 6:e sekund om flera tips finns */
+      if (koksTipsLista.length > 1) {
+        koksTipsTimer = setInterval(() => visaKoksTip(koksTipsIndex + 1), 6000);
+      }
+    }
+
+    document.getElementById('koksan-nasta').addEventListener('click', () => {
+      clearInterval(koksTipsTimer);
+      visaKoksTip(koksTipsIndex + 1);
+      if (koksTipsLista.length > 1) {
+        koksTipsTimer = setInterval(() => visaKoksTip(koksTipsIndex + 1), 6000);
+      }
+    });
+
+    /* ── Startpunkt-pills ── */
+    document.querySelectorAll('[data-start]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        startVal = btn.dataset.start;
+        document.querySelectorAll('[data-start]').forEach(b =>
+          b.classList.toggle('aktiv', b.dataset.start === startVal)
+        );
+
+        const frysV = document.getElementById('frys-valjare');
+        const vinV  = document.getElementById('vin-valjare');
+        frysV.classList.toggle('synlig', startVal === 'ravara');
+        vinV.classList.toggle('synlig',  startVal === 'vin');
+
+        if (startVal === 'ravara') byggFryslista('');
+        if (startVal === 'vin')    byggVinlista('');
+        if (startVal === 'slump')  { valdRavara = null; valdVin = null; }
+      });
+    });
+
+    document.getElementById('frys-sok').addEventListener('input', e => byggFryslista(e.target.value));
+    document.getElementById('vin-sok').addEventListener('input',  e => byggVinlista(e.target.value));
+
+    /* ── Rätter: toggle ── */
     document.querySelectorAll('[data-ratt]').forEach(btn => {
       btn.addEventListener('click', () => {
         const r = btn.dataset.ratt;
@@ -414,7 +1013,7 @@
       });
     });
 
-    /* ── Tonläge: radio (ett val) ── */
+    /* ── Tonläge: radio ── */
     document.querySelectorAll('[data-ton]').forEach(btn => {
       btn.addEventListener('click', () => {
         tonlage = btn.dataset.ton;
@@ -431,31 +1030,335 @@
       document.getElementById('plus-btn').disabled  = antal >= 20;
     }
 
-    document.getElementById('minus-btn').addEventListener('click', () => {
-      if (antal > 1)  { antal--; uppdateraStepper(); }
-    });
-
-    document.getElementById('plus-btn').addEventListener('click', () => {
-      if (antal < 20) { antal++; uppdateraStepper(); }
-    });
-
+    document.getElementById('minus-btn').addEventListener('click', () => { if (antal > 1)  { antal--; uppdateraStepper(); } });
+    document.getElementById('plus-btn').addEventListener('click',  () => { if (antal < 20) { antal++; uppdateraStepper(); } });
     uppdateraStepper();
 
-    /* ── Planera-knapp ── */
-    document.getElementById('planera-btn').addEventListener('click', () => {
+    /* ── UI-tillstånd ── */
+    function visaLaddning(ja) {
+      document.getElementById('laddning').classList.toggle('synlig', ja);
+      document.getElementById('planera-btn').disabled = ja;
+      if (ja) {
+        document.getElementById('felruta').classList.remove('synlig');
+        document.getElementById('resultat-sektion').classList.remove('synlig');
+      }
+    }
+
+    function visaFel(text) {
+      const el = document.getElementById('felruta');
+      el.innerHTML = `<strong>⚠️ Något gick fel</strong><br>${text}`;
+      el.classList.add('synlig');
+    }
+
+    /* ── Markdown-renderer med [FRYS]-stöd ── */
+    function formatInline(text) {
+      text = text.replace(/\[FRYS\]/g, '<span class="frys-badge">🧊 FRYS</span>');
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.+?)\*/g,     '<em>$1</em>');
+      return text;
+    }
+
+    function renderMarkdown(md) {
+      const rader = md.split('\n');
+      let html   = '';
+      let iLista = false;
+
+      for (let i = 0; i < rader.length; i++) {
+        const rad = rader[i];
+
+        if (rad.match(/^---+$/)) {
+          if (iLista) { html += '</ul>'; iLista = false; }
+          html += '<hr>'; continue;
+        }
+        if (rad.startsWith('## ')) {
+          if (iLista) { html += '</ul>'; iLista = false; }
+          html += `<h2>${formatInline(rad.slice(3).trim())}</h2>`; continue;
+        }
+        if (rad.startsWith('### ')) {
+          if (iLista) { html += '</ul>'; iLista = false; }
+          html += `<h3>${formatInline(rad.slice(4).trim())}</h3>`; continue;
+        }
+        if (rad.match(/^[-*] /)) {
+          if (!iLista) { html += '<ul>'; iLista = true; }
+          html += `<li>${formatInline(rad.slice(2).trim())}</li>`; continue;
+        }
+        if (iLista) { html += '</ul>'; iLista = false; }
+        const trimad = rad.trim();
+        if (trimad) html += `<p>${formatInline(trimad)}</p>`;
+      }
+
+      if (iLista) html += '</ul>';
+      return html;
+    }
+
+    /* ── Extrahera inköpslista ── */
+    function extraherapInkoplista(text) {
+      const match = text.match(/##\s*(?:Inköpslista|Inkopslista)\s*\n([\s\S]+?)(?=\n##|$)/i);
+      if (!match) return null;
+      const rader = match[1].split('\n')
+        .map(r => r.trim())
+        .filter(r => r.match(/^[-*]/))
+        .map(r => r.replace(/^[-*]\s*/, '').trim())
+        .filter(Boolean);
+      return rader.length ? rader : null;
+    }
+
+    /* ── Bygg prompt ── */
+    function byggPrompt(alternativt) {
       const rattOrdning = ['forratt', 'varmratt', 'efterratt'];
-      const rattText = rattOrdning
-        .filter(r => valtaRatter.has(r))
-        .map(r => RATT_LABEL[r])
-        .join(' + ');
+      const rattText = rattOrdning.filter(r => valtaRatter.has(r)).map(r => RATT_LABEL[r]).join(', ');
 
-      document.getElementById('resultat-meta').textContent =
-        `${rattText} · ${TON_LABEL[tonlage]} · ${antal} pers`;
+      const frysvarer  = hamtaFrysdata();
+      const sousvide   = hamtaSousvide();
+      const vinkallare = hamtaVinkallare().filter(v => (Number(v.antal) || 0) > 0);
 
-      const kort = document.getElementById('resultat-kort');
-      kort.classList.add('synlig');
-      kort.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const atSnartVaror = frysvarer.filter(isAtSnart);
+      const ovrigaVaror  = frysvarer.filter(v => !isAtSnart(v));
+      const frysText = [...atSnartVaror, ...ovrigaVaror].length
+        ? [...atSnartVaror, ...ovrigaVaror].map(v => {
+            const s = isAtSnart(v) ? ' [ÄT SNART – prioritera]' : '';
+            return `- ${getNamn(v)}: ${getQty(v)} ${getUnit(v)}${s}`;
+          }).join('\n')
+        : '(tomt)';
+
+      const vinText = vinkallare.length
+        ? vinkallare.map(v => {
+            const hyll = v.hyllplats || v.plats || '';
+            return `- ${v.namn || 'Okänt vin'}${v.årgång || v.argarg ? ' ' + (v.årgång || v.argarg) : ''}, ${v.typ || ''}, ${v.druva || ''} (${v.antal} fl${hyll ? ', ' + hyll : ''})`;
+          }).join('\n')
+        : '(tomt)';
+
+      const svText = sousvide.length
+        ? sousvide.slice(0, 20).map(k => {
+            const d = [k.temp ? k.temp + '°C' : '', k.tid ? k.tid + ' tim' : '', k.betyg ? '⭐'.repeat(Number(k.betyg)) : ''].filter(Boolean).join(', ');
+            return `- ${k.namn || k.kat || 'Okänd'}: ${d}${k.omdome ? ' – "' + k.omdome + '"' : ''}`;
+          }).join('\n')
+        : '(inga körningar)';
+
+      let startKontext = '';
+      if (startVal === 'ravara' && valdRavara) {
+        startKontext = `\nStartpunkt: Bygg menyn kring råvaran **${valdRavara.namn}** (${valdRavara.qty} ${valdRavara.unit}${valdRavara.atSnart ? ', ÄT SNART' : ''}) som finns i frysen.`;
+      } else if (startVal === 'vin' && valdVin) {
+        const vn = valdVin;
+        startKontext = `\nStartpunkt: Välj mat som passar till vinet **${vn.namn || 'okänt vin'}** (${vn.typ || ''}, ${vn.druva || ''}, ${vn.land || ''}${vn.årgång || vn.argarg ? ', ' + (vn.årgång || vn.argarg) : ''}). Hitta sedan matchande råvaror i frysen ovan.`;
+      } else {
+        startKontext = '\nStartpunkt: Välj fritt bland frysens råvaror – prioritera de märkta [ÄT SNART].';
+      }
+
+      const alternativtText = alternativt
+        ? '\n⚠️ Användaren vill ha ett HELT ANNAT upplägg – annan rätt, annan råvara, annan stil. Ingenting från föregående meny.'
+        : '';
+
+      return `Du är en Michelin-stjärnig köksmästare och personlig matassistent. Din uppgift är att planera en fullständig middagsmeny baserat på nedanstående förutsättningar.
+
+## Användarens önskemål
+- Rätter: ${rattText}
+- Tonläge: ${TON_LABEL[tonlage]}
+- Antal personer: ${antal}
+${startKontext}
+${alternativtText}
+
+## Frysens innehåll
+${frysText}
+
+## Vinkällaren
+${vinText}
+
+## Sous vide-historik (egna körningar och betyg)
+${svText}
+
+---
+
+## Din arbetsprocess (intern – visa INTE detta för användaren)
+
+**Steg A – Generera alternativ (internt):**
+Tänk igenom 2–3 olika menyer i ditt huvud. Variera råvaror, tillagningsmetoder och stil.
+
+**Steg B – Välj och kritisera:**
+Välj det bästa alternativet baserat på: (1) råvaror i frysen, (2) tonläge, (3) årstid, (4) sous vide-historia. Motivera valet för dig själv.
+
+**Steg C – Presentera BARA det valda alternativet** enligt formatet nedan.
+
+---
+
+## Outputformat (visa bara detta)
+
+Börja direkt med menyn. Ingen inledning om processen.
+
+För varje rätt (förrätt/varmrätt/efterrätt om valda):
+
+### [Rättens namn]
+[En mening om rätten och varför den passar]
+
+**Ingredienser (${antal} pers):**
+- [Ingrediens] [FRYS] – om den kommer från frysen
+- [Ingrediens] – köpas
+
+**Tillagning:**
+[Steg-för-steg instruktioner. Om sous vide passar och det finns relevant historik, väv in det naturligt: "Sous vide på 58°C i 2 tim – du körde lammet så förra gången och gav det 5/5."]
+
+**Vinval:**
+[Om matchande vin finns i vinkällaren: "Din [vinnamn] ([hyllplats], [antal] fl kvar) passar utmärkt – [kort motivering]."
+Om inget passande vin finns: "Köp: [konkret vinförslag med druva, region och prisintervall]."]
+
+---
+
+## Inköpslista
+- [Vara som behöver köpas, med mängd]
+(Bara varor som inte finns i frysen)
+
+---
+
+Avsluta inte med "Smaklig måltid" eller liknande fraser.`;
+    }
+
+    /* ── Anropa Claude API ── */
+    async function anropaClaude(prompt) {
+      let apiNyckel = localStorage.getItem('frysregister_apikey_v1') || '';
+      if (!apiNyckel) {
+        apiNyckel = (window.prompt('Klistra in din Anthropic API-nyckel:') || '').trim();
+        if (!apiNyckel) throw new Error('Ingen API-nyckel angiven.');
+        localStorage.setItem('frysregister_apikey_v1', apiNyckel);
+      }
+
+      const resp = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': apiNyckel,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true',
+          'content-type': 'application/json'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 16000,
+          tools: [{ type: 'web_search_20260209', name: 'web_search' }],
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+
+      if (!resp.ok) {
+        const felText = await resp.text();
+        if (resp.status === 401) localStorage.removeItem('frysregister_apikey_v1');
+        throw new Error(`API-fel ${resp.status}: ${felText.slice(0, 200)}`);
+      }
+
+      const svar = await resp.json();
+
+      /* Hantera pause_turn (web_search kan pausa internt) */
+      if (svar.stop_reason === 'pause_turn') {
+        const block = (svar.content || []).find(b => b.type === 'text');
+        if (block && block.text) return block.text;
+        throw new Error('Svaret pausades av API:et – försök igen.');
+      }
+
+      const block = (svar.content || []).find(b => b.type === 'text');
+      if (!block || !block.text) throw new Error('Tomt svar från Claude – inga textblock i svaret.');
+      return block.text;
+    }
+
+    /* ── Planera middag ── */
+    async function planeraMiddag(alternativt) {
+      if (startVal === 'ravara' && !valdRavara) {
+        visaFel('Välj en råvara från frysen, eller byt till "Överraska mig".');
+        return;
+      }
+      if (startVal === 'vin' && !valdVin) {
+        visaFel('Välj ett vin från vinkällaren, eller byt till "Överraska mig".');
+        return;
+      }
+
+      visaLaddning(true);
+
+      try {
+        const prompt = byggPrompt(alternativt || false);
+
+        const rattOrdning = ['forratt', 'varmratt', 'efterratt'];
+        const rattText = rattOrdning.filter(r => valtaRatter.has(r)).map(r => RATT_LABEL[r]).join(' + ');
+        let metaText = `${rattText} · ${TON_LABEL[tonlage]} · ${antal} pers`;
+        if (startVal === 'ravara' && valdRavara) metaText += ` · 🥩 ${valdRavara.namn}`;
+        if (startVal === 'vin'    && valdVin)    metaText += ` · 🍷 ${valdVin.namn || 'valt vin'}`;
+
+        const text = await anropaClaude(prompt);
+        senastSvar = text;
+
+        const utanInkop = text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim();
+        document.getElementById('resultat-innehall').innerHTML = renderMarkdown(utanInkop);
+
+        const inkopRader = extraherapInkoplista(text);
+        const inkopSekt  = document.getElementById('inkop-sektion');
+        if (inkopRader && inkopRader.length) {
+          document.getElementById('inkop-lista').innerHTML =
+            inkopRader.map(r => `<div>• ${formatInline(r)}</div>`).join('');
+          inkopSekt.classList.add('synlig');
+        } else {
+          inkopSekt.classList.remove('synlig');
+        }
+
+        document.getElementById('resultat-meta').textContent = metaText;
+        visaLaddning(false);
+        document.getElementById('resultat-sektion').classList.add('synlig');
+        document.getElementById('resultat-sektion').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+      } catch (fel) {
+        visaLaddning(false);
+        visaFel(fel.message || String(fel));
+      }
+    }
+
+    /* ── Knappar ── */
+    document.getElementById('planera-btn').addEventListener('click', () => planeraMiddag(false));
+    document.getElementById('nytt-btn').addEventListener('click',    () => planeraMiddag(true));
+
+    document.getElementById('spara-btn').addEventListener('click', () => {
+      if (!senastSvar) return;
+      const rattOrdning = ['forratt', 'varmratt', 'efterratt'];
+      const rattText = rattOrdning.filter(r => valtaRatter.has(r)).map(r => RATT_LABEL[r]).join(' + ');
+      const recept = {
+        id: Date.now(),
+        datum: new Date().toISOString().slice(0, 10),
+        rattText, tonlage, antal, startVal,
+        valdRavaranamn: valdRavara ? valdRavara.namn : null,
+        valdVinnamn:    valdVin    ? (valdVin.namn || null) : null,
+        text: senastSvar
+      };
+      try {
+        const bank = JSON.parse(localStorage.getItem('receptbank_v1') || '[]');
+        bank.unshift(recept);
+        localStorage.setItem('receptbank_v1', JSON.stringify(bank));
+        const btn = document.getElementById('spara-btn');
+        const orig = btn.textContent;
+        btn.textContent = '✓ Sparat!';
+        setTimeout(() => { btn.textContent = orig; }, 2000);
+      } catch (e) {
+        visaFel('Kunde inte spara i receptbanken: ' + e.message);
+      }
     });
+
+    document.getElementById('kopiera-btn').addEventListener('click', () => {
+      const lista = document.getElementById('inkop-lista');
+      const text  = Array.from(lista.querySelectorAll('div'))
+        .map(d => d.textContent.replace(/^•\s*/, '- '))
+        .join('\n');
+
+      navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('kopiera-btn');
+        btn.textContent = '✓ Kopierat!';
+        btn.classList.add('kopierat');
+        setTimeout(() => { btn.textContent = '📋 Kopiera'; btn.classList.remove('kopierat'); }, 2000);
+      }).catch(() => {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;opacity:0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      });
+    });
+
+    /* ── Init ── */
+    initKoksan();
   </script>
 
 </body>
