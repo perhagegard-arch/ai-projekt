@@ -805,9 +805,27 @@
       const noteringar = r.noteringar || [];
       const noterText  = noteringar.length > 0
         ? '\n\nPers förbättringsnoteringar:\n' + noteringar.map((n, i) => `${i + 1}. ${n.datum}: ${n.text}`).join('\n')
-        : '\n\n(Inga noteringar – gör ändå en lätt förbättring av språk och struktur.)';
+        : '\n\nPers noteringar: (inga noteringar tillagda – kopiera grundreceptet ordagrant utan ändringar)';
 
-      const prompt = `Du är en kockassistent. Här är Pers recept på "${r.rattText || 'rätten'}":\n\n${utanInkop}${noterText}\n\nSkriv en förbättrad version av receptet som tar hänsyn till noteringarna. Behåll samma format (rubriker, ingredienslista, steg-för-steg) men förbättra receptet. Svara BARA med receptet, inget förord eller efterord.`;
+      const prompt = `Du är en receptredigerare. Din enda uppgift är att tillämpa Pers noteringar på grundreceptet – ingenting annat.
+
+REGLER (följ exakt):
+1. Varje notering är en exakt instruktion. Genomför den fullständigt.
+2. Ändra INGET som noteringarna inte explicit berör. Kopiera allt annat ordagrant – samma ord, samma mängder, samma ordning.
+3. Lägg inte till egna förbättringar, tips, varianter eller justeringar som Per inte bett om.
+4. Är en notering otydlig: lämna den delen orörd. Gissa inte.
+
+Exempel på korrekt beteende:
+Grundrecept: "1/2 dl grädde". Notering: "2 dl grädde".
+Korrekt: receptet är identiskt med originalet, men grädden är nu "2 dl grädde".
+Fel: att även ändra kryddor, tillagningstid, teknik eller annat som Per inte nämnt.
+
+Grundrecept – "${r.rattText || 'rätten'}":
+
+${utanInkop}
+${noterText}
+
+Skriv nu den redigerade versionen. Svara BARA med receptet i samma format (rubriker, ingredienslista, steg-för-steg). Inget förord, inget efterord, inga kommentarer om vad du ändrat.`;
 
       try {
         const resp = await fetch('https://api.anthropic.com/v1/messages', {
