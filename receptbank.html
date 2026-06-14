@@ -378,6 +378,109 @@
     .skapa-version-knapp:hover    { background: #342508; border-color: #7a5a18; color: #e8a840; }
     .skapa-version-knapp:disabled { opacity: 0.5; cursor: default; }
 
+    /* ── Versionshistorik-tidslinje ── */
+    .tidslinje-sektion {
+      margin-top: 0.75rem;
+      border-top: 1px solid #1e1e1e;
+      padding-top: 0.75rem;
+    }
+
+    .tidslinje-rubrik {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: #555;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .tidslinje-rad {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.3rem 0.4rem;
+      cursor: pointer;
+      border-radius: 6px;
+      transition: background 0.1s;
+    }
+
+    .tidslinje-rad:hover { background: #1c1c1c; }
+
+    .tidslinje-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #333;
+      border: 1px solid #333;
+      flex-shrink: 0;
+    }
+
+    .tidslinje-dot.aktuell { background: #c89030; border-color: #c89030; }
+
+    .tidslinje-meta { flex: 1; min-width: 0; }
+
+    .tidslinje-rubrikrad {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+    }
+
+    .tidslinje-vnr    { color: #777; font-weight: 600; font-size: 0.75rem; white-space: nowrap; }
+    .tidslinje-datum  { color: #444; font-size: 0.72rem; white-space: nowrap; }
+
+    .tidslinje-sammanfattning {
+      flex: 1;
+      color: #888;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tidslinje-aktuell-badge {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: #c89030;
+      white-space: nowrap;
+    }
+
+    .tidslinje-pil {
+      color: #333;
+      font-size: 0.62rem;
+      flex-shrink: 0;
+      transition: transform 0.15s;
+    }
+
+    .tidslinje-rad.oppet .tidslinje-pil { transform: rotate(90deg); }
+
+    .tidslinje-fulltext {
+      display: none;
+      margin: 0.35rem 0 0.25rem 1.55rem;
+      padding: 0.75rem;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 8px;
+    }
+
+    .tidslinje-rad.oppet + .tidslinje-fulltext { display: block; }
+
+    .tidslinje-aterstall {
+      margin-top: 0.65rem;
+      padding: 0.3rem 0.75rem;
+      background: none;
+      border: 1px solid #2a2a2a;
+      border-radius: 7px;
+      color: #666;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .tidslinje-aterstall:hover { color: #d4a84b; border-color: #5a4a20; }
+
     /* ── Tomt tillstånd ── */
     .tomt {
       text-align: center;
@@ -456,7 +559,26 @@
 
     /* ── Data ── */
     function hamtaBank() {
-      try { return JSON.parse(localStorage.getItem(LS_NYCKEL) || '[]'); } catch { return []; }
+      try {
+        const bank = JSON.parse(localStorage.getItem(LS_NYCKEL) || '[]');
+        /* Migrera gammal persVersion (sträng) → persVersioner (array) */
+        let dirty = false;
+        bank.forEach(r => {
+          if (r.persVersion && !r.persVersioner) {
+            r.persVersioner = [{
+              vNr: 1,
+              datum: r.datum || new Date().toISOString().slice(0, 10),
+              sammanfattning: 'Importerad från tidigare version',
+              text: r.persVersion
+            }];
+            delete r.persVersion;
+            dirty = true;
+          }
+          if (!r.persVersioner) r.persVersioner = [];
+        });
+        if (dirty) localStorage.setItem(LS_NYCKEL, JSON.stringify(bank));
+        return bank;
+      } catch { return []; }
     }
 
     function sparaBank(bank) {
@@ -518,6 +640,14 @@
         .map(r => r.replace(/^[-*]\s*/, '').trim()).filter(Boolean);
     }
 
+    /* ── Formatera ISO-datum till "14 jun" ── */
+    function formatDatum(iso) {
+      if (!iso) return '';
+      const [, m, d] = iso.split('-');
+      const man = ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'];
+      return `${Number(d)} ${man[Number(m) - 1] || ''}`;
+    }
+
     /* ── Bygg rubriktext för ett recept ── */
     function byggRubrik(r) {
       return r.rattText || 'Recept';
@@ -536,13 +666,16 @@
 
     /* ── Rendera ett enskilt kort ── */
     function renderKort(r, oppet) {
-      const utanInkop = r.text
+      const utanInkop  = r.text
         ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim()
         : '';
-      const inkopRader  = r.text ? extraherapInkoplista(r.text) : null;
-      const noteringar  = r.noteringar || [];
-      const aktiv       = aktivVersion[r.id] || 'grund';
-      const visText     = aktiv === 'pers' && r.persVersion ? r.persVersion : utanInkop;
+      const inkopRader = r.text ? extraherapInkoplista(r.text) : null;
+      const noteringar = r.noteringar  || [];
+      const versioner  = r.persVersioner || [];
+      const harVersion = versioner.length > 0;
+      const senasteV   = harVersion ? versioner[versioner.length - 1] : null;
+      const aktiv      = aktivVersion[r.id] || 'grund';
+      const visText    = aktiv === 'pers' && senasteV ? senasteV.text : utanInkop;
 
       const inkopHtml = inkopRader && inkopRader.length
         ? `<div class="inkop-sektion">
@@ -556,10 +689,10 @@
            </div>`
         : '';
 
-      const versionsValje = r.persVersion
+      const versionsValje = harVersion
         ? `<div class="versions-valje">
              <button class="version-btn${aktiv === 'grund' ? ' aktiv' : ''}" data-version="grund" data-kortid="${r.id}">📄 Grundrecept</button>
-             <button class="version-btn${aktiv === 'pers'  ? ' aktiv' : ''}" data-version="pers"  data-kortid="${r.id}">✨ Pers version</button>
+             <button class="version-btn${aktiv === 'pers'  ? ' aktiv' : ''}" data-version="pers"  data-kortid="${r.id}">✨ Pers version (v${senasteV.vNr})</button>
            </div>`
         : '';
 
@@ -572,6 +705,34 @@
                <button class="ta-bort-notering" data-kortid="${r.id}" data-idx="${i}" title="Ta bort">×</button>
              </div>`
           ).join('');
+
+      /* Tidslinje – versioner i omvänd ordning (senaste överst) */
+      const oppnaHist  = oppnaHistorik[r.id] || new Set();
+      const tidslinjeHtml = versioner.length === 0 ? '' :
+        `<div class="tidslinje-sektion">
+           <div class="tidslinje-rubrik">Versionshistorik</div>
+           ${[...versioner].reverse().map(v => {
+             const arAktuell = v.vNr === senasteV.vNr;
+             const erOppet   = oppnaHist.has(v.vNr);
+             return `
+               <div class="tidslinje-rad${erOppet ? ' oppet' : ''}" data-kortid="${r.id}" data-vnr="${v.vNr}">
+                 <div class="tidslinje-dot${arAktuell ? ' aktuell' : ''}"></div>
+                 <div class="tidslinje-meta">
+                   <div class="tidslinje-rubrikrad">
+                     <span class="tidslinje-vnr">v${v.vNr}</span>
+                     <span class="tidslinje-datum">${formatDatum(v.datum)}</span>
+                     <span class="tidslinje-sammanfattning">${esc(v.sammanfattning)}</span>
+                     ${arAktuell ? '<span class="tidslinje-aktuell-badge">Aktuell</span>' : ''}
+                   </div>
+                 </div>
+                 <span class="tidslinje-pil">▶</span>
+               </div>
+               <div class="tidslinje-fulltext">
+                 <div class="recept-text">${renderMarkdown(v.text)}</div>
+                 ${!arAktuell ? `<button class="tidslinje-aterstall" data-kortid="${r.id}" data-vnr="${v.vNr}">↩ Återställ till v${v.vNr}</button>` : ''}
+               </div>`;
+           }).join('')}
+         </div>`;
 
       return `<div class="recept-kort${oppet ? ' oppet' : ''}" id="kort-${r.id}" data-id="${r.id}">
         <div class="recept-huvud">
@@ -594,6 +755,7 @@
             </div>
             <button class="skapa-version-knapp" data-kortid="${r.id}" id="skapa-version-${r.id}">✨ Skapa Pers version</button>
           </div>
+          ${tidslinjeHtml}
           ${inkopHtml}
           <div class="ta-bort-rad">
             <button class="ta-bort-btn" data-tabort="${r.id}">🗑 Ta bort</button>
@@ -604,7 +766,8 @@
 
     /* ── Rendera hela listan ── */
     let oppnaKort    = new Set();
-    let aktivVersion = {};  /* kortid → 'grund' | 'pers' */
+    let aktivVersion = {};   /* kortid → 'grund' | 'pers' */
+    let oppnaHistorik = {};  /* kortid → Set<vNr> */
 
     function renderLista() {
       const bank   = hamtaBank();
@@ -701,12 +864,14 @@
           aktivVersion[id] = ver;
           const kort = document.getElementById(`kort-${id}`);
           kort.querySelectorAll('.version-btn').forEach(b => b.classList.toggle('aktiv', b.dataset.version === ver));
-          const bank2 = hamtaBank();
-          const r = bank2.find(x => x.id === id);
+          const bank2   = hamtaBank();
+          const r       = bank2.find(x => x.id === id);
           if (!r) return;
           const utanInkop2 = r.text ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim() : '';
+          const vers2      = r.persVersioner || [];
+          const senaste2   = vers2.length ? vers2[vers2.length - 1] : null;
           document.getElementById(`recept-text-${id}`).innerHTML = renderMarkdown(
-            ver === 'pers' && r.persVersion ? r.persVersion : utanInkop2
+            ver === 'pers' && senaste2 ? senaste2.text : utanInkop2
           );
         });
       });
@@ -759,6 +924,43 @@
 
       /* Bind ta-bort-noteringar på alla noteringslistor */
       lista.querySelectorAll('.noteringar-lista').forEach(el => bindTaBortNoteringar(el));
+
+      /* Tidslinje-rader: toggle expand via CSS-syskonselektor */
+      lista.querySelectorAll('.tidslinje-rad').forEach(rad => {
+        rad.addEventListener('click', e => {
+          e.stopPropagation();
+          const id  = Number(rad.dataset.kortid);
+          const vNr = Number(rad.dataset.vnr);
+          if (!oppnaHistorik[id]) oppnaHistorik[id] = new Set();
+          const hist = oppnaHistorik[id];
+          if (hist.has(vNr)) { hist.delete(vNr); rad.classList.remove('oppet'); }
+          else                { hist.add(vNr);    rad.classList.add('oppet'); }
+        });
+      });
+
+      /* Återställ till äldre version → ny version läggs till i slutet */
+      lista.querySelectorAll('.tidslinje-aterstall').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id  = Number(btn.dataset.kortid);
+          const vNr = Number(btn.dataset.vnr);
+          const bank = hamtaBank();
+          const r    = bank.find(x => x.id === id);
+          if (!r?.persVersioner?.length) return;
+          const gammal = r.persVersioner.find(x => x.vNr === vNr);
+          if (!gammal) return;
+          const nyVNr = Math.max(...r.persVersioner.map(v => v.vNr)) + 1;
+          r.persVersioner.push({
+            vNr: nyVNr,
+            datum: new Date().toISOString().slice(0, 10),
+            sammanfattning: `Återställd till v${vNr}`,
+            text: gammal.text
+          });
+          sparaBank(bank);
+          aktivVersion[id] = 'pers';
+          renderLista();
+        });
+      });
     }
 
     /* ── Hjälpfunktion: bind ta-bort-knappar i en noteringar-lista ── */
@@ -801,13 +1003,18 @@
       knapp.textContent = 'Skriver om receptet…';
       knapp.disabled    = true;
 
-      const utanInkop  = r.text ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim() : '';
+      const versioner  = r.persVersioner || [];
+      /* Bygg alltid på senaste versionen (inte grundreceptet) */
+      const basText    = versioner.length > 0
+        ? versioner[versioner.length - 1].text
+        : r.text ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim() : '';
+      const nyVNr      = versioner.length > 0 ? Math.max(...versioner.map(v => v.vNr)) + 1 : 1;
       const noteringar = r.noteringar || [];
       const noterText  = noteringar.length > 0
         ? '\n\nPers förbättringsnoteringar:\n' + noteringar.map((n, i) => `${i + 1}. ${n.datum}: ${n.text}`).join('\n')
-        : '\n\nPers noteringar: (inga noteringar tillagda – kopiera grundreceptet ordagrant utan ändringar)';
+        : '\n\nPers noteringar: (inga noteringar – kopiera receptet ordagrant utan ändringar)';
 
-      const prompt = `Du är en receptredigerare. Din enda uppgift är att tillämpa Pers noteringar på grundreceptet – ingenting annat.
+      const prompt = `Du är en receptredigerare. Din enda uppgift är att tillämpa Pers noteringar på receptet – ingenting annat.
 
 REGLER (följ exakt):
 1. Varje notering är en exakt instruktion. Genomför den fullständigt.
@@ -816,16 +1023,19 @@ REGLER (följ exakt):
 4. Är en notering otydlig: lämna den delen orörd. Gissa inte.
 
 Exempel på korrekt beteende:
-Grundrecept: "1/2 dl grädde". Notering: "2 dl grädde".
+Recept: "1/2 dl grädde". Notering: "2 dl grädde".
 Korrekt: receptet är identiskt med originalet, men grädden är nu "2 dl grädde".
 Fel: att även ändra kryddor, tillagningstid, teknik eller annat som Per inte nämnt.
 
-Grundrecept – "${r.rattText || 'rätten'}":
+Recept – "${r.rattText || 'rätten'}":
 
-${utanInkop}
+${basText}
 ${noterText}
 
-Skriv nu den redigerade versionen. Svara BARA med receptet i samma format (rubriker, ingredienslista, steg-för-steg). Inget förord, inget efterord, inga kommentarer om vad du ändrat.`;
+Svara i EXAKT detta format – börja alltid med SAMMANFATTNING-raden:
+SAMMANFATTNING: [en mening, max 60 tecken, vad du ändrade – t.ex. "2 dl grädde istf ½ dl, längre stektid"]
+
+[hela receptet i markdown, inget förord eller efterord]`;
 
       try {
         const resp = await fetch('https://api.anthropic.com/v1/messages', {
@@ -838,7 +1048,7 @@ Skriv nu den redigerade versionen. Svara BARA med receptet i samma format (rubri
           },
           body: JSON.stringify({
             model: 'claude-sonnet-4-6',
-            max_tokens: 2000,
+            max_tokens: 2500,
             messages: [{ role: 'user', content: prompt }]
           })
         });
@@ -849,11 +1059,25 @@ Skriv nu den redigerade versionen. Svara BARA med receptet i samma format (rubri
         }
 
         const data = await resp.json();
-        let text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+        let raw = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
         /* Strippa eventuella kodblock-markeringar */
-        text = text.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '').trim();
+        raw = raw.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '').trim();
 
-        r.persVersion = text;
+        /* Parsa ut SAMMANFATTNING-raden */
+        let sammanfattning = '';
+        let receptText     = raw;
+        const forstaRad    = raw.split('\n')[0];
+        if (forstaRad.startsWith('SAMMANFATTNING:')) {
+          sammanfattning = forstaRad.replace('SAMMANFATTNING:', '').trim();
+          receptText     = raw.slice(forstaRad.length).replace(/^\n+/, '');
+        } else {
+          /* Fallback: sammanfatta från noteringar */
+          sammanfattning = noteringar.length > 0
+            ? noteringar.slice(-2).map(n => n.text).join(', ')
+            : 'Pers version';
+        }
+
+        r.persVersioner.push({ vNr: nyVNr, datum: new Date().toISOString().slice(0, 10), sammanfattning, text: receptText });
         sparaBank(bank);
 
         /* Visa Pers version direkt */
