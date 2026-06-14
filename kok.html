@@ -279,6 +279,62 @@
       padding-left: calc(0.85rem - 3px);
     }
 
+    /* Vinfärg-kanter via data-attribut (om ej vald) */
+    .valjare-item[data-vintyp="rod"]:not(.vald)         { border-left: 3px solid #7a1a2a; padding-left: calc(0.85rem - 3px); }
+    .valjare-item[data-vintyp="vit"]:not(.vald)         { border-left: 3px solid #5a7a10; padding-left: calc(0.85rem - 3px); }
+    .valjare-item[data-vintyp="mousserande"]:not(.vald) { border-left: 3px solid #8a7a10; padding-left: calc(0.85rem - 3px); }
+    .valjare-item[data-vintyp="rose"]:not(.vald)        { border-left: 3px solid #8a3050; padding-left: calc(0.85rem - 3px); }
+    .valjare-item[data-vintyp="sott"]:not(.vald)        { border-left: 3px solid #6a4a10; padding-left: calc(0.85rem - 3px); }
+
+    /* Fryskategori-kanter (om ej vald och ej snart) */
+    .valjare-item[data-kat="kott"]:not(.vald):not(.snart)  { border-left: 3px solid #5a2a1a; padding-left: calc(0.85rem - 3px); }
+    .valjare-item[data-kat="fisk"]:not(.vald):not(.snart)  { border-left: 3px solid #1a4a6a; padding-left: calc(0.85rem - 3px); }
+    .valjare-item[data-kat="fagel"]:not(.vald):not(.snart) { border-left: 3px solid #4a4a1a; padding-left: calc(0.85rem - 3px); }
+    .valjare-item[data-kat="gront"]:not(.vald):not(.snart) { border-left: 3px solid #2a5a2a; padding-left: calc(0.85rem - 3px); }
+
+    /* Snabbfilter-rad (horisontellt scrollbar) */
+    .valjare-filter-rad {
+      display: flex;
+      gap: 0.35rem;
+      padding: 0.5rem 0.75rem;
+      background: #161616;
+      border-bottom: 1px solid #1e1e1e;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .valjare-filter-rad::-webkit-scrollbar { display: none; }
+
+    .valjare-fpill {
+      flex-shrink: 0;
+      padding: 0.28rem 0.65rem;
+      border-radius: 12px;
+      border: 1px solid #2a2a2a;
+      background: transparent;
+      color: #555;
+      font-size: 0.7rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.1s, color 0.1s, border-color 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .valjare-fpill:hover { color: #999; border-color: #3a3a3a; }
+    .valjare-fpill.aktiv { background: #2e2410; border-color: #7a5a1a; color: #d4a84b; }
+
+    /* Sektionsrubrik (gruppnamn inuti listan) */
+    .valjare-sektion-rubrik {
+      padding: 0.38rem 0.85rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #4a4a4a;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      background: #111;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
     .valjare-meta { font-size: 0.72rem; color: #555; }
 
     /* ÄT NU-badge (röd) */
@@ -632,6 +688,7 @@
           </div>
           <input type="search" class="valjare-sok" id="frys-sok"
                  placeholder="🔍 Sök i frysen…" autocomplete="off">
+          <div class="valjare-filter-rad" id="frys-filter-rad" style="display:none"></div>
           <div class="valjare-lista-wrap">
             <div class="valjare-lista" id="frys-lista"></div>
           </div>
@@ -645,6 +702,7 @@
           </div>
           <input type="search" class="valjare-sok" id="vin-sok"
                  placeholder="🔍 Sök i vinkällaren…" autocomplete="off">
+          <div class="valjare-filter-rad" id="vin-filter-rad" style="display:none"></div>
           <div class="valjare-lista-wrap">
             <div class="valjare-lista" id="vin-lista"></div>
           </div>
@@ -751,6 +809,57 @@
     function hamtaVinkallare() { try { return JSON.parse(localStorage.getItem('vinkallare_viner') || '[]'); } catch(e) { return []; } }
     function hamtaSousvide()   { try { return JSON.parse(localStorage.getItem('sousvide_koningar') || '[]'); } catch(e) { return []; } }
 
+    /* ── Vintyp-metadata och normalisering ── */
+    const VIN_TYPER = {
+      rod:         { emoji: '🍷', label: 'Röda' },
+      vit:         { emoji: '🥂', label: 'Vita' },
+      mousserande: { emoji: '🍾', label: 'Mousserande' },
+      rose:        { emoji: '🌸', label: 'Rosé' },
+      sott:        { emoji: '🍯', label: 'Sött' },
+    };
+
+    const VIN_TYP_ORDNING = ['rod', 'vit', 'mousserande', 'rose', 'sott'];
+
+    function normaliseraVintyp(typ) {
+      const t = (typ || '').toLowerCase().replace(/\s+/g, '');
+      if (/^r[öo]d|^red/.test(t))                                  return 'rod';
+      if (/^vit|^white/.test(t))                                    return 'vit';
+      if (/^(mous|bubb|cham|pros|cava|sekt|friz|spark)/.test(t))   return 'mousserande';
+      if (/^ros[eé]?$/.test(t))                                     return 'rose';
+      if (/^(s[öo]t|des|port|sher|lik[öo]r)/.test(t))              return 'sott';
+      return '';
+    }
+
+    /* ── Fryskategori-metadata och normalisering ── */
+    const FRYS_KAT_META = {
+      kott:   { emoji: '🥩', label: 'Kött & Vilt' },
+      fisk:   { emoji: '🐟', label: 'Fisk & Skaldjur' },
+      fagel:  { emoji: '🐓', label: 'Fågel' },
+      gront:  { emoji: '🥦', label: 'Grönt & Övrigt' },
+      ovrigt: { emoji: '📦', label: 'Övrigt' },
+    };
+
+    const FRYS_KAT_ORDNING = ['kott', 'fisk', 'fagel', 'gront', 'ovrigt'];
+
+    function normaliseraFrysKat(v) {
+      /* Explicit kategori-fält prioriteras, annars gissning från namnet */
+      const explicit =
+        v.grupp || v.kat ||
+        (v.namn  && v.kategori  ? v.kategori  : null) ||
+        (v.name  && v.category  ? v.category  : null) || '';
+      const text = (explicit || getNamn(v)).toLowerCase();
+
+      if (/k[öo]tt|vilt|lamm|nöt|gris|älg|rådjur|vildsvin|hjort|fläsk|biff|köttfärs|rens|rensdj/.test(text)) return 'kott';
+      if (/fisk|lax|torsk|räk|skaldjur|abborre|gädda|[öo]ring|röding|sej|makrill/.test(text))                  return 'fisk';
+      if (/kyckling|fågel|anka|kalkon|h[öo]ns|duva/.test(text))                                                 return 'fagel';
+      if (/gröns|spenat|morot|l[öo]k|potatis|bär|frukt|svamp|br[öo]d|pasta/.test(text))                        return 'gront';
+      return 'ovrigt';
+    }
+
+    /* Filter-state för väljarna */
+    let vinTypFilter = 'alla';
+    let frysKatFilter = 'alla';
+
     /* ── Hjälp: om ett vin är nära slutet av drickfönstret ── */
     function isDrickSnart(v) {
       const till = v.dricktill || v.drinkTill || v.drinkfran_till;
@@ -767,45 +876,105 @@
       return dagarKvar >= 0 && dagarKvar <= 120;
     }
 
-    /* ── Bygg frysväljare ── */
+    /* ── Bygg frysväljare med kategorigrupper ── */
     function byggFryslista(sok) {
-      const varor  = hamtaFrysdata();
-      const filter = (sok || '').toLowerCase().trim();
-      const lista  = document.getElementById('frys-lista');
+      const varor     = hamtaFrysdata();
+      const filter    = (sok || '').toLowerCase().trim();
+      const lista     = document.getElementById('frys-lista');
+      const filterRad = document.getElementById('frys-filter-rad');
 
-      const matchade = varor.filter(v => {
-        const namn = getNamn(v).toLowerCase();
-        return !filter || namn.includes(filter);
+      /* Räkna varor per kategori (för filterpills) */
+      const perKat = {};
+      varor.forEach(v => {
+        const k = normaliseraFrysKat(v);
+        perKat[k] = (perKat[k] || 0) + 1;
       });
 
-      /* Ät-snart-varor överst, sedan resten */
-      matchade.sort((a, b) => (isAtSnart(b) ? 1 : 0) - (isAtSnart(a) ? 1 : 0));
+      /* Bygg filterpills om fler än en kategori finns */
+      const befintligaKat = FRYS_KAT_ORDNING.filter(k => perKat[k]);
+      filterRad.innerHTML = '';
+      if (befintligaKat.length > 1) {
+        filterRad.style.display = '';
+        const allaBtn = document.createElement('button');
+        allaBtn.className = 'valjare-fpill' + (frysKatFilter === 'alla' ? ' aktiv' : '');
+        allaBtn.textContent = `Alla · ${varor.length}`;
+        allaBtn.addEventListener('click', () => {
+          frysKatFilter = 'alla';
+          byggFryslista(document.getElementById('frys-sok').value);
+        });
+        filterRad.appendChild(allaBtn);
 
-      /* Uppdatera räknaren i headern */
-      const totalAntal = varor.length;
+        befintligaKat.forEach(k => {
+          const meta = FRYS_KAT_META[k];
+          const btn  = document.createElement('button');
+          btn.className = 'valjare-fpill' + (frysKatFilter === k ? ' aktiv' : '');
+          btn.textContent = `${meta.emoji} ${meta.label} · ${perKat[k]}`;
+          btn.addEventListener('click', () => {
+            frysKatFilter = k;
+            byggFryslista(document.getElementById('frys-sok').value);
+          });
+          filterRad.appendChild(btn);
+        });
+      } else {
+        filterRad.style.display = 'none';
+      }
+
+      /* Filtrera på sökning + aktiv kategori */
+      const matchade = varor.filter(v => {
+        const namn     = getNamn(v).toLowerCase();
+        const textOk   = !filter || namn.includes(filter);
+        const katOk    = frysKatFilter === 'alla' || normaliseraFrysKat(v) === frysKatFilter;
+        return textOk && katOk;
+      });
+
+      /* Räknare i header */
       document.getElementById('frys-header-antal').textContent =
-        filter ? `${matchade.length} av ${totalAntal}` : `${totalAntal} varor`;
+        (filter || frysKatFilter !== 'alla')
+          ? `${matchade.length} av ${varor.length}`
+          : `${varor.length} varor`;
 
       if (!matchade.length) {
         lista.innerHTML = '<div class="valjare-tom">Inga varor hittades</div>';
         return;
       }
 
-      lista.innerHTML = matchade.map(v => {
-        const namn  = getNamn(v);
-        const qty   = getQty(v);
-        const unit  = getUnit(v);
-        const snart = isAtSnart(v);
-        const valdNu = valdRavara && valdRavara.namn === namn;
+      /* Gruppera per kategori – ät-snart alltid högst upp */
+      const snartVaror = matchade.filter(isAtSnart);
+      const ovrigaVaror = matchade.filter(v => !isAtSnart(v));
 
-        const snartBadge = snart ? '<span class="snart-badge">ÄT NU</span>' : '';
-        const klasser    = ['valjare-item', snart ? 'snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
+      const grupper = {};
+      ovrigaVaror.forEach(v => {
+        const k = normaliseraFrysKat(v);
+        if (!grupper[k]) grupper[k] = [];
+        grupper[k].push(v);
+      });
 
-        return `<div class="${klasser}" data-namn="${escHtml(namn)}" data-qty="${qty}" data-unit="${escHtml(unit)}" data-snart="${snart}">
-          <span>${escHtml(namn)}${snartBadge}</span>
-          <span class="valjare-meta">${qty} ${escHtml(unit)}</span>
-        </div>`;
-      }).join('');
+      let html = '';
+
+      /* Ät-snart-sektion allra överst om sådana varor finns (och inte katfilter aktivt) */
+      if (snartVaror.length && frysKatFilter === 'alla') {
+        html += `<div class="valjare-sektion-rubrik">⚠️ Äts snart · ${snartVaror.length}</div>`;
+        snartVaror.forEach(v => { html += frysItemHtml(v); });
+      }
+
+      /* Kategorisektioner */
+      const visaGrupper = befintligaKat.length > 1;
+      FRYS_KAT_ORDNING.forEach(k => {
+        const gr = grupper[k];
+        if (!gr || !gr.length) return;
+        if (visaGrupper) {
+          const meta = FRYS_KAT_META[k];
+          html += `<div class="valjare-sektion-rubrik">${meta.emoji} ${meta.label} · ${gr.length}</div>`;
+        }
+        gr.forEach(v => { html += frysItemHtml(v); });
+      });
+
+      /* Om katfilter är aktivt, visa snart-varor i filtrad grupp också */
+      if (frysKatFilter !== 'alla') {
+        snartVaror.forEach(v => { html += frysItemHtml(v); });
+      }
+
+      lista.innerHTML = html;
 
       lista.querySelectorAll('.valjare-item').forEach(el => {
         el.addEventListener('click', () => {
@@ -821,43 +990,131 @@
       });
     }
 
-    /* ── Bygg vinväljare ── */
+    function frysItemHtml(v) {
+      const namn   = getNamn(v);
+      const qty    = getQty(v);
+      const unit   = getUnit(v);
+      const snart  = isAtSnart(v);
+      const valdNu = valdRavara && valdRavara.namn === namn;
+      const kat    = normaliseraFrysKat(v);
+
+      const snartBadge = snart ? '<span class="snart-badge">ÄT NU</span>' : '';
+      const klasser    = ['valjare-item', snart ? 'snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
+
+      return `<div class="${klasser}" data-namn="${escHtml(namn)}" data-qty="${qty}" data-unit="${escHtml(unit)}" data-snart="${snart}" data-kat="${kat}">
+        <span>${escHtml(namn)}${snartBadge}</span>
+        <span class="valjare-meta">${qty} ${escHtml(unit)}</span>
+      </div>`;
+    }
+
+    /* ── Bygg vinväljare med typgrupper och snabbfilter ── */
     function byggVinlista(sok) {
-      const viner  = hamtaVinkallare();
-      const filter = (sok || '').toLowerCase().trim();
-      const lista  = document.getElementById('vin-lista');
+      const viner     = hamtaVinkallare();
+      const filter    = (sok || '').toLowerCase().trim();
+      const lista     = document.getElementById('vin-lista');
+      const filterRad = document.getElementById('vin-filter-rad');
 
       const tillgangliga = viner.filter(v => (Number(v.antal) || 0) > 0);
-      const matchade = tillgangliga.filter(v => {
-        const text = [v.namn, v.druva, v.land, v.region, v.typ].join(' ').toLowerCase();
-        return !filter || text.includes(filter);
+
+      /* Räkna flaskor per normaliserad typ */
+      const perTyp = {};
+      tillgangliga.forEach(v => {
+        const t = normaliseraVintyp(v.typ) || 'okand';
+        perTyp[t] = (perTyp[t] || 0) + (Number(v.antal) || 1);
       });
 
-      /* Drick-snart-viner överst */
-      matchade.sort((a, b) => (isDrickSnart(b) ? 1 : 0) - (isDrickSnart(a) ? 1 : 0));
+      const totalFlaskor = tillgangliga.reduce((s, v) => s + (Number(v.antal) || 1), 0);
+      const befintligaTyper = VIN_TYP_ORDNING.filter(t => perTyp[t]);
 
-      /* Räknare */
+      /* Bygg filterpills om fler än en typ finns */
+      filterRad.innerHTML = '';
+      if (befintligaTyper.length > 1) {
+        filterRad.style.display = '';
+        const allaBtn = document.createElement('button');
+        allaBtn.className = 'valjare-fpill' + (vinTypFilter === 'alla' ? ' aktiv' : '');
+        allaBtn.textContent = `Alla · ${totalFlaskor}`;
+        allaBtn.addEventListener('click', () => {
+          vinTypFilter = 'alla';
+          byggVinlista(document.getElementById('vin-sok').value);
+        });
+        filterRad.appendChild(allaBtn);
+
+        befintligaTyper.forEach(t => {
+          const meta = VIN_TYPER[t];
+          const btn  = document.createElement('button');
+          btn.className = 'valjare-fpill' + (vinTypFilter === t ? ' aktiv' : '');
+          btn.textContent = `${meta.emoji} ${meta.label} · ${perTyp[t]}`;
+          btn.addEventListener('click', () => {
+            vinTypFilter = t;
+            byggVinlista(document.getElementById('vin-sok').value);
+          });
+          filterRad.appendChild(btn);
+        });
+      } else {
+        filterRad.style.display = 'none';
+      }
+
+      /* Filtrera på sökning + aktiv typfilter */
+      const matchade = tillgangliga.filter(v => {
+        const text   = [v.namn, v.druva, v.land, v.region, v.typ].join(' ').toLowerCase();
+        const textOk = !filter || text.includes(filter);
+        const typOk  = vinTypFilter === 'alla' || normaliseraVintyp(v.typ) === vinTypFilter;
+        return textOk && typOk;
+      });
+
+      /* Räknare i header */
+      const matchadeFlaskor = matchade.reduce((s, v) => s + (Number(v.antal) || 1), 0);
       document.getElementById('vin-header-antal').textContent =
-        filter ? `${matchade.length} av ${tillgangliga.length}` : `${tillgangliga.length} fl`;
+        (filter || vinTypFilter !== 'alla')
+          ? `${matchadeFlaskor} av ${totalFlaskor} fl`
+          : `${totalFlaskor} fl`;
 
       if (!matchade.length) {
-        lista.innerHTML = '<div class="valjare-tom">Inga viner i källaren</div>';
+        lista.innerHTML = '<div class="valjare-tom">Inga viner matchar</div>';
         return;
       }
 
-      lista.innerHTML = matchade.map(v => {
-        const valdNu    = valdVin && (valdVin.id || valdVin.namn) == (v.id || v.namn);
-        const drSnart   = isDrickSnart(v);
-        const etik      = [v.namn, v.årgång || v.argarg || ''].filter(Boolean).join(' ');
-        const detalj    = [v.druva, v.land].filter(Boolean).join(' · ');
-        const drickBadge = drSnart ? '<span class="drick-badge">DRICK NU</span>' : '';
-        const klasser   = ['valjare-item', drSnart ? 'drick-snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
+      /* Gruppera per normaliserad typ */
+      const grupper = {};
+      matchade.forEach(v => {
+        const t = normaliseraVintyp(v.typ) || 'okand';
+        if (!grupper[t]) grupper[t] = [];
+        grupper[t].push(v);
+      });
 
-        return `<div class="${klasser}" data-id="${escHtml(String(v.id || v.namn))}">
-          <span>${escHtml(etik)}${drickBadge}</span>
-          <span class="valjare-meta">${escHtml(detalj)} · ${v.antal} fl</span>
-        </div>`;
-      }).join('');
+      const visaGrupper = befintligaTyper.length > 1 && vinTypFilter === 'alla';
+
+      let html = '';
+      [...VIN_TYP_ORDNING, 'okand'].forEach(t => {
+        const gr = grupper[t];
+        if (!gr || !gr.length) return;
+
+        if (visaGrupper) {
+          const meta  = VIN_TYPER[t] || { emoji: '🍶', label: 'Övriga' };
+          const total = gr.reduce((s, v) => s + (Number(v.antal) || 1), 0);
+          html += `<div class="valjare-sektion-rubrik">${meta.emoji} ${meta.label} · ${total}</div>`;
+        }
+
+        /* Drick-snart-viner överst inom gruppen */
+        gr.sort((a, b) => (isDrickSnart(b) ? 1 : 0) - (isDrickSnart(a) ? 1 : 0));
+
+        gr.forEach(v => {
+          const valdNu   = valdVin && String(valdVin.id || valdVin.namn) === String(v.id || v.namn);
+          const drSnart  = isDrickSnart(v);
+          const etik     = [v.namn, v.årgång || v.argarg || ''].filter(Boolean).join(' ');
+          const detalj   = [v.druva, v.land].filter(Boolean).join(' · ');
+          const drickBadge = drSnart ? '<span class="drick-badge">DRICK NU</span>' : '';
+          const klasser  = ['valjare-item', drSnart ? 'drick-snart' : '', valdNu ? 'vald' : ''].filter(Boolean).join(' ');
+          const normTyp  = normaliseraVintyp(v.typ);
+
+          html += `<div class="${klasser}" data-id="${escHtml(String(v.id || v.namn))}" data-vintyp="${normTyp}">
+            <span>${escHtml(etik)}${drickBadge}</span>
+            <span class="valjare-meta">${escHtml(detalj)} · ${v.antal} fl</span>
+          </div>`;
+        });
+      });
+
+      lista.innerHTML = html;
 
       lista.querySelectorAll('.valjare-item').forEach(el => {
         el.addEventListener('click', () => {
@@ -989,9 +1246,17 @@
         frysV.classList.toggle('synlig', startVal === 'ravara');
         vinV.classList.toggle('synlig',  startVal === 'vin');
 
-        if (startVal === 'ravara') byggFryslista('');
-        if (startVal === 'vin')    byggVinlista('');
-        if (startVal === 'slump')  { valdRavara = null; valdVin = null; }
+        if (startVal === 'ravara') {
+          frysKatFilter = 'alla';
+          document.getElementById('frys-sok').value = '';
+          byggFryslista('');
+        }
+        if (startVal === 'vin') {
+          vinTypFilter = 'alla';
+          document.getElementById('vin-sok').value = '';
+          byggVinlista('');
+        }
+        if (startVal === 'slump') { valdRavara = null; valdVin = null; }
       });
     });
 
