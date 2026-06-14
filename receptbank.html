@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Receptbank – Pers Kök & Vinkällare</title>
+  <style>
+    /* Mörkt tema per CLAUDE.md */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #121212;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-emblem {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .header-titel { font-size: 1.05rem; font-weight: 700; flex: 1; }
+
+    .tillbaka {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid #333;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .tillbaka:hover { color: #e0e0e0; border-color: #555; }
+
+    /* ── Innehåll ── */
+    .container {
+      max-width: 580px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    /* ── Sökrad ── */
+    .sokrad {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .sokfalt {
+      flex: 1;
+      padding: 0.65rem 0.9rem;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #e0e0e0;
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.12s;
+    }
+
+    .sokfalt:focus { border-color: #5a4a1a; }
+    .sokfalt::placeholder { color: #3a3a3a; }
+
+    .antal-chip {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #555;
+      white-space: nowrap;
+    }
+
+    /* ── Receptkort ── */
+    .recept-kort {
+      background: #181818;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      margin-bottom: 0.75rem;
+      overflow: hidden;
+      transition: border-color 0.12s;
+    }
+
+    .recept-kort.oppet { border-color: #4a3a10; }
+
+    .recept-huvud {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.9rem 1rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .recept-huvud:hover { background: #1e1e1e; }
+
+    .recept-info { flex: 1; min-width: 0; }
+
+    .recept-rattext {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #e8d090;
+      margin-bottom: 0.25rem;
+    }
+
+    .recept-meta {
+      font-size: 0.75rem;
+      color: #666;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem 0.75rem;
+    }
+
+    .recept-meta-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+    }
+
+    .recept-datum {
+      font-size: 0.72rem;
+      color: #3a3a3a;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .recept-pil {
+      color: #3a3a3a;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      margin-top: 0.2rem;
+      transition: transform 0.15s;
+    }
+
+    .recept-kort.oppet .recept-pil { transform: rotate(90deg); }
+
+    /* ── Expanderat innehåll ── */
+    .recept-innehall {
+      display: none;
+      border-top: 1px solid #222;
+      padding: 1.25rem 1rem 1rem;
+    }
+
+    .recept-kort.oppet .recept-innehall { display: block; }
+
+    /* Markdown-rendering – samma stil som kok.html */
+    .recept-text h2 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #e8d090;
+      margin: 1.1rem 0 0.5rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .recept-text h2:first-child { margin-top: 0; }
+
+    .recept-text h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #c8b060;
+      margin: 0.85rem 0 0.35rem;
+    }
+
+    .recept-text ul { padding-left: 1.2rem; margin: 0.35rem 0; }
+    .recept-text li { margin-bottom: 0.2rem; color: #b8b8b8; font-size: 0.85rem; }
+    .recept-text p  { margin: 0.4rem 0; color: #b8b8b8; font-size: 0.85rem; line-height: 1.65; }
+    .recept-text hr { border: none; border-top: 1px solid #2a2a2a; margin: 1rem 0; }
+    .recept-text strong { color: #e0e0e0; }
+
+    /* FRYS-badge */
+    .frys-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-weight: 700;
+      background: #0d2a35;
+      color: #70c0e0;
+      border: 1px solid #1a5f7a;
+      border-radius: 6px;
+      padding: 0.08rem 0.35rem;
+      margin: 0 0.12rem;
+      vertical-align: middle;
+    }
+
+    /* ── Inköpslista ── */
+    .inkop-sektion {
+      background: #161616;
+      border: 1px solid #252525;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-top: 0.85rem;
+    }
+
+    .inkop-rubrik {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.6rem;
+    }
+
+    .inkop-rubrik h3 { font-size: 0.85rem; font-weight: 700; color: #c8b060; }
+
+    .kopiera-btn {
+      padding: 0.25rem 0.7rem;
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      border-radius: 7px;
+      color: #777;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .kopiera-btn:hover    { color: #d4a84b; border-color: #5a4a20; }
+    .kopiera-btn.kopierat { color: #70c070; border-color: #2a5a2a; }
+
+    .inkop-lista { font-size: 0.82rem; color: #b0b0b0; line-height: 1.7; }
+
+    /* ── Ta bort-knapp ── */
+    .ta-bort-rad {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #1e1e1e;
+    }
+
+    .ta-bort-btn {
+      padding: 0.4rem 0.9rem;
+      background: none;
+      border: 1px solid #3a2020;
+      border-radius: 8px;
+      color: #6a3030;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+    }
+
+    .ta-bort-btn:hover { color: #e07070; border-color: #7a2020; background: #1e0a0a; }
+
+    /* ── Tomt tillstånd ── */
+    .tomt {
+      text-align: center;
+      padding: 3.5rem 1rem;
+      color: #3a3a3a;
+    }
+
+    .tomt-ikon { font-size: 3rem; margin-bottom: 1rem; }
+    .tomt p    { font-size: 0.88rem; line-height: 1.7; }
+    .tomt a    { color: #7a5a20; text-decoration: none; }
+    .tomt a:hover { color: #d4a84b; }
+
+    /* ── Verktygsrad (säkerhetskopia) ── */
+    .verktygsrad {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #1e1e1e;
+    }
+
+    .verktygknapp {
+      padding: 0.5rem 1.1rem;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 9px;
+      color: #666;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .verktygknapp:hover { color: #aaa; border-color: #444; }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <img src="Logga.png" alt="" class="header-emblem"
+         onerror="this.style.display='none'">
+    <span class="header-titel">📋 Receptbank</span>
+    <a href="kok.html" class="tillbaka">← Köket</a>
+  </header>
+
+  <div class="container">
+
+    <div class="sokrad">
+      <input type="search" class="sokfalt" id="sokfalt"
+             placeholder="🔍 Sök bland sparade recept…" autocomplete="off">
+      <span class="antal-chip" id="antal-chip"></span>
+    </div>
+
+    <div id="recept-lista"></div>
+
+    <div class="verktygsrad">
+      <button class="verktygknapp" id="exportera-btn">↓ Säkerhetskopia</button>
+      <label class="verktygknapp" style="cursor:pointer">
+        ↑ Importera
+        <input type="file" accept=".json" id="importera-fil" style="display:none">
+      </label>
+    </div>
+
+  </div>
+
+  <script>
+    /* ── Konstanter ── */
+    const LS_NYCKEL = 'receptbank_v1';
+
+    const TON_LABEL = {
+      vardag:         'Vardag',
+      'lite-extra':   'Lite extra',
+      'full-michelin':'Full Michelin'
+    };
+
+    /* ── Data ── */
+    function hamtaBank() {
+      try { return JSON.parse(localStorage.getItem(LS_NYCKEL) || '[]'); } catch { return []; }
+    }
+
+    function sparaBank(bank) {
+      localStorage.setItem(LS_NYCKEL, JSON.stringify(bank));
+    }
+
+    /* ── Escape HTML ── */
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    /* ── Inline-formatering med [FRYS]-stöd ── */
+    function formatInline(text) {
+      text = text.replace(/\[FRYS\]/g, '<span class="frys-badge">🧊 FRYS</span>');
+      text = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      text = text.replace(/\*(.+?)\*/g,     '<em>$1</em>');
+      return text;
+    }
+
+    /* ── Markdown-renderer ── */
+    function renderMarkdown(md) {
+      const rader = md.split('\n');
+      let html = '', iLista = false;
+
+      for (const rad of rader) {
+        if (rad.match(/^---+$/)) {
+          if (iLista) { html += '</ul>'; iLista = false; }
+          html += '<hr>'; continue;
+        }
+        if (rad.startsWith('## ')) {
+          if (iLista) { html += '</ul>'; iLista = false; }
+          html += `<h2>${formatInline(rad.slice(3).trim())}</h2>`; continue;
+        }
+        if (rad.startsWith('### ')) {
+          if (iLista) { html += '</ul>'; iLista = false; }
+          html += `<h3>${formatInline(rad.slice(4).trim())}</h3>`; continue;
+        }
+        if (rad.match(/^[-*] /)) {
+          if (!iLista) { html += '<ul>'; iLista = true; }
+          html += `<li>${formatInline(rad.slice(2).trim())}</li>`; continue;
+        }
+        if (iLista) { html += '</ul>'; iLista = false; }
+        const t = rad.trim();
+        if (t) html += `<p>${formatInline(t)}</p>`;
+      }
+
+      if (iLista) html += '</ul>';
+      return html;
+    }
+
+    /* ── Extrahera inköpslista ── */
+    function extraherapInkoplista(text) {
+      const match = text.match(/##\s*(?:Inköpslista|Inkopslista)\s*\n([\s\S]+?)(?=\n##|$)/i);
+      if (!match) return null;
+      return match[1].split('\n')
+        .map(r => r.trim()).filter(r => r.match(/^[-*]/))
+        .map(r => r.replace(/^[-*]\s*/, '').trim()).filter(Boolean);
+    }
+
+    /* ── Bygg rubriktext för ett recept ── */
+    function byggRubrik(r) {
+      return r.rattText || 'Recept';
+    }
+
+    /* ── Bygg metaraden ── */
+    function byggMeta(r) {
+      const delar = [];
+      const ton = TON_LABEL[r.tonlage] || r.tonlage || '';
+      if (ton) delar.push(ton);
+      if (r.antal) delar.push(`${r.antal} pers`);
+      if (r.startVal === 'ravara' && r.valdRavaranamn) delar.push(`🥩 ${r.valdRavaranamn}`);
+      if (r.startVal === 'vin'    && r.valdVinnamn)    delar.push(`🍷 ${r.valdVinnamn}`);
+      return delar.map(d => `<span class="recept-meta-chip">${esc(d)}</span>`).join('');
+    }
+
+    /* ── Rendera ett enskilt kort ── */
+    function renderKort(r, oppet) {
+      const utanInkop = r.text
+        ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim()
+        : '';
+      const inkopRader = r.text ? extraherapInkoplista(r.text) : null;
+
+      const inkopHtml = inkopRader && inkopRader.length
+        ? `<div class="inkop-sektion">
+             <div class="inkop-rubrik">
+               <h3>🛒 Inköpslista</h3>
+               <button class="kopiera-btn" data-kopiera="${r.id}">📋 Kopiera</button>
+             </div>
+             <div class="inkop-lista" id="inkop-${r.id}">
+               ${inkopRader.map(rad => `<div>• ${formatInline(esc(rad))}</div>`).join('')}
+             </div>
+           </div>`
+        : '';
+
+      return `<div class="recept-kort${oppet ? ' oppet' : ''}" id="kort-${r.id}" data-id="${r.id}">
+        <div class="recept-huvud">
+          <div class="recept-info">
+            <div class="recept-rattext">${esc(byggRubrik(r))}</div>
+            <div class="recept-meta">${byggMeta(r)}</div>
+          </div>
+          <span class="recept-datum">${r.datum || ''}</span>
+          <span class="recept-pil">▶</span>
+        </div>
+        <div class="recept-innehall">
+          <div class="recept-text">${renderMarkdown(utanInkop)}</div>
+          ${inkopHtml}
+          <div class="ta-bort-rad">
+            <button class="ta-bort-btn" data-tabort="${r.id}">🗑 Ta bort</button>
+          </div>
+        </div>
+      </div>`;
+    }
+
+    /* ── Rendera hela listan ── */
+    let oppnaKort = new Set();
+
+    function renderLista() {
+      const bank   = hamtaBank();
+      const filter = document.getElementById('sokfalt').value.toLowerCase().trim();
+      const lista  = document.getElementById('recept-lista');
+
+      const matchade = bank.filter(r => {
+        if (!filter) return true;
+        const haystack = [
+          r.rattText, r.tonlage, r.valdRavaranamn, r.valdVinnamn, r.datum, r.text
+        ].join(' ').toLowerCase();
+        return haystack.includes(filter);
+      });
+
+      /* Räknarchip */
+      const chip = document.getElementById('antal-chip');
+      chip.textContent = filter
+        ? `${matchade.length} av ${bank.length}`
+        : bank.length === 1 ? '1 recept' : `${bank.length} recept`;
+
+      if (!matchade.length) {
+        lista.innerHTML = bank.length === 0
+          ? `<div class="tomt">
+               <div class="tomt-ikon">📋</div>
+               <p>Inga sparade recept än.<br>
+               Gå till <a href="kok.html">Köket</a>, planera en middag och tryck
+               "Spara i receptbanken".</p>
+             </div>`
+          : `<div class="tomt">
+               <div class="tomt-ikon">🔍</div>
+               <p>Inga recept matchar sökningen.</p>
+             </div>`;
+        return;
+      }
+
+      lista.innerHTML = matchade.map(r => renderKort(r, oppnaKort.has(r.id))).join('');
+
+      /* Klick på huvud: toggle öppet/stängt */
+      lista.querySelectorAll('.recept-huvud').forEach(el => {
+        el.addEventListener('click', () => {
+          const id   = Number(el.closest('.recept-kort').dataset.id);
+          const kort = document.getElementById(`kort-${id}`);
+          if (oppnaKort.has(id)) {
+            oppnaKort.delete(id);
+            kort.classList.remove('oppet');
+          } else {
+            oppnaKort.add(id);
+            kort.classList.add('oppet');
+          }
+        });
+      });
+
+      /* Ta bort */
+      lista.querySelectorAll('[data-tabort]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id = Number(btn.dataset.tabort);
+          if (!confirm('Ta bort det här receptet?')) return;
+          const bank2 = hamtaBank().filter(r => r.id !== id);
+          sparaBank(bank2);
+          oppnaKort.delete(id);
+          renderLista();
+        });
+      });
+
+      /* Kopiera inköpslista */
+      lista.querySelectorAll('[data-kopiera]').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id     = Number(btn.dataset.kopiera);
+          const el     = document.getElementById(`inkop-${id}`);
+          const text   = Array.from(el.querySelectorAll('div'))
+            .map(d => d.textContent.replace(/^•\s*/, '- ')).join('\n');
+          navigator.clipboard.writeText(text).then(() => {
+            btn.textContent = '✓ Kopierat!';
+            btn.classList.add('kopierat');
+            setTimeout(() => { btn.textContent = '📋 Kopiera'; btn.classList.remove('kopierat'); }, 2000);
+          }).catch(() => {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.cssText = 'position:fixed;opacity:0';
+            document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+            document.body.removeChild(ta);
+          });
+        });
+      });
+    }
+
+    /* ── Sök ── */
+    document.getElementById('sokfalt').addEventListener('input', renderLista);
+
+    /* ── Export ── */
+    document.getElementById('exportera-btn').addEventListener('click', () => {
+      const bank    = hamtaBank();
+      const payload = JSON.stringify({ version: 1, exportdatum: new Date().toISOString().slice(0, 10), recept: bank }, null, 2);
+      const blob    = new Blob([payload], { type: 'application/json' });
+      const url     = URL.createObjectURL(blob);
+      const a       = document.createElement('a');
+      a.href = url;
+      a.download = `receptbank-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    /* ── Import ── */
+    document.getElementById('importera-fil').addEventListener('change', e => {
+      const fil = e.target.files[0];
+      if (!fil) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        try {
+          const parsed = JSON.parse(ev.target.result);
+          const lista  = Array.isArray(parsed) ? parsed : (parsed.recept || []);
+          if (!Array.isArray(lista)) throw new Error('Ogiltig struktur');
+          if (!confirm(`Importera ${lista.length} recept? Befintlig receptbank ersätts.`)) return;
+          sparaBank(lista);
+          oppnaKort.clear();
+          renderLista();
+        } catch {
+          alert('Ogiltigt format – kontrollera att filen är en giltig JSON-export.');
+        }
+      };
+      reader.readAsText(fil);
+      e.target.value = '';
+    });
+
+    /* ── Init ── */
+    renderLista();
+  </script>
+
+</body>
+</html>
