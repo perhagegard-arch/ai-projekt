@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Köket – Pers Kök & Vinkällare</title>
+  <style>
+    /* Mörkt tema per CLAUDE.md */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #121212;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-emblem {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .header-titel {
+      font-size: 1.05rem;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .tillbaka {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid #333;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .tillbaka:hover { color: #e0e0e0; border-color: #555; }
+
+    /* ── Innehåll ── */
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 2rem 1rem 3rem;
+    }
+
+    /* ── Rubrik ── */
+    .startvy-rubrik {
+      text-align: center;
+      margin-bottom: 1.75rem;
+    }
+
+    .startvy-rubrik h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f0f0f0;
+      letter-spacing: -0.01em;
+    }
+
+    /* ── Primärkort: Planera middag ── */
+    .planera-kort {
+      background: linear-gradient(160deg, #1e1a0a, #161410);
+      border: 1px solid #4a3a10;
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .kort-titelrad {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .kort-ikon { font-size: 1.5rem; }
+
+    .kort-namn {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #e8d090;
+    }
+
+    /* ── Formulärsektioner ── */
+    .formsektion { margin-bottom: 1.25rem; }
+
+    .sektion-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.6rem;
+    }
+
+    /* Pill-rad (gemensam layout för toggle och radio) */
+    .pill-rad {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    /* Toggle-pills: rätter (fler kan väljas) */
+    .toggle-pill {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      border: 1px solid #3a3a3a;
+      background: #1e1e1e;
+      color: #777;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .toggle-pill.aktiv {
+      background: #2e2410;
+      border-color: #7a5a1a;
+      color: #d4a84b;
+    }
+
+    /* Radio-pills: tonläge (ett val) */
+    .radio-pill {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      border: 1px solid #3a3a3a;
+      background: #1e1e1e;
+      color: #777;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .radio-pill.aktiv {
+      background: #2e2410;
+      border-color: #7a5a1a;
+      color: #d4a84b;
+    }
+
+    /* ── Stepper: antal personer ── */
+    .stepper {
+      display: flex;
+      align-items: center;
+      background: #1e1e1e;
+      border: 1px solid #3a3a3a;
+      border-radius: 12px;
+      overflow: hidden;
+      width: fit-content;
+    }
+
+    .stepper-btn {
+      width: 46px;
+      height: 46px;
+      background: none;
+      border: none;
+      color: #888;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.12s, background 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .stepper-btn:hover { color: #d4a84b; background: #2a2010; }
+    .stepper-btn:disabled { color: #3a3a3a; cursor: default; background: none; }
+
+    .stepper-tal {
+      min-width: 48px;
+      text-align: center;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      padding: 0 0.25rem;
+      border-left: 1px solid #2a2a2a;
+      border-right: 1px solid #2a2a2a;
+      line-height: 46px;
+    }
+
+    /* ── Planera-knapp ── */
+    .planera-btn {
+      width: 100%;
+      padding: 1rem;
+      background: linear-gradient(135deg, #7a5a10, #5a3f0a);
+      border: none;
+      border-radius: 14px;
+      color: #f0d878;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: opacity 0.12s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .planera-btn:hover  { opacity: 0.88; }
+    .planera-btn:active { transform: scale(0.98); }
+
+    /* ── Resultatkort (platshållare) ── */
+    .resultat-kort {
+      background: #181818;
+      border: 1px dashed #2e2e2e;
+      border-radius: 16px;
+      padding: 1.75rem 1.25rem;
+      text-align: center;
+      margin-bottom: 2rem;
+      display: none;
+    }
+
+    .resultat-kort.synlig { display: block; }
+
+    .resultat-meta {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #8a6a20;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      background: #2a1e08;
+      border: 1px solid #4a3a10;
+      border-radius: 20px;
+      padding: 0.25rem 0.75rem;
+    }
+
+    .resultat-ikon {
+      display: block;
+      font-size: 2.8rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .resultat-rubrik {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #888;
+      margin-bottom: 0.4rem;
+    }
+
+    .resultat-text {
+      font-size: 0.82rem;
+      color: #4a4a4a;
+      line-height: 1.6;
+    }
+
+    /* ── Sekundär sektion ── */
+    .sekundar-sektion {
+      border-top: 1px solid #1e1e1e;
+      padding-top: 1.5rem;
+    }
+
+    .sekundar-rubrik {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #3a3a3a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      text-align: center;
+      margin-bottom: 0.85rem;
+    }
+
+    .sekundar-knappar {
+      display: flex;
+      gap: 0.6rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .sekundar-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1rem;
+      background: #181818;
+      border: 1px solid #252525;
+      border-radius: 10px;
+      color: #555;
+      font-size: 0.82rem;
+      text-decoration: none;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .sekundar-btn:hover { color: #999; border-color: #3a3a3a; background: #1e1e1e; }
+
+    .sekundar-btn.inaktiv {
+      opacity: 0.38;
+      cursor: default;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <img src="Logga.png" alt="" class="header-emblem"
+         onerror="this.style.display='none'">
+    <span class="header-titel">🍽️ Köket</span>
+    <a href="hub.html" class="tillbaka">← Hub</a>
+  </header>
+
+  <div class="container">
+
+    <div class="startvy-rubrik">
+      <h1>Vad vill du laga ikväll?</h1>
+    </div>
+
+    <!-- Primärkort: Planera middag -->
+    <div class="planera-kort">
+
+      <div class="kort-titelrad">
+        <span class="kort-ikon">🍽️</span>
+        <span class="kort-namn">Planera middag</span>
+      </div>
+
+      <!-- Rätter -->
+      <div class="formsektion">
+        <div class="sektion-label">Rätter</div>
+        <div class="pill-rad">
+          <button class="toggle-pill" data-ratt="forratt">Förrätt</button>
+          <button class="toggle-pill aktiv" data-ratt="varmratt">Varmrätt</button>
+          <button class="toggle-pill" data-ratt="efterratt">Efterrätt</button>
+        </div>
+      </div>
+
+      <!-- Tonläge -->
+      <div class="formsektion">
+        <div class="sektion-label">Tonläge</div>
+        <div class="pill-rad">
+          <button class="radio-pill aktiv" data-ton="vardag">Vardag</button>
+          <button class="radio-pill" data-ton="lite-extra">Lite extra</button>
+          <button class="radio-pill" data-ton="full-michelin">Full Michelin</button>
+        </div>
+      </div>
+
+      <!-- Antal personer -->
+      <div class="formsektion">
+        <div class="sektion-label">Antal personer</div>
+        <div class="stepper">
+          <button class="stepper-btn" id="minus-btn">−</button>
+          <span class="stepper-tal" id="antal-tal">2</span>
+          <button class="stepper-btn" id="plus-btn">＋</button>
+        </div>
+      </div>
+
+      <button class="planera-btn" id="planera-btn">Planera middag &nbsp;→</button>
+
+    </div><!-- /planera-kort -->
+
+    <!-- Platshållare: visas efter att man tryckt Planera -->
+    <div class="resultat-kort" id="resultat-kort">
+      <span class="resultat-meta" id="resultat-meta"></span>
+      <span class="resultat-ikon">🧑‍🍳</span>
+      <div class="resultat-rubrik">AI-kocken komponerar menyn</div>
+      <div class="resultat-text">
+        Middagskomponören byggs i nästa steg.<br>
+        Här visas färdig meny, tillagning och vinval.
+      </div>
+    </div>
+
+    <!-- Sekundär sektion: dagbok och receptbank -->
+    <div class="sekundar-sektion">
+      <div class="sekundar-rubrik">Dagbok &amp; recept</div>
+      <div class="sekundar-knappar">
+        <a href="sousvide-dagbok.html" class="sekundar-btn">🌡️ Sous Vide-dagbok</a>
+        <span class="sekundar-btn inaktiv">📋 Receptbank</span>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+
+  <script>
+    /* ── State ── */
+    let valtaRatter = new Set(['varmratt']);
+    let tonlage     = 'vardag';
+    let antal       = 2;
+
+    const RATT_LABEL = { forratt:'Förrätt', varmratt:'Varmrätt', efterratt:'Efterrätt' };
+    const TON_LABEL  = { vardag:'Vardag', 'lite-extra':'Lite extra', 'full-michelin':'Full Michelin' };
+
+    /* ── Rätter: toggle (fler kan väljas, minst en måste vara vald) ── */
+    document.querySelectorAll('[data-ratt]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const r = btn.dataset.ratt;
+        if (valtaRatter.has(r)) {
+          if (valtaRatter.size === 1) return;
+          valtaRatter.delete(r);
+          btn.classList.remove('aktiv');
+        } else {
+          valtaRatter.add(r);
+          btn.classList.add('aktiv');
+        }
+      });
+    });
+
+    /* ── Tonläge: radio (ett val) ── */
+    document.querySelectorAll('[data-ton]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        tonlage = btn.dataset.ton;
+        document.querySelectorAll('[data-ton]').forEach(b =>
+          b.classList.toggle('aktiv', b.dataset.ton === tonlage)
+        );
+      });
+    });
+
+    /* ── Stepper ── */
+    function uppdateraStepper() {
+      document.getElementById('antal-tal').textContent = antal;
+      document.getElementById('minus-btn').disabled = antal <= 1;
+      document.getElementById('plus-btn').disabled  = antal >= 20;
+    }
+
+    document.getElementById('minus-btn').addEventListener('click', () => {
+      if (antal > 1)  { antal--; uppdateraStepper(); }
+    });
+
+    document.getElementById('plus-btn').addEventListener('click', () => {
+      if (antal < 20) { antal++; uppdateraStepper(); }
+    });
+
+    uppdateraStepper();
+
+    /* ── Planera-knapp ── */
+    document.getElementById('planera-btn').addEventListener('click', () => {
+      const rattOrdning = ['forratt', 'varmratt', 'efterratt'];
+      const rattText = rattOrdning
+        .filter(r => valtaRatter.has(r))
+        .map(r => RATT_LABEL[r])
+        .join(' + ');
+
+      document.getElementById('resultat-meta').textContent =
+        `${rattText} · ${TON_LABEL[tonlage]} · ${antal} pers`;
+
+      const kort = document.getElementById('resultat-kort');
+      kort.classList.add('synlig');
+      kort.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  </script>
+
+</body>
+</html>
