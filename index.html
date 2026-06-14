@@ -1,715 +1,281 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <!-- Metadata och teckenkodning -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pers Kök & Vinkällare</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    /* Grundläggande återställning och mörkt tema */
+    /* Basinställningar – mörkt tema per CLAUDE.md */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    :root {
-      --bg:      #0a0a0f;
-      --bg2:     #12121a;
-      --bg3:     #1a1a24;
-      --border:  #2a2a3a;
-      --text:    #f0eef8;
-      --text2:   #9a96b0;
-      --text3:   #5a5870;
-      --accent:  #7c6af0;
-      --amber:   #d4962a;
-      --wine:    #c42840;
-    }
-
-    html { scroll-behavior: smooth; }
-
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', system-ui, sans-serif;
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
-    }
-
-    /* ── NAVIGERING ───────────────────────────────────────────────── */
-    .sitenav {
-      background: rgba(10, 10, 15, 0.95);
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      backdrop-filter: blur(12px);
-    }
-    .sitenav-inner {
-      max-width: 1200px;
-      margin: 0 auto;
       display: flex;
-      align-items: center;
-      padding: 0 1.5rem;
-    }
-    .nav-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      color: var(--text);
-      text-decoration: none;
-      margin-right: 2rem;
-      white-space: nowrap;
-      padding: 0.9rem 0;
-    }
-    .nav-links { display: flex; }
-    .sitenav-link {
-      display: block;
-      padding: 0.9rem 1rem;
-      text-decoration: none;
-      color: var(--text3);
-      font-size: 0.78rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      transition: color 0.2s;
-      border-bottom: 2px solid transparent;
-      white-space: nowrap;
-    }
-    .sitenav-link:hover { color: var(--text); }
-    .sitenav-link.aktiv { color: var(--accent); border-bottom-color: var(--accent); }
-
-    /* Hamburger */
-    .hamburger {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0.9rem 1rem;
       flex-direction: column;
-      justify-content: center;
-      gap: 5px;
-      margin-left: auto;
-    }
-    .hamburger span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: var(--text3);
-      border-radius: 2px;
-      transition: background 0.2s;
-    }
-    .hamburger:hover span { background: var(--text); }
-
-    /* ── HERO ─────────────────────────────────────────────────────── */
-    .hero {
-      position: relative;
-      min-height: 75vh;
-      display: flex;
       align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: var(--bg2);
+      padding: 2.5rem 1rem 3rem;
     }
-    /* Bakgrundsbild från biblioteket */
-    .hero-bild {
-      position: absolute;
-      inset: 0;
-      background-size: cover;
-      background-position: center;
-      opacity: 0;
-      transition: opacity 1s ease;
-    }
-    .hero-bild.laddad { opacity: 1; }
-    /* Mörkt överlager för läsbarhet */
-    .hero-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        135deg,
-        rgba(10,10,15,0.85) 0%,
-        rgba(10,10,15,0.6) 50%,
-        rgba(10,10,15,0.75) 100%
-      );
-    }
-    .hero-innehall {
-      position: relative;
-      z-index: 1;
+
+    /* Emblem och rubrik */
+    header {
       text-align: center;
-      padding: 4rem 2rem;
-      max-width: 800px;
-    }
-    .hero-etikett {
-      display: inline-block;
-      font-size: 0.72rem;
-      letter-spacing: 0.25em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 1.25rem;
-      border: 1px solid rgba(124,106,240,0.3);
-      padding: 0.3rem 0.9rem;
-      border-radius: 999px;
-    }
-    .hero h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(2.5rem, 7vw, 5rem);
-      font-weight: 700;
-      line-height: 1.1;
-      color: var(--text);
-      margin-bottom: 1.25rem;
-    }
-    .hero h1 em {
-      font-style: normal;
-      color: var(--accent);
-    }
-    .hero-beskrivning {
-      font-size: 1.1rem;
-      color: var(--text2);
-      line-height: 1.7;
-      max-width: 560px;
-      margin: 0 auto 2.5rem;
-    }
-    .hero-knappar {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-    .knapp-prim {
-      background: var(--accent);
-      color: white;
-      text-decoration: none;
-      padding: 0.85rem 2rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      transition: opacity 0.15s, transform 0.1s;
-    }
-    .knapp-prim:hover { opacity: 0.88; transform: translateY(-2px); }
-    .knapp-sek {
-      background: rgba(255,255,255,0.08);
-      color: var(--text);
-      text-decoration: none;
-      padding: 0.85rem 2rem;
-      border-radius: 8px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-    .knapp-sek:hover { background: rgba(255,255,255,0.14); }
-
-    /* ── SEKTIONSKORT ─────────────────────────────────────────────── */
-    .sektioner {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 5rem 1.5rem;
-    }
-    .sektioner-rubrik {
-      text-align: center;
-      margin-bottom: 3rem;
-    }
-    .sektioner-rubrik h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 2rem;
-      color: var(--text);
-      margin-bottom: 0.5rem;
-    }
-    .sektioner-rubrik p { color: var(--text2); font-size: 0.95rem; }
-
-    /* Kortgitter */
-    .kort-gitter {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-    }
-
-    /* Enskilt sektionskort */
-    .sida-kort {
-      display: flex;
-      flex-direction: column;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      overflow: hidden;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-    }
-    .sida-kort:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-      border-color: rgba(124,106,240,0.3);
-    }
-
-    /* Kortets bilddel */
-    .kort-bild-yta {
-      height: 220px;
-      position: relative;
-      overflow: hidden;
-      background: var(--bg3);
-    }
-    .kort-bild-yta img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.4s ease;
-    }
-    .sida-kort:hover .kort-bild-yta img { transform: scale(1.04); }
-    /* Fallback-gradient per sida */
-    .kort-bild-yta.gradient-sous {
-      background: linear-gradient(135deg, #1a0f00 0%, #3d2200 50%, #1a0f00 100%);
-    }
-    .kort-bild-yta.gradient-vin {
-      background: linear-gradient(135deg, #0f0010 0%, #2d0820 50%, #0f0010 100%);
-    }
-    .kort-bild-yta.gradient-recept {
-      background: linear-gradient(135deg, #0a0f10 0%, #0d2520 50%, #0a0f10 100%);
-    }
-    /* Kategori-badge på bilden */
-    .kort-badge {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      padding: 0.3rem 0.75rem;
-      border-radius: 999px;
-      backdrop-filter: blur(8px);
-    }
-    .badge-sous  { background: rgba(212,150,42,0.25); color: #fbbf24; border: 1px solid rgba(212,150,42,0.4); }
-    .badge-vin   { background: rgba(196,40,64,0.25);  color: #fca5a5; border: 1px solid rgba(196,40,64,0.4); }
-    .badge-recept{ background: rgba(16,185,129,0.2);  color: #6ee7b7; border: 1px solid rgba(16,185,129,0.35); }
-    /* Emoji i mitten av fallback-gradient */
-    .kort-emoji {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 5rem;
-      opacity: 0.25;
-    }
-
-    /* Kortets textdel */
-    .kort-text {
-      padding: 1.5rem;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-    }
-    .kort-titel {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.4rem;
-      color: var(--text);
-    }
-    .kort-beskrivning {
-      font-size: 0.88rem;
-      color: var(--text2);
-      line-height: 1.65;
-      flex: 1;
-    }
-    .kort-statistik {
-      display: flex;
-      gap: 1.25rem;
-      flex-wrap: wrap;
-      margin-top: 0.25rem;
-    }
-    .stat {
-      font-size: 0.78rem;
-      color: var(--text3);
-    }
-    .stat strong { color: var(--text2); font-weight: 600; }
-    .kort-pil {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--accent);
-      margin-top: 0.75rem;
-      transition: gap 0.2s;
-    }
-    .sida-kort:hover .kort-pil { gap: 0.75rem; }
-
-    /* ── BILDBIBLIOTEK ────────────────────────────────────────────── */
-    .bibliotek-sektion {
-      background: var(--bg2);
-      border-top: 1px solid var(--border);
-      padding: 4rem 1.5rem;
-    }
-    .bibliotek-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    .bibliotek-rubrik {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
       margin-bottom: 2rem;
-      flex-wrap: wrap;
-      gap: 1rem;
     }
-    .bibliotek-rubrik h2 {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.6rem;
-      color: var(--text);
-    }
-    .bibliotek-rubrik p { color: var(--text2); font-size: 0.85rem; margin-top: 0.25rem; }
-    /* Uppladdningsknapp */
-    .ladda-upp-knapp {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      color: var(--text2);
-      padding: 0.65rem 1.25rem;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      cursor: pointer;
-      transition: border-color 0.15s, color 0.15s;
-      white-space: nowrap;
-    }
-    .ladda-upp-knapp:hover { border-color: var(--accent); color: var(--text); }
-    /* Bildgitter */
-    .bild-gitter {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-      gap: 0.75rem;
-    }
-    .bild-ruta {
-      aspect-ratio: 4/3;
-      border-radius: 8px;
-      overflow: hidden;
-      background: var(--bg3);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: transform 0.15s;
-    }
-    .bild-ruta img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.3s;
-    }
-    .bild-ruta:hover { transform: scale(1.02); }
-    .bild-ruta:hover img { transform: scale(1.05); }
-    /* Tom biblioteksvy */
-    .bibliotek-tomt {
-      text-align: center;
-      padding: 4rem 2rem;
-      border: 2px dashed var(--border);
-      border-radius: 12px;
-    }
-    .bibliotek-tomt p { color: var(--text3); font-size: 0.9rem; margin-top: 0.5rem; }
 
-    /* ── SIDFOT ───────────────────────────────────────────────────── */
-    footer {
-      text-align: center;
-      padding: 2rem 1.5rem;
-      border-top: 1px solid var(--border);
-      color: var(--text3);
-      font-size: 0.8rem;
+    .emblem {
+      width: 110px;
+      height: 110px;
+      object-fit: contain;
+      margin-bottom: 1.25rem;
+      /* Mjuk glöd i emblembrun/guld-ton */
+      filter: drop-shadow(0 0 18px rgba(160, 110, 40, 0.35));
+    }
+
+    .emblem-fallback {
+      font-size: 4.5rem;
+      line-height: 1;
+      margin-bottom: 0.75rem;
+      display: none;
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: #f5ede0;
+    }
+
+    .valkomst-underrubrik {
+      font-size: 0.95rem;
+      color: #a07830;
+      margin-top: 0.4rem;
+      letter-spacing: 0.03em;
+    }
+
+    .fotnot {
+      margin-top: 2.25rem;
+      font-size: 0.78rem;
+      color: #3a3020;
       letter-spacing: 0.05em;
     }
 
-    /* ── LIGHTBOX ─────────────────────────────────────────────────── */
-    .lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.9);
-      z-index: 500;
+    /* Överblicksrad */
+    .overblick {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+      background: #1c1c1c;
+      border: 1px solid #2a2a2a;
+      border-radius: 14px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .overblick-post {
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+      padding: 0.9rem 1rem;
+      border-right: 1px solid #2a2a2a;
+      font-size: 0.8rem;
+      color: #777;
+    }
+
+    .overblick-post:last-child { border-right: none; }
+
+    .overblick-post .siffra {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #e0e0e0;
+      margin-bottom: 0.15rem;
+      letter-spacing: -0.01em;
+    }
+
+    /* Ingångskort */
+    .ingångar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .kort {
+      display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      cursor: zoom-out;
-    }
-    .lightbox.oppet { display: flex; }
-    .lightbox img {
-      max-width: 92vw;
-      max-height: 92vh;
-      border-radius: 8px;
-      box-shadow: 0 24px 72px rgba(0,0,0,0.9);
-    }
-
-    /* ── RESPONSIV ────────────────────────────────────────────────── */
-    @media (max-width: 700px) {
-      .sitenav-inner { flex-wrap: wrap; }
-      .nav-logo { margin-right: auto; }
-      .hamburger { display: flex; }
-      .nav-links {
-        display: none; flex-direction: column; width: 100%;
-        border-top: 1px solid var(--border);
-      }
-      .nav-links.oppet { display: flex; }
-      .sitenav-link {
-        border-bottom: none !important;
-        border-left: 3px solid transparent;
-        padding: 0.75rem 1.2rem;
-      }
-      .sitenav-link.aktiv { border-left-color: var(--accent) !important; }
-      .kort-gitter { grid-template-columns: 1fr; }
+      gap: 0.6rem;
+      min-height: 160px;
+      padding: 1.75rem 1rem 1.5rem;
+      border-radius: 18px;
+      text-decoration: none;
+      color: #e0e0e0;
+      border: 1px solid transparent;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
-    /* Logotyp i hero-sektionen */
-    .hero-logo {
-      width: 340px;
-      max-width: 80vw;
-      margin: 0 auto 1.8rem;
-      display: block;
-      border-radius: 50%;
-      mix-blend-mode: lighten;
-      filter: drop-shadow(0 4px 24px rgba(196, 40, 64, 0.4));
+    .kort:active { transform: scale(0.96); }
+
+    /* Hover bara på enheter med pekare (ej touch) */
+    @media (hover: hover) {
+      .kort:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+    }
+
+    .kort-ikon { font-size: 2.8rem; line-height: 1; }
+    .kort-namn  { font-size: 1.05rem; font-weight: 700; }
+
+    .snart {
+      font-size: 0.65rem;
+      font-weight: 500;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: #666;
+      background: rgba(255, 255, 255, 0.06);
+      border-radius: 20px;
+      padding: 0.2rem 0.55rem;
+    }
+
+    /* Frysen – is-blå accent */
+    .kort-frys {
+      background: linear-gradient(145deg, #0d2a35, #0a1e27);
+      border-color: #1a5f7a;
+    }
+
+    /* Vinkällaren – vinröd accent */
+    .kort-vin {
+      background: linear-gradient(145deg, #2a0d14, #1e0a0f);
+      border-color: #7a1a2a;
+    }
+
+    /* Köket – guld-accent */
+    .kort-kok {
+      background: linear-gradient(145deg, #271d08, #1c1506);
+      border-color: #7a5f14;
+    }
+
+    /* Smal skärm: en kolumn med horisontella kort */
+    @media (max-width: 520px) {
+      .ingångar {
+        grid-template-columns: 1fr;
+        max-width: 420px;
+      }
+
+      .kort {
+        flex-direction: row;
+        justify-content: flex-start;
+        min-height: 90px;
+        padding: 1.25rem 1.5rem;
+        gap: 1.25rem;
+      }
+
+      .kort-text { text-align: left; }
     }
   </style>
 </head>
 <body>
 
-  <!-- Navigering -->
-  <nav class="sitenav">
-    <div class="sitenav-inner">
-      <a href="index.html" class="nav-logo">Pers Kök &amp; Vinkällare</a>
-      <div class="nav-links" id="nav-links">
-        <a href="index.html"      class="sitenav-link aktiv">🏠 Hem</a>
-        <a href="sousvide.html"   class="sitenav-link">♨️ Sous Vide</a>
-        <a href="vinkallare.html" class="sitenav-link">🍷 Vinkällare</a>
-      </div>
-      <button class="hamburger" id="hamburger" aria-label="Meny" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+  <header>
+    <img
+      src="Logga.png"
+      alt="Pers Kök & Vinkällare"
+      class="emblem"
+      onerror="this.style.display='none'; document.getElementById('emblem-fb').style.display='block';"
+    >
+    <div id="emblem-fb" class="emblem-fallback">👨‍🍳</div>
+    <h1>Välkommen hem</h1>
+    <p class="valkomst-underrubrik">Vad vill du laga idag?</p>
+  </header>
+
+  <!-- Överblick – data läses live från localStorage -->
+  <div class="overblick" role="status" aria-label="Snabköversikt">
+    <div class="overblick-post">
+      <span class="siffra" id="frys-antal">—</span>
+      förp i frysen
     </div>
-  </nav>
-
-  <!-- Hero-sektion -->
-  <section class="hero">
-    <div class="hero-bild" id="hero-bild"></div>
-    <div class="hero-overlay"></div>
-    <div class="hero-innehall">
-      <span class="hero-etikett">Välkommen</span>
-
-      <!-- Logotyp -->
-      <img class="hero-logo"
-           src="static/bilder/logo.png"
-           alt="Pers Kök & Vinkällare">
-
-      <p class="hero-beskrivning">
-        Sous vide-dagbok och personlig vinkällare med AI-smakanalys
-        — allt på ett ställe.
-      </p>
-      <div class="hero-knappar">
-        <a href="sousvide.html"   class="knapp-prim">♨️ Öppna dagboken</a>
-        <a href="vinkallare.html" class="knapp-sek">🍷 Min vinkällare</a>
-      </div>
+    <div class="overblick-post">
+      <span class="siffra" id="vin-antal">—</span>
+      flaskor i källaren
     </div>
-  </section>
-
-  <!-- Sektionskort -->
-  <section class="sektioner">
-    <div class="sektioner-rubrik">
-      <h2>Utforska</h2>
-      <p>Klicka på en sektion för att komma igång</p>
+    <div class="overblick-post">
+      <span class="siffra" id="sv-antal">—</span>
+      sous vide-körningar
     </div>
-    <div class="kort-gitter" id="kort-gitter">
-
-      <!-- Sous Vide Dagbok -->
-      <a class="sida-kort" href="sousvide.html">
-        <div class="kort-bild-yta gradient-sous" id="bild-sous">
-          <div class="kort-emoji">♨️</div>
-          <span class="kort-badge badge-sous">Dagbok</span>
-        </div>
-        <div class="kort-text">
-          <div class="kort-titel">Sous Vide Dagbok</div>
-          <p class="kort-beskrivning">
-            Alla dina körningar samlad på ett ställe. Sök bland råvaror,
-            metoder och betyg. Automatisk vinmatchning för varje köttstycke.
-          </p>
-          <div class="kort-statistik">
-            <span class="stat"><strong id="stat-recept">45</strong> körningar</span>
-            <span class="stat"><strong>9</strong> råvarutyper</span>
-          </div>
-          <div class="kort-pil">Öppna dagboken <span>→</span></div>
-        </div>
-      </a>
-
-      <!-- Vinkällare -->
-      <a class="sida-kort" href="vinkallare.html">
-        <div class="kort-bild-yta gradient-vin" id="bild-vin">
-          <div class="kort-emoji">🍷</div>
-          <span class="kort-badge badge-vin">Källare</span>
-        </div>
-        <div class="kort-text">
-          <div class="kort-titel">Vinkällare</div>
-          <p class="kort-beskrivning">
-            Din personliga vinsamling med etikettbilder och AI-genererade
-            smaknoter. Sök på druva, region och typ — och ta bort flaskor
-            när de är druckna.
-          </p>
-          <div class="kort-statistik">
-            <span class="stat"><strong id="stat-vin">–</strong> flaskor</span>
-            <span class="stat">AI-smakanalys</span>
-          </div>
-          <div class="kort-pil">Öppna källaren <span>→</span></div>
-        </div>
-      </a>
-
-    </div>
-  </section>
-
-  <!-- Bildbibliotek -->
-  <section class="bibliotek-sektion">
-    <div class="bibliotek-inner">
-      <div class="bibliotek-rubrik">
-        <div>
-          <h2>📷 Bildbibliotek</h2>
-          <p>Bilder härifrån används automatiskt och slumpmässigt på dina sidor</p>
-        </div>
-        <!-- Dold filinput kopplad till knappen -->
-        <label class="ladda-upp-knapp">
-          ＋ Lägg till bilder
-          <input type="file" id="bild-input" accept="image/jpeg,image/png,image/webp"
-                 multiple style="display:none" onchange="laddaUppBilder(this)">
-        </label>
-      </div>
-      <div class="bild-gitter" id="bild-gitter">
-        <div class="bibliotek-tomt" id="bibliotek-tomt">
-          <p style="font-size:3rem">🖼️</p>
-          <p>Inget i biblioteket ännu.</p>
-          <p>Lägg till bilder med knappen ovan — de används sedan automatiskt på dina sidor.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Sidfot -->
-  <footer>
-    Pers Kök &amp; Källare &nbsp;·&nbsp; Byggd med Flask &amp; SQLite
-  </footer>
-
-  <!-- Lightbox för bildbiblioteket -->
-  <div class="lightbox" id="lightbox" onclick="this.classList.remove('oppet')">
-    <img id="lightbox-bild" src="" alt="Stor bild">
   </div>
 
+  <nav class="ingångar" aria-label="Plattformens delar">
+
+    <a href="https://perhagegard-arch.github.io/frysregister/" class="kort kort-frys">
+      <span class="kort-ikon">🧊</span>
+      <div class="kort-text">
+        <div class="kort-namn">Frysen</div>
+      </div>
+    </a>
+
+    <a href="vinkallare.html" class="kort kort-vin">
+      <span class="kort-ikon">🍷</span>
+      <div class="kort-text">
+        <div class="kort-namn">Vinkällaren</div>
+      </div>
+    </a>
+
+    <a href="kok.html" class="kort kort-kok">
+      <span class="kort-ikon">🍽️</span>
+      <div class="kort-text">
+        <div class="kort-namn">Köket</div>
+      </div>
+    </a>
+
+  </nav>
+
+  <p class="fotnot">God aptit, Per</p>
+
   <script>
-    /* ── BILDBIBLIOTEK ──────────────────────────────────────────── */
-    let BIBLIOTEK = [];
+    // Läs data från localStorage – fungerar bara på publicerad GitHub Pages (samma origin).
+    // Lokal fil (file://) ger SecurityError eller tomt svar – visa streck som fallback.
+    (function () {
+      if (window.location.protocol === 'file:') return;
 
-    async function laddaBildbibliotek() {
       try {
-        const r = await fetch('/api/bilder');
-        BIBLIOTEK = r.ok ? await r.json() : [];
-      } catch (_) { BIBLIOTEK = []; }
-      renderBibliotek();
-      sattSlumpBilder();
-    }
-
-    /* Visar bilderna i biblioteksgittret */
-    function renderBibliotek() {
-      const gitter = document.getElementById('bild-gitter');
-      const tomt   = document.getElementById('bibliotek-tomt');
-      if (BIBLIOTEK.length === 0) {
-        gitter.innerHTML = '';
-        gitter.appendChild(tomt);
-        tomt.style.display = '';
-        return;
-      }
-      tomt.style.display = 'none';
-      gitter.innerHTML = BIBLIOTEK.map(url => `
-        <div class="bild-ruta" onclick="oppnaLightbox('${url}')">
-          <img src="${url}" alt="Biblioteksbild" loading="lazy">
-        </div>`).join('');
-    }
-
-    /* Sätter slumpmässiga bilder i hero och kort */
-    function sattSlumpBilder() {
-      if (BIBLIOTEK.length === 0) return;
-
-      /* Blanda bilderna */
-      const blandade = [...BIBLIOTEK].sort(() => Math.random() - 0.5);
-      let index = 0;
-
-      /* Hero-bakgrund */
-      const heroBild = document.getElementById('hero-bild');
-      const heroUrl  = blandade[index++ % blandade.length];
-      heroBild.style.backgroundImage = `url('${heroUrl}')`;
-      heroBild.classList.add('laddad');
-
-      /* Sous Vide-kortet */
-      sattKortBild('bild-sous', blandade[index++ % blandade.length]);
-
-      /* Vinkällar-kortet */
-      sattKortBild('bild-vin', blandade[index++ % blandade.length]);
-    }
-
-    /* Ersätter fallback-gradienten med en riktig bild */
-    function sattKortBild(elementId, bildUrl) {
-      const yta = document.getElementById(elementId);
-      if (!yta) return;
-      /* Bevara badge och emoji medan vi lägger till bilden */
-      const badge = yta.querySelector('.kort-badge');
-      const emoji = yta.querySelector('.kort-emoji');
-      const img   = document.createElement('img');
-      img.src = bildUrl;
-      img.alt = '';
-      img.style.cssText = 'width:100%;height:100%;object-fit:cover;position:absolute;inset:0;';
-      yta.style.position = 'relative';
-      yta.insertBefore(img, yta.firstChild);
-      /* Ta bort emoji-platshållaren nu när vi har en riktig bild */
-      if (emoji) emoji.remove();
-    }
-
-    /* ── UPPLADDNING ────────────────────────────────────────────── */
-    async function laddaUppBilder(input) {
-      const filer = Array.from(input.files);
-      for (const fil of filer) {
-        const form = new FormData();
-        form.append('fil', fil);
-        try {
-          await fetch('/api/bilder/ladda-upp', { method: 'POST', body: form });
-        } catch (_) {}
-      }
-      await laddaBildbibliotek();
-      input.value = '';
-    }
-
-    /* ── LIGHTBOX ───────────────────────────────────────────────── */
-    function oppnaLightbox(src) {
-      document.getElementById('lightbox-bild').src = src;
-      document.getElementById('lightbox').classList.add('oppet');
-    }
-
-    /* ── STATISTIK ──────────────────────────────────────────────── */
-    async function laddaStatistik() {
-      /* Räkna körningar i sous vide-dagboken */
-      try {
-        const r = await fetch('/api/recept');
-        if (r.ok) {
-          const d = await r.json();
-          document.getElementById('stat-recept').textContent = d.length;
+        var raw = localStorage.getItem('frysregister_v1');
+        if (raw) {
+          var varor = JSON.parse(raw);
+          var totalAntal = varor.reduce(function (sum, v) {
+            return sum + (Number(v.qty) || 0);
+          }, 0);
+          document.getElementById('frys-antal').textContent = totalAntal;
         }
-      } catch (_) {}
+      } catch (e) { /* behåll streck */ }
 
-      /* Räkna flaskor i vinkällaren */
       try {
-        const r = await fetch('/api/vinkallare');
-        if (r.ok) {
-          const d = await r.json();
-          document.getElementById('stat-vin').textContent = d.length;
+        var vinRaw = localStorage.getItem('vinkallare_viner');
+        if (vinRaw) {
+          var viner = JSON.parse(vinRaw);
+          var totalFlaskor = viner.reduce(function (s, v) { return s + (Number(v.antal) || 0); }, 0);
+          document.getElementById('vin-antal').textContent = totalFlaskor;
         }
-      } catch (_) {}
-    }
+      } catch (e) { /* behåll streck */ }
 
-    /* ── HAMBURGERMENY ──────────────────────────────────────────── */
-    document.getElementById('hamburger').addEventListener('click', function () {
-      const links = document.getElementById('nav-links');
-      links.classList.toggle('oppet');
-      this.setAttribute('aria-expanded', links.classList.contains('oppet'));
-    });
-
-    /* ── INIT ───────────────────────────────────────────────────── */
-    document.addEventListener('DOMContentLoaded', () => {
-      laddaBildbibliotek();
-      laddaStatistik();
-    });
+      try {
+        var svRaw = localStorage.getItem('sousvide_koningar');
+        if (svRaw) {
+          var koningar = JSON.parse(svRaw);
+          document.getElementById('sv-antal').textContent = koningar.length;
+        }
+      } catch (e) { /* behåll streck */ }
+    }());
   </script>
 
 </body>
