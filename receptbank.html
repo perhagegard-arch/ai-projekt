@@ -255,6 +255,129 @@
 
     .ta-bort-btn:hover { color: #e07070; border-color: #7a2020; background: #1e0a0a; }
 
+    /* ── Versions-väljare ── */
+    .versions-valje {
+      display: flex;
+      gap: 0.4rem;
+      margin-bottom: 0.85rem;
+    }
+
+    .version-btn {
+      padding: 0.3rem 0.85rem;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #666;
+      font-size: 0.78rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+    }
+
+    .version-btn.aktiv {
+      background: #271d08;
+      border-color: #7a5f14;
+      color: #d4a84b;
+    }
+
+    /* ── Förbättringslogg ── */
+    .forbattring-sektion {
+      background: #161616;
+      border: 1px solid #252525;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      margin-top: 0.85rem;
+    }
+
+    .forbattring-rubrik {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #777;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 0.65rem;
+    }
+
+    .noteringar-lista { margin-bottom: 0.65rem; }
+
+    .notering-post {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+      font-size: 0.82rem;
+    }
+
+    .notering-datum { color: #444; white-space: nowrap; font-size: 0.72rem; flex-shrink: 0; }
+    .notering-text  { flex: 1; color: #b0b0b0; }
+
+    .ta-bort-notering {
+      background: none;
+      border: none;
+      color: #3a2020;
+      font-size: 1rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0 0.15rem;
+      flex-shrink: 0;
+      transition: color 0.12s;
+    }
+
+    .ta-bort-notering:hover { color: #e07070; }
+
+    .notering-tom { font-size: 0.78rem; color: #3a3a3a; font-style: italic; }
+
+    .notering-input-rad {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 0.65rem;
+      margin-top: 0.65rem;
+    }
+
+    .notering-input {
+      flex: 1;
+      padding: 0.45rem 0.7rem;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #e0e0e0;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.12s;
+    }
+
+    .notering-input:focus { border-color: #5a4a1a; }
+    .notering-input::placeholder { color: #3a3a3a; }
+
+    .lagg-till-btn {
+      padding: 0.45rem 0.8rem;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #777;
+      font-size: 0.78rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .lagg-till-btn:hover { color: #d4a84b; border-color: #5a4a20; }
+
+    .skapa-version-knapp {
+      width: 100%;
+      padding: 0.55rem 1rem;
+      background: #271d08;
+      border: 1px solid #5a4010;
+      border-radius: 9px;
+      color: #c89030;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+
+    .skapa-version-knapp:hover    { background: #342508; border-color: #7a5a18; color: #e8a840; }
+    .skapa-version-knapp:disabled { opacity: 0.5; cursor: default; }
+
     /* ── Tomt tillstånd ── */
     .tomt {
       text-align: center;
@@ -416,7 +539,10 @@
       const utanInkop = r.text
         ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim()
         : '';
-      const inkopRader = r.text ? extraherapInkoplista(r.text) : null;
+      const inkopRader  = r.text ? extraherapInkoplista(r.text) : null;
+      const noteringar  = r.noteringar || [];
+      const aktiv       = aktivVersion[r.id] || 'grund';
+      const visText     = aktiv === 'pers' && r.persVersion ? r.persVersion : utanInkop;
 
       const inkopHtml = inkopRader && inkopRader.length
         ? `<div class="inkop-sektion">
@@ -430,6 +556,23 @@
            </div>`
         : '';
 
+      const versionsValje = r.persVersion
+        ? `<div class="versions-valje">
+             <button class="version-btn${aktiv === 'grund' ? ' aktiv' : ''}" data-version="grund" data-kortid="${r.id}">📄 Grundrecept</button>
+             <button class="version-btn${aktiv === 'pers'  ? ' aktiv' : ''}" data-version="pers"  data-kortid="${r.id}">✨ Pers version</button>
+           </div>`
+        : '';
+
+      const noteringarHtml = noteringar.length === 0
+        ? '<div class="notering-tom">Inga noteringar än.</div>'
+        : noteringar.map((n, i) =>
+            `<div class="notering-post">
+               <span class="notering-datum">${esc(n.datum)}</span>
+               <span class="notering-text">${esc(n.text)}</span>
+               <button class="ta-bort-notering" data-kortid="${r.id}" data-idx="${i}" title="Ta bort">×</button>
+             </div>`
+          ).join('');
+
       return `<div class="recept-kort${oppet ? ' oppet' : ''}" id="kort-${r.id}" data-id="${r.id}">
         <div class="recept-huvud">
           <div class="recept-info">
@@ -440,7 +583,17 @@
           <span class="recept-pil">▶</span>
         </div>
         <div class="recept-innehall">
-          <div class="recept-text">${renderMarkdown(utanInkop)}</div>
+          ${versionsValje}
+          <div class="recept-text" id="recept-text-${r.id}">${renderMarkdown(visText)}</div>
+          <div class="forbattring-sektion">
+            <div class="forbattring-rubrik">Förbättringslogg</div>
+            <div class="noteringar-lista" id="noteringar-${r.id}">${noteringarHtml}</div>
+            <div class="notering-input-rad">
+              <input type="text" class="notering-input" id="notering-input-${r.id}" placeholder="Skriv en notering…">
+              <button class="lagg-till-btn" data-kortid="${r.id}">+ Lägg till</button>
+            </div>
+            <button class="skapa-version-knapp" data-kortid="${r.id}" id="skapa-version-${r.id}">✨ Skapa Pers version</button>
+          </div>
           ${inkopHtml}
           <div class="ta-bort-rad">
             <button class="ta-bort-btn" data-tabort="${r.id}">🗑 Ta bort</button>
@@ -450,7 +603,8 @@
     }
 
     /* ── Rendera hela listan ── */
-    let oppnaKort = new Set();
+    let oppnaKort    = new Set();
+    let aktivVersion = {};  /* kortid → 'grund' | 'pers' */
 
     function renderLista() {
       const bank   = hamtaBank();
@@ -537,6 +691,161 @@
           });
         });
       });
+
+      /* Versions-väljare */
+      lista.querySelectorAll('.version-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id  = Number(btn.dataset.kortid);
+          const ver = btn.dataset.version;
+          aktivVersion[id] = ver;
+          const kort = document.getElementById(`kort-${id}`);
+          kort.querySelectorAll('.version-btn').forEach(b => b.classList.toggle('aktiv', b.dataset.version === ver));
+          const bank2 = hamtaBank();
+          const r = bank2.find(x => x.id === id);
+          if (!r) return;
+          const utanInkop2 = r.text ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim() : '';
+          document.getElementById(`recept-text-${id}`).innerHTML = renderMarkdown(
+            ver === 'pers' && r.persVersion ? r.persVersion : utanInkop2
+          );
+        });
+      });
+
+      /* Lägg till notering */
+      lista.querySelectorAll('.lagg-till-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id    = Number(btn.dataset.kortid);
+          const input = document.getElementById(`notering-input-${id}`);
+          const text  = input.value.trim();
+          if (!text) return;
+          const bank2 = hamtaBank();
+          const r     = bank2.find(x => x.id === id);
+          if (!r) return;
+          if (!r.noteringar) r.noteringar = [];
+          r.noteringar.push({ datum: new Date().toISOString().slice(0, 10), text });
+          sparaBank(bank2);
+          input.value = '';
+          const noterEl = document.getElementById(`noteringar-${id}`);
+          noterEl.innerHTML = r.noteringar.map((n, i) =>
+            `<div class="notering-post">
+               <span class="notering-datum">${esc(n.datum)}</span>
+               <span class="notering-text">${esc(n.text)}</span>
+               <button class="ta-bort-notering" data-kortid="${id}" data-idx="${i}" title="Ta bort">×</button>
+             </div>`
+          ).join('');
+          bindTaBortNoteringar(noterEl);
+        });
+      });
+
+      /* Enter i notering-input */
+      lista.querySelectorAll('.notering-input').forEach(input => {
+        input.addEventListener('click',   e => e.stopPropagation());
+        input.addEventListener('keydown', e => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            input.closest('.forbattring-sektion').querySelector('.lagg-till-btn').click();
+          }
+        });
+      });
+
+      /* Skapa Pers version */
+      lista.querySelectorAll('.skapa-version-knapp').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          skapaPerVersion(Number(btn.dataset.kortid));
+        });
+      });
+
+      /* Bind ta-bort-noteringar på alla noteringslistor */
+      lista.querySelectorAll('.noteringar-lista').forEach(el => bindTaBortNoteringar(el));
+    }
+
+    /* ── Hjälpfunktion: bind ta-bort-knappar i en noteringar-lista ── */
+    function bindTaBortNoteringar(el) {
+      el.querySelectorAll('.ta-bort-notering').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const id   = Number(btn.dataset.kortid);
+          const idx  = Number(btn.dataset.idx);
+          const bank = hamtaBank();
+          const r    = bank.find(x => x.id === id);
+          if (!r || !r.noteringar) return;
+          r.noteringar.splice(idx, 1);
+          sparaBank(bank);
+          el.innerHTML = r.noteringar.length === 0
+            ? '<div class="notering-tom">Inga noteringar än.</div>'
+            : r.noteringar.map((n, i) =>
+                `<div class="notering-post">
+                   <span class="notering-datum">${esc(n.datum)}</span>
+                   <span class="notering-text">${esc(n.text)}</span>
+                   <button class="ta-bort-notering" data-kortid="${id}" data-idx="${i}" title="Ta bort">×</button>
+                 </div>`
+              ).join('');
+          bindTaBortNoteringar(el);
+        });
+      });
+    }
+
+    /* ── Skapa Pers version via Claude ── */
+    async function skapaPerVersion(id) {
+      const apiKey = localStorage.getItem('frysregister_apikey_v1');
+      if (!apiKey) { alert('Ingen API-nyckel hittad. Ange den i Köket.'); return; }
+
+      const bank = hamtaBank();
+      const r    = bank.find(x => x.id === id);
+      if (!r) return;
+
+      const knapp    = document.getElementById(`skapa-version-${id}`);
+      const ursprung = knapp.textContent;
+      knapp.textContent = 'Skriver om receptet…';
+      knapp.disabled    = true;
+
+      const utanInkop  = r.text ? r.text.replace(/##\s*(?:Inköpslista|Inkopslista)[\s\S]*$/i, '').trim() : '';
+      const noteringar = r.noteringar || [];
+      const noterText  = noteringar.length > 0
+        ? '\n\nPers förbättringsnoteringar:\n' + noteringar.map((n, i) => `${i + 1}. ${n.datum}: ${n.text}`).join('\n')
+        : '\n\n(Inga noteringar – gör ändå en lätt förbättring av språk och struktur.)';
+
+      const prompt = `Du är en kockassistent. Här är Pers recept på "${r.rattText || 'rätten'}":\n\n${utanInkop}${noterText}\n\nSkriv en förbättrad version av receptet som tar hänsyn till noteringarna. Behåll samma format (rubriker, ingredienslista, steg-för-steg) men förbättra receptet. Svara BARA med receptet, inget förord eller efterord.`;
+
+      try {
+        const resp = await fetch('https://api.anthropic.com/v1/messages', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-api-key': apiKey,
+            'anthropic-version': '2023-06-01',
+            'anthropic-dangerous-direct-browser-access': 'true'
+          },
+          body: JSON.stringify({
+            model: 'claude-sonnet-4-6',
+            max_tokens: 2000,
+            messages: [{ role: 'user', content: prompt }]
+          })
+        });
+
+        if (!resp.ok) {
+          const fel = await resp.json().catch(() => ({}));
+          throw new Error(fel.error?.message || `HTTP ${resp.status}`);
+        }
+
+        const data = await resp.json();
+        let text = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+        /* Strippa eventuella kodblock-markeringar */
+        text = text.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '').trim();
+
+        r.persVersion = text;
+        sparaBank(bank);
+
+        /* Visa Pers version direkt */
+        aktivVersion[id] = 'pers';
+        renderLista();
+      } catch (err) {
+        alert('Något gick fel: ' + err.message);
+        knapp.textContent = ursprung;
+        knapp.disabled    = false;
+      }
     }
 
     /* ── Sök ── */
