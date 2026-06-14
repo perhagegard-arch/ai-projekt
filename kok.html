@@ -1424,7 +1424,8 @@
       const vinText = vinkallare.length
         ? vinkallare.map(v => {
             const hyll = v.hyllplats || v.plats || '';
-            return `- ${v.namn || 'Okänt vin'}${v.årgång || v.argarg ? ' ' + (v.årgång || v.argarg) : ''}, ${v.typ || ''}, ${v.druva || ''} (${v.antal} fl${hyll ? ', ' + hyll : ''})`;
+            const pris = v.pris ? `, ${v.pris} kr/fl` : '';
+            return `- ${v.namn || 'Okänt vin'}${v.årgång || v.argarg ? ' ' + (v.årgång || v.argarg) : ''}, ${v.typ || ''}, ${v.druva || ''} (${v.antal} fl${hyll ? ', ' + hyll : ''}${pris})`;
           }).join('\n')
         : '(tomt)';
 
@@ -1477,6 +1478,11 @@ Tänk igenom 2–3 olika menyer i ditt huvud. Variera råvaror, tillagningsmetod
 **Steg B – Välj och kritisera:**
 Välj det bästa alternativet baserat på: (1) råvaror i frysen, (2) tonläge, (3) årstid, (4) sous vide-historia. Motivera valet för dig själv.
 
+Vid vinval – anpassa efter tonläge:
+- Vardag: prioritera viner under ~200 kr. Nämn inte dyra flaskor (>300 kr) som förstaval till en enkel vardagsrätt om billigare alternativ passar lika bra.
+- Lite extra: välj genomtänkt oavsett prisnivå.
+- Full Michelin: välj det bäst passande vinet oavsett pris – lyft fram kvaliteten.
+
 **Steg C – Presentera BARA det valda alternativet** enligt formatet nedan.
 
 ---
@@ -1498,8 +1504,11 @@ För varje rätt (förrätt/varmrätt/efterrätt om valda):
 [Steg-för-steg instruktioner. Om sous vide passar och det finns relevant historik, väv in det naturligt: "Sous vide på 58°C i 2 tim – du körde lammet så förra gången och gav det 5/5."]
 
 **Vinval:**
-[Om matchande vin finns i vinkällaren: "Din [vinnamn] ([hyllplats], [antal] fl kvar) passar utmärkt – [kort motivering]."
-Om inget passande vin finns: "Köp: [konkret vinförslag med druva, region och prisintervall]."]
+Lista 2–3 viner ur källaren som passar rätten, rangordnade från bäst till sämst match. För varje vin:
+1. **[Vinnamn] [årgång]** · [hyllplats] · [antal] fl · [pris] kr
+   [En mening: varför det passar + priskommentar anpassad till tonläget (t.ex. "en prisvärd vardagsflaska" eller "värt att öppna för tillfällets skull").]
+Om källaren inte räcker till en rätt: avsluta med "(Om inget passar: köp [konkret förslag med druva, region, ~pris på Systembolaget].)"
+Ta bara med viner som faktiskt finns i källardatan ovan.
 
 ---
 
