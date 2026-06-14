@@ -747,7 +747,7 @@
     <!-- Laddningsindikator -->
     <div id="laddning">
       <div class="laddning-spinner"></div>
-      <div class="laddning-text"><strong>AI-kocken tänker…</strong><br>Komponerar din meny – ett ögonblick.</div>
+      <div class="laddning-text"><strong>AI-kocken tänker…</strong><br>Komponerar din meny – vanligtvis 30–60 sekunder.</div>
     </div>
 
     <!-- Felruta -->
@@ -1509,7 +1509,9 @@ Om inget passande vin finns: "Köp: [konkret vinförslag med druva, region och p
 
 ---
 
-Avsluta inte med "Smaklig måltid" eller liknande fraser.`;
+Avsluta inte med "Smaklig måltid" eller liknande fraser.
+
+Var ärlig: Hitta aldrig på viner, hyllplatser eller sous vide-körningar som inte finns i datan ovan. Saknas passande vin i källaren – säg det och ge ett köpförslag istället.`;
     }
 
     /* ── Anropa Claude API ── */
@@ -1554,7 +1556,8 @@ Avsluta inte med "Smaklig måltid" eller liknande fraser.`;
 
       const block = (svar.content || []).find(b => b.type === 'text');
       if (!block || !block.text) throw new Error('Tomt svar från Claude – inga textblock i svaret.');
-      return block.text;
+      /* Rensa ev. ```-staket som Claude ibland lägger till runt svaret */
+      return block.text.replace(/^```[^\n]*\n?/, '').replace(/\n?```$/, '').trim();
     }
 
     /* ── Planera middag ── */
