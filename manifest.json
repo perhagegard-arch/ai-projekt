@@ -1,0 +1,13 @@
+{
+  "name": "Pers Kök & Vinkällare",
+  "short_name": "Pers Kök",
+  "start_url": "/ai-projekt/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#1c1506",
+  "icons": [
+    { "src": "apple-touch-icon-152.png", "sizes": "152x152", "type": "image/png" },
+    { "src": "apple-touch-icon-167.png", "sizes": "167x167", "type": "image/png" },
+    { "src": "apple-touch-icon.png",     "sizes": "180x180", "type": "image/png" }
+  ]
+}
