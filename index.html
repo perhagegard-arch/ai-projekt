@@ -187,6 +187,184 @@
 
       .kort-text { text-align: left; }
     }
+    /* ── Info-knapp bredvid rubriken ── */
+    .rubrik-rad {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
+
+    .info-knapp {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 1px solid #4a3a18;
+      background: none;
+      color: #6a5028;
+      font-size: 0.88rem;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.12s, border-color 0.12s;
+      line-height: 1;
+    }
+
+    .info-knapp:hover { color: #d4a84b; border-color: #9a7a30; }
+
+    /* ── Gemensam modalöverlag ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.80);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .modal-overlay.synlig { display: flex; }
+
+    /* ── Rundtur-kort ── */
+    .tur-kort {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 22px;
+      max-width: 440px;
+      width: 100%;
+      padding: 2.25rem 1.75rem 1.6rem;
+      text-align: center;
+      animation: modal-in 0.18s ease;
+    }
+
+    @keyframes modal-in {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0);   }
+    }
+
+    .tur-ikon    { font-size: 2.8rem; line-height: 1; margin-bottom: 0.85rem; }
+    .tur-rubrik  { font-size: 1.15rem; font-weight: 700; color: #f0e0b0; margin-bottom: 0.6rem; line-height: 1.3; }
+    .tur-text    { font-size: 0.9rem; color: #aaa; line-height: 1.75; margin-bottom: 1.6rem; }
+
+    .tur-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tur-punkter { display: flex; gap: 0.4rem; align-items: center; }
+
+    .tur-punkt {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #333;
+      transition: background 0.2s;
+    }
+
+    .tur-punkt.aktiv { background: #c89030; }
+
+    .tur-knappar { display: flex; gap: 0.6rem; align-items: center; }
+
+    .tur-hoppa {
+      background: none;
+      border: none;
+      color: #444;
+      font-size: 0.82rem;
+      cursor: pointer;
+      padding: 0.4rem 0.5rem;
+      transition: color 0.12s;
+    }
+
+    .tur-hoppa:hover { color: #888; }
+
+    .tur-nasta {
+      padding: 0.5rem 1.2rem;
+      background: #271d08;
+      border: 1px solid #7a5f14;
+      border-radius: 10px;
+      color: #d4a84b;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .tur-nasta:hover { background: #342508; border-color: #9a7a20; }
+
+    /* ── Info-modal ── */
+    .info-kort {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 20px;
+      max-width: 440px;
+      width: 100%;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 1.4rem 1.5rem 1.25rem;
+      animation: modal-in 0.18s ease;
+    }
+
+    .info-huvud {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid #252525;
+    }
+
+    .info-titel { font-size: 0.92rem; font-weight: 700; color: #e0e0e0; }
+
+    .stang-knapp {
+      background: none;
+      border: none;
+      color: #555;
+      font-size: 1rem;
+      cursor: pointer;
+      padding: 0.15rem 0.4rem;
+      transition: color 0.12s;
+      line-height: 1;
+    }
+
+    .stang-knapp:hover { color: #e0e0e0; }
+
+    .info-del { margin-bottom: 1rem; }
+
+    .info-del-rubrik {
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: #d4a84b;
+      margin-bottom: 0.3rem;
+    }
+
+    .info-del p, .info-del li {
+      font-size: 0.83rem;
+      color: #999;
+      line-height: 1.65;
+    }
+
+    .info-del ul { padding-left: 1.1rem; }
+    .info-del li { margin-bottom: 0.2rem; }
+    .info-del strong { color: #ccc; }
+
+    .info-separator { border: none; border-top: 1px solid #252525; margin: 0.9rem 0; }
+
+    .starta-tur-knapp {
+      width: 100%;
+      padding: 0.5rem 1rem;
+      background: none;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      color: #777;
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+    }
+
+    .starta-tur-knapp:hover { color: #d4a84b; border-color: #5a4a20; }
   </style>
 </head>
 <body>
@@ -199,7 +377,10 @@
       onerror="this.style.display='none'; document.getElementById('emblem-fb').style.display='block';"
     >
     <div id="emblem-fb" class="emblem-fallback">👨‍🍳</div>
-    <h1>Välkommen hem</h1>
+    <div class="rubrik-rad">
+      <h1>Välkommen hem</h1>
+      <button class="info-knapp" id="info-knapp" title="Om Pers Kök & Vinkällare" aria-label="Öppna info">ⓘ</button>
+    </div>
     <p class="valkomst-underrubrik">Vad vill du laga idag?</p>
   </header>
 
@@ -249,6 +430,48 @@
 
   <p class="fotnot">God aptit, Per</p>
 
+  <!-- ── Rundtur-modal ── -->
+  <div id="tur-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Välkomstrundtur">
+    <div class="tur-kort">
+      <div id="tur-innehall"></div>
+      <div class="tur-nav">
+        <div class="tur-punkter" id="tur-punkter"></div>
+        <div class="tur-knappar">
+          <button class="tur-hoppa" id="tur-hoppa">Hoppa över</button>
+          <button class="tur-nasta" id="tur-nasta">Nästa →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Info-modal ── -->
+  <div id="info-overlay" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Om plattformen">
+    <div class="info-kort">
+      <div class="info-huvud">
+        <span class="info-titel">Om Pers Kök & Vinkällare</span>
+        <button class="stang-knapp" id="info-stang" aria-label="Stäng">✕</button>
+      </div>
+      <div class="info-del">
+        <div class="info-del-rubrik">🧊 Frysen</div>
+        <p>Registrera råvaror med förpackningsdatum och plats. Köket läser frysen automatiskt när du planerar en middag.</p>
+      </div>
+      <div class="info-del">
+        <div class="info-del-rubrik">🍷 Vinkällaren</div>
+        <p>Lägg in dina flaskor med hyllplats, årgång och pris. Köket föreslår rätt vin till maten baserat på vad du faktiskt har hemma.</p>
+      </div>
+      <div class="info-del">
+        <div class="info-del-rubrik">🍽️ Köket</div>
+        <ul>
+          <li><strong>Laga mat</strong> – AI-kocken komponerar en middag från frysen och källaren</li>
+          <li><strong>Kockens viskning</strong> – fördjupning per rätt: varför, våga prova, lär mig mer</li>
+          <li><strong>Receptbank</strong> – spara och förfina recept med din egna versionshistorik</li>
+        </ul>
+      </div>
+      <hr class="info-separator">
+      <button class="starta-tur-knapp" id="starta-tur-igen">▶ Starta rundturen igen</button>
+    </div>
+  </div>
+
   <script>
     // Läs data från localStorage – fungerar bara på publicerad GitHub Pages (samma origin).
     // Lokal fil (file://) ger SecurityError eller tomt svar – visa streck som fallback.
@@ -283,6 +506,105 @@
         }
       } catch (e) { /* behåll streck */ }
     }());
+
+    // ── Välkomstrundtur ──
+    var TUR_NYCKEL = 'onboarding_klar';
+    var TUR_STEG = [
+      {
+        ikon: '👨‍🍳',
+        rubrik: 'Välkommen till Pers Kök & Vinkällare!',
+        text: 'Här samlas din matlagning – råvaror i frysen, viner i källaren och ett AI-kök som sätter ihop alltihop.'
+      },
+      {
+        ikon: '🧊',
+        rubrik: 'Frysen och Vinkällaren',
+        text: 'Frysen håller koll på dina råvaror och förpackningsdatum.\n🍷 Vinkällaren håller koll på dina flaskor, hyllplatser och priser.'
+      },
+      {
+        ikon: '🍳',
+        rubrik: 'I Köket möts allt',
+        text: 'Tryck Laga mat så komponerar AI-kocken en middag av det du har – med rätt vin ur din källare. Dyk djupare med Kockens viskning eller spara och förfina recept i Receptbanken.'
+      },
+      {
+        ikon: '🎉',
+        rubrik: 'Ha så kul!',
+        text: 'Testa gärna att planera din första middag. Börja med att lägga in råvaror i Frysen eller viner i Vinkällaren – sen kör du i Köket!'
+      }
+    ];
+
+    var turSteg = 0;
+
+    function visaTurSteg(n) {
+      var steg = TUR_STEG[n];
+      document.getElementById('tur-innehall').innerHTML =
+        '<div class="tur-ikon">' + steg.ikon + '</div>' +
+        '<div class="tur-rubrik">' + steg.rubrik + '</div>' +
+        '<div class="tur-text">'  + steg.text.replace(/\n/g, '<br>') + '</div>';
+      document.getElementById('tur-punkter').innerHTML = TUR_STEG.map(function (_, i) {
+        return '<span class="tur-punkt' + (i === n ? ' aktiv' : '') + '"></span>';
+      }).join('');
+      document.getElementById('tur-nasta').textContent =
+        n === TUR_STEG.length - 1 ? 'Kom igång!' : 'Nästa →';
+    }
+
+    function oppnaTur() {
+      turSteg = 0;
+      visaTurSteg(0);
+      document.getElementById('tur-overlay').classList.add('synlig');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function stangTur() {
+      try { localStorage.setItem(TUR_NYCKEL, '1'); } catch (e) {}
+      document.getElementById('tur-overlay').classList.remove('synlig');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('tur-nasta').addEventListener('click', function () {
+      if (turSteg < TUR_STEG.length - 1) {
+        turSteg++;
+        visaTurSteg(turSteg);
+      } else {
+        stangTur();
+      }
+    });
+
+    document.getElementById('tur-hoppa').addEventListener('click', stangTur);
+
+    document.getElementById('tur-overlay').addEventListener('click', function (e) {
+      if (e.target === this) stangTur();
+    });
+
+    try {
+      if (!localStorage.getItem(TUR_NYCKEL)) oppnaTur();
+    } catch (e) {}
+
+    // ── Info-modal ──
+    function oppnaInfo() {
+      document.getElementById('info-overlay').classList.add('synlig');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function stangInfo() {
+      document.getElementById('info-overlay').classList.remove('synlig');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('info-knapp').addEventListener('click', oppnaInfo);
+    document.getElementById('info-stang').addEventListener('click', stangInfo);
+
+    document.getElementById('info-overlay').addEventListener('click', function (e) {
+      if (e.target === this) stangInfo();
+    });
+
+    document.getElementById('starta-tur-igen').addEventListener('click', function () {
+      stangInfo();
+      oppnaTur();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { stangTur(); stangInfo(); }
+    });
   </script>
 
 </body>
