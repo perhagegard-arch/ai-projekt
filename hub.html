@@ -25,15 +25,42 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2.5rem 1rem 3rem;
+      padding: 0 1rem 3rem;
     }
 
-    /* Emblem och rubrik */
+    /* Emblem och rubrik – hero med stämningsbild */
     header {
       position: relative;
       text-align: center;
-      margin-bottom: 2rem;
+      width: 100%;
+      padding: 3.5rem 1rem 5.5rem;
+      margin-bottom: 2.5rem;
+      background-image: url('bilder/vinkallare-frankrike-opt.jpg');
+      background-size: cover;
+      background-position: center 30%;
     }
+
+    /* Gradient-overlay: bilden syns tydligt överst, tonar till #121212 */
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.12) 0%,
+        rgba(18, 18, 18, 0.68) 62%,
+        #121212 100%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Headerinnehåll ovanpå overlayen */
+    .emblem, .emblem-fallback, header h1, header .valkomst-underrubrik {
+      position: relative;
+      z-index: 1;
+    }
+
+    .info-knapp { z-index: 1; }
 
     .emblem {
       width: 330px;
@@ -376,6 +403,7 @@
 <body>
 
   <header>
+    <div class="hero-overlay" aria-hidden="true"></div>
     <img
       src="Logga.png"
       alt="Pers Kök & Vinkällare"
