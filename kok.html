@@ -59,24 +59,40 @@
 
     .tillbaka:hover { color: #e0e0e0; border-color: #555; }
 
+    /* ── Stämningsbild-hero ─────────────────────────────────────── */
+    .kok-hero {
+      position: relative;
+      width: 100%;
+      padding: 3.5rem 1rem 5rem;
+      background-image: url('bilder/tax-maskrosor.jpg');
+      background-size: cover;
+      background-position: center 35%;
+      text-align: center;
+    }
+
+    .kok-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(18,18,18,0.65) 60%, #121212 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .kok-hero h1 {
+      position: relative;
+      z-index: 1;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #f5ede0;
+      letter-spacing: -0.01em;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+    }
+
     /* ── Innehåll ── */
     .container {
       max-width: 520px;
       margin: 0 auto;
       padding: 2rem 1rem 3rem;
-    }
-
-    /* ── Sidorubrik ── */
-    .startvy-rubrik {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .startvy-rubrik h1 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: #f0f0f0;
-      letter-spacing: -0.01em;
     }
 
     /* ── Köksanden: förslagsruta ── */
@@ -761,11 +777,13 @@
     <a href="hub.html" class="tillbaka">← Hemma</a>
   </header>
 
-  <div class="container">
+  <!-- Stämningsbild: taxen i maskrosäng med gradient-overlay -->
+  <section class="kok-hero">
+    <div class="kok-hero-overlay"></div>
+    <h1>Vad vill du laga ikväll?</h1>
+  </section>
 
-    <div class="startvy-rubrik">
-      <h1>Vad vill du laga ikväll?</h1>
-    </div>
+  <div class="container">
 
     <!-- Köksanden: smarta datadrivna tips (göms om inga tips finns) -->
     <div class="koksan-kort" id="koksan-kort" style="display:none">

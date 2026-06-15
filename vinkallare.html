@@ -765,6 +765,45 @@
     }
     .uppskatta-status .upp-fel { color: #c07070; }
 
+    /* ── Stämningsbild-hero ─────────────────────────────────────── */
+    .vin-hero {
+      position: relative;
+      width: 100%;
+      padding: 3.5rem 1rem 5rem;
+      background-image: url('bilder/vinvagg.jpg');
+      background-size: cover;
+      background-position: center center;
+      text-align: center;
+    }
+
+    .vin-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.10) 0%, rgba(18,18,18,0.65) 60%, #121212 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .vin-hero-innehall {
+      position: relative;
+      z-index: 1;
+    }
+
+    .vin-hero-rubrik {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #f5ede0;
+      letter-spacing: -0.01em;
+      text-shadow: 0 2px 12px rgba(0,0,0,0.7);
+    }
+
+    .vin-hero-under {
+      font-size: 0.92rem;
+      color: #c8a0a0;
+      margin-top: 0.45rem;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+    }
+
     /* ── Responsivt ──────────────────────────────────────────────── */
     @media (max-width: 520px) {
       .stats { grid-template-columns: repeat(2, 1fr); }
@@ -1132,6 +1171,15 @@
     <span class="header-titel">🍷 Vinkällaren</span>
     <a href="hub.html" class="tillbaka">← Hemma</a>
   </header>
+
+  <!-- Stämningsbild: vinvägg med gradient-overlay -->
+  <section class="vin-hero">
+    <div class="vin-hero-overlay"></div>
+    <div class="vin-hero-innehall">
+      <div class="vin-hero-rubrik">🍷 Vinkällaren</div>
+      <div class="vin-hero-under">Din personliga vinkälla</div>
+    </div>
+  </section>
 
   <div class="container">
 
