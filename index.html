@@ -97,11 +97,11 @@
       letter-spacing: -0.01em;
     }
 
-    /* Ingångskort */
+    /* Ingångskort – hierarki: Köket dominerar, Frysen + Vinkällaren under */
     .ingångar {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.25rem;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
       width: 100%;
       max-width: 700px;
     }
@@ -111,9 +111,9 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 0.6rem;
-      min-height: 160px;
-      padding: 1.75rem 1rem 1.5rem;
+      gap: 0.5rem;
+      min-height: 120px;
+      padding: 1.5rem 1rem;
       border-radius: 18px;
       text-decoration: none;
       color: #e0e0e0;
@@ -133,18 +133,13 @@
       }
     }
 
-    .kort-ikon { font-size: 2.8rem; line-height: 1; }
-    .kort-namn  { font-size: 1.05rem; font-weight: 700; }
+    .kort-ikon { font-size: 2.5rem; line-height: 1; }
+    .kort-namn  { font-size: 1rem; font-weight: 700; }
 
-    .snart {
-      font-size: 0.65rem;
-      font-weight: 500;
-      letter-spacing: 0.07em;
-      text-transform: uppercase;
-      color: #666;
-      background: rgba(255, 255, 255, 0.06);
-      border-radius: 20px;
-      padding: 0.2rem 0.55rem;
+    .kort-tagline {
+      font-size: 0.88rem;
+      color: #a07830;
+      font-weight: 400;
     }
 
     /* Frysen – is-blå accent */
@@ -159,18 +154,26 @@
       border-color: #7a1a2a;
     }
 
-    /* Köket – guld-accent */
+    /* Köket – guld, full bredd, dominant */
     .kort-kok {
-      background: linear-gradient(145deg, #271d08, #1c1506);
-      border-color: #7a5f14;
+      grid-column: 1 / -1;
+      min-height: 190px;
+      padding: 2rem 1.5rem;
+      background: linear-gradient(145deg, #2c2008, #1c1506);
+      border-color: #9a7a20;
     }
 
-    /* Smal skärm: en kolumn med horisontella kort */
-    @media (max-width: 520px) {
+    .kort-kok .kort-ikon { font-size: 3.5rem; }
+    .kort-kok .kort-namn  { font-size: 1.45rem; color: #f0e0b0; }
+
+    /* Mobil (<500px): allt i en kolumn, horisontell kortlayout */
+    @media (max-width: 500px) {
       .ingångar {
         grid-template-columns: 1fr;
         max-width: 420px;
       }
+
+      .kort-kok { grid-column: auto; }
 
       .kort {
         flex-direction: row;
@@ -179,6 +182,8 @@
         padding: 1.25rem 1.5rem;
         gap: 1.25rem;
       }
+
+      .kort-kok { min-height: 110px; }
 
       .kort-text { text-align: left; }
     }
@@ -216,6 +221,16 @@
 
   <nav class="ingångar" aria-label="Plattformens delar">
 
+    <!-- Köket: full bredd, visas överst -->
+    <a href="kok.html" class="kort kort-kok">
+      <span class="kort-ikon">🍽️</span>
+      <div class="kort-text">
+        <div class="kort-namn">Laga mat</div>
+        <div class="kort-tagline">Vad blir det idag?</div>
+      </div>
+    </a>
+
+    <!-- Frysen och Vinkällaren: sida vid sida under Köket -->
     <a href="https://perhagegard-arch.github.io/frysregister/" class="kort kort-frys">
       <span class="kort-ikon">🧊</span>
       <div class="kort-text">
@@ -227,13 +242,6 @@
       <span class="kort-ikon">🍷</span>
       <div class="kort-text">
         <div class="kort-namn">Vinkällaren</div>
-      </div>
-    </a>
-
-    <a href="kok.html" class="kort kort-kok">
-      <span class="kort-ikon">🍽️</span>
-      <div class="kort-text">
-        <div class="kort-namn">Köket</div>
       </div>
     </a>
 
