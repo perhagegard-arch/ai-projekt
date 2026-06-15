@@ -21,6 +21,7 @@
 
     /* Emblem och rubrik */
     header {
+      position: relative;
       text-align: center;
       margin-bottom: 2rem;
     }
@@ -187,23 +188,19 @@
 
       .kort-text { text-align: left; }
     }
-    /* ── Info-knapp bredvid rubriken ── */
-    .rubrik-rad {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.55rem;
-    }
-
+    /* ── Info-knapp – absolut i headerns hörn, påverkar ej centrering ── */
     .info-knapp {
-      width: 26px;
-      height: 26px;
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 28px;
+      height: 28px;
       border-radius: 50%;
       border: 1px solid #4a3a18;
       background: none;
       color: #6a5028;
       font-size: 0.88rem;
       cursor: pointer;
-      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -377,11 +374,9 @@
       onerror="this.style.display='none'; document.getElementById('emblem-fb').style.display='block';"
     >
     <div id="emblem-fb" class="emblem-fallback">👨‍🍳</div>
-    <div class="rubrik-rad">
-      <h1>Välkommen hem</h1>
-      <button class="info-knapp" id="info-knapp" title="Om Pers Kök & Vinkällare" aria-label="Öppna info">ⓘ</button>
-    </div>
+    <h1>Välkommen hem</h1>
     <p class="valkomst-underrubrik">Vad vill du laga idag?</p>
+    <button class="info-knapp" id="info-knapp" title="Om Pers Kök & Vinkällare" aria-label="Öppna info">ⓘ</button>
   </header>
 
   <!-- Överblick – data läses live från localStorage -->
