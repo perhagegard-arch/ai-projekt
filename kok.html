@@ -66,8 +66,17 @@
       padding: 3.5rem 1rem 5rem;
       background-image: url('bilder/tax-maskrosor.jpg');
       background-size: cover;
-      background-position: center 35%;
+      background-position: center 35%;  /* mobilvy: visar hunden bra */
       text-align: center;
+    }
+
+    /* Desktop: bilden är stående (1400×1867) – på bred skärm behövs
+       lägre position och mer höjd för att taxen ska synas */
+    @media (min-width: 768px) {
+      .kok-hero {
+        padding: 5rem 1rem 7rem;
+        background-position: center 62%;
+      }
     }
 
     .kok-hero-overlay {
