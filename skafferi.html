@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+  <link rel="apple-touch-icon" sizes="167x167" href="apple-touch-icon-167.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="apple-touch-icon-152.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pers Kök">
+  <meta name="theme-color" content="#1c1506">
+  <title>Skafferiet – Pers Kök & Vinkällare</title>
+  <style>
+    /* Mörkt tema per CLAUDE.md */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #121212;
+      color: #e0e0e0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      padding-bottom: 5rem;
+    }
+
+    /* ── Sticky header ────────────────────────────────────────────── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #1a1a1a;
+      border-bottom: 1px solid #2a2a2a;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .header-emblem {
+      width: 34px;
+      height: 34px;
+      object-fit: contain;
+      border-radius: 50%;
+    }
+
+    .header-titel { font-size: 1.05rem; font-weight: 700; flex: 1; }
+
+    .tillbaka {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.82rem;
+      padding: 0.4rem 0.7rem;
+      border: 1px solid #333;
+      border-radius: 8px;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .tillbaka:hover { color: #e0e0e0; border-color: #555; }
+
+    /* ── Filterflikar ─────────────────────────────────────────────── */
+    .filter-rad {
+      position: sticky;
+      top: 53px;
+      z-index: 90;
+      display: flex;
+      background: #1a1a1a;
+      border-bottom: 1px solid #222;
+      padding: 0 0.5rem;
+    }
+
+    .flik {
+      flex: 1;
+      padding: 0.65rem 0.5rem;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: none;
+      color: #555;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: color 0.12s, border-color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .flik .badge {
+      display: inline-block;
+      background: #252525;
+      border-radius: 10px;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 0.05rem 0.45rem;
+      margin-left: 0.3rem;
+      color: #555;
+      min-width: 1.4rem;
+      text-align: center;
+    }
+
+    .flik.aktiv               { color: #8ac88a; border-bottom-color: #4a8a4a; }
+    .flik.aktiv .badge        { background: #152015; color: #6aab6a; }
+    .flik[data-flik="inkop"].aktiv        { color: #d4a84b; border-bottom-color: #a07830; }
+    .flik[data-flik="inkop"].aktiv .badge { background: #221a06; color: #c89030; }
+
+    /* ── Innehåll ─────────────────────────────────────────────────── */
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    /* ── Kategorisektioner ────────────────────────────────────────── */
+    .kategori { border-bottom: 1px solid #1c1c1c; padding: 0 1.1rem; }
+
+    .kategori-rubrik {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #4a4a4a;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 1rem 0 0.5rem;
+    }
+
+    /* ── Vara-rad ─────────────────────────────────────────────────── */
+    .vara-rad {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.62rem 0;
+      border-top: 1px solid #191919;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    /* Checkbox */
+    .vara-check {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      border: 1.5px solid #303030;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      font-size: 0.7rem;
+      color: transparent;
+      transition: background 0.12s, border-color 0.12s, color 0.12s;
+    }
+
+    .vara-rad.har .vara-check {
+      background: #152015;
+      border-color: #3a6a3a;
+      color: #5a9a5a;
+    }
+
+    .vara-rad.har .vara-check::after { content: '✓'; }
+
+    /* Varunamn */
+    .vara-namn {
+      flex: 1;
+      font-size: 0.88rem;
+      color: #444;
+      line-height: 1.3;
+    }
+
+    .vara-rad.har .vara-namn { color: #d0d0d0; }
+
+    /* Varor på inköpslistan: guldton */
+    .vara-rad.inkop .vara-namn { color: #b89040; }
+
+    /* "Tog slut"-knapp – visas bara på har-varor */
+    .tog-slut-btn {
+      flex-shrink: 0;
+      display: none;
+      background: none;
+      border: 1px solid #282828;
+      border-radius: 7px;
+      color: #444;
+      font-size: 0.68rem;
+      padding: 0.2rem 0.5rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: color 0.12s, border-color 0.12s, background 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vara-rad.har .tog-slut-btn { display: inline-block; }
+    .tog-slut-btn:hover { color: #d4a84b; border-color: #5a4010; background: #1a1208; }
+
+    /* Ta bort-knapp för egna varor */
+    .ta-bort-btn {
+      flex-shrink: 0;
+      display: none;
+      background: none;
+      border: none;
+      color: #2a2a2a;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.35rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .vara-rad:hover .ta-bort-btn,
+    .vara-rad:focus-within .ta-bort-btn { display: inline-block; }
+
+    .ta-bort-btn:hover { color: #c05050; }
+
+    /* ── Lägg till-rad ────────────────────────────────────────────── */
+    .lagg-till-rad { padding: 0.65rem 0 0.9rem; }
+
+    .lagg-till-btn {
+      background: none;
+      border: 1px dashed #252525;
+      border-radius: 8px;
+      color: #383838;
+      font-size: 0.78rem;
+      padding: 0.38rem 0.85rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .lagg-till-btn:hover { color: #777; border-color: #404040; }
+
+    .ny-vara-form {
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .ny-vara-form.synlig { display: flex; }
+
+    .ny-vara-input {
+      flex: 1;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #e0e0e0;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .ny-vara-input:focus { border-color: #4a6a4a; }
+
+    .ny-vara-spara {
+      flex-shrink: 0;
+      background: #152015;
+      border: 1px solid #2a5a2a;
+      border-radius: 8px;
+      color: #6aab6a;
+      font-size: 0.82rem;
+      padding: 0.5rem 0.85rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .ny-vara-avbryt {
+      background: none;
+      border: none;
+      color: #444;
+      font-size: 0.85rem;
+      padding: 0.4rem 0.3rem;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Inköpspanel ──────────────────────────────────────────────── */
+    .inkop-panel {
+      margin: 1.25rem 1.1rem 0;
+      background: #161410;
+      border: 1px solid #3a2e10;
+      border-radius: 14px;
+      padding: 1rem 1.15rem 1.15rem;
+    }
+
+    .inkop-panel-rubrik {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.7rem;
+    }
+
+    .inkop-panel-rubrik h3 { font-size: 0.88rem; font-weight: 700; color: #b89040; }
+
+    .kopiera-btn {
+      padding: 0.3rem 0.85rem;
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      color: #777;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: color 0.12s, border-color 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .kopiera-btn:hover    { color: #d4a84b; border-color: #5a4010; }
+    .kopiera-btn.kopierat { color: #6aab6a; border-color: #2a5a2a; }
+
+    .inkop-lista {
+      font-size: 0.85rem;
+      color: #b89040;
+      line-height: 2;
+    }
+
+    .inkop-tom {
+      font-size: 0.82rem;
+      color: #3a3a3a;
+      font-style: italic;
+    }
+
+    /* ── Tom-state ────────────────────────────────────────────────── */
+    .tom-state {
+      text-align: center;
+      padding: 4rem 1rem 2rem;
+      color: #333;
+    }
+
+    .tom-ikon { font-size: 2.5rem; margin-bottom: 0.6rem; }
+    .tom-text { font-size: 0.85rem; line-height: 1.5; }
+
+    /* ── Responsivt ───────────────────────────────────────────────── */
+    @media (min-width: 480px) {
+      .flik { font-size: 0.85rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="header">
+    <img src="Logga.png" alt="" class="header-emblem"
+         onerror="this.style.display='none'">
+    <span class="header-titel">🗄️ Skafferiet</span>
+    <a href="hub.html" class="tillbaka">← Hemma</a>
+  </header>
+
+  <div class="filter-rad">
+    <button class="flik aktiv" data-flik="alla">
+      Allt <span class="badge" id="badge-alla">—</span>
+    </button>
+    <button class="flik" data-flik="saknas">
+      Saknas <span class="badge" id="badge-saknas">0</span>
+    </button>
+    <button class="flik" data-flik="inkop">
+      Inköpslista <span class="badge" id="badge-inkop">0</span>
+    </button>
+  </div>
+
+  <div class="container" id="container"></div>
+
+  <script>
+    /* ── Kategorier och förkryssad grundlista ── */
+    const KATEGORIER = [
+      {
+        id: 'kryddor',
+        namn: '🧂 Kryddor & torra smaksättare',
+        varor: [
+          'Salt','Svartpeppar','Vitpeppar','Paprikapulver','Rökt paprika',
+          'Spiskummin','Timjan (torkad)','Oregano (torkad)','Lagerblad',
+          'Chiliflakes','Kanel','Kardemumma','Gurkmeja','Curry',
+          'Rosmarin (torkad)','Cayennepeppar','Muskot'
+        ]
+      },
+      {
+        id: 'oljor',
+        namn: '🫒 Oljor & vinäger',
+        varor: [
+          'Olivolja','Rapsolja','Sesamolja',
+          'Balsamvinäger','Rödvinsvinäger','Vitvinsvinäger','Äppelcidervinäger'
+        ]
+      },
+      {
+        id: 'saser',
+        namn: '🍶 Såser, soja & fond',
+        varor: [
+          'Sojasås','Fisksås','Kalvfond','Hönsfond','Grönsaksbuljong',
+          'Dijonsenap','Grovsenap','Worcestershire','Tomatpuré',
+          'Sweet chili','Tabasco'
+        ]
+      },
+      {
+        id: 'torrvaror',
+        namn: '🌾 Torrvaror',
+        varor: [
+          'Vetemjöl','Strösocker','Farinsocker','Pasta','Ris (långkornigt)',
+          'Couscous','Ströbröd','Panko','Bakpulver','Bikarbonat','Majsstärkelse'
+        ]
+      },
+      {
+        id: 'konserver',
+        namn: '🥫 Konserver & burkar',
+        varor: [
+          'Krossade tomater','Kokosmjölk','Kapris','Oliver (gröna)',
+          'Ansjovisfilé','Tonfisk (i olja)','Vita bönor'
+        ]
+      },
+      {
+        id: 'sprit',
+        namn: '🥃 Sprit till matlagning',
+        varor: [
+          'Cognac','Madeira','Portvin','Torrt vitt vin','Calvados'
+        ]
+      },
+      {
+        id: 'kyl',
+        namn: '❄️ Basvaror kyl',
+        varor: [
+          'Smör','Grädde (40%)','Crème fraîche','Ägg','Mjölk','Parmesan','Citron'
+        ]
+      }
+    ];
+
+    const LS_NYCKEL = 'skafferi_v1';
+
+    /* ── Hjälpfunktioner ── */
+    function normId(s) {
+      return s.toLowerCase()
+        .replace(/å/g,'a').replace(/ä/g,'a').replace(/ö/g,'o')
+        .replace(/é/g,'e').replace(/[^a-z0-9]/g,'_')
+        .replace(/_+/g,'_').replace(/^_|_$/g,'');
+    }
+
+    function varuId(katId, namn) { return katId + '_' + normId(namn); }
+
+    function nyttId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+    }
+
+    function escHtml(s) {
+      return String(s)
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    /* ── Standarddata – alla varor förkryssade (har: true) ── */
+    function standardData() {
+      const varor = {};
+      KATEGORIER.forEach(kat => {
+        kat.varor.forEach(namn => {
+          varor[varuId(kat.id, namn)] = { har: true, inkop: false };
+        });
+      });
+      return { varor, egna: [] };
+    }
+
+    /* ── Ladda från localStorage – faller tillbaka på standard vid fel ── */
+    let data;
+
+    function ladda() {
+      try {
+        const raw = localStorage.getItem(LS_NYCKEL);
+        if (!raw) { data = standardData(); return; }
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed.varor !== 'object') { data = standardData(); return; }
+        if (!Array.isArray(parsed.egna)) parsed.egna = [];
+        /* Lägg till nya standardvaror som lagts till i koden efter att Per sparat */
+        const std = standardData();
+        Object.keys(std.varor).forEach(id => {
+          if (!(id in parsed.varor)) parsed.varor[id] = std.varor[id];
+        });
+        data = parsed;
+      } catch (e) {
+        data = standardData();
+      }
+    }
+
+    /* ── Spara – tyst vid fel ── */
+    function spara() {
+      try { localStorage.setItem(LS_NYCKEL, JSON.stringify(data)); } catch (e) {}
+    }
+
+    /* ── State ── */
+    let aktivFlik = 'alla';
+    let oppnaForm = null;
+
+    /* ── Räkna statistik ── */
+    function raknaStats() {
+      let alla = 0, saknas = 0, inkop = 0;
+      KATEGORIER.forEach(kat => {
+        kat.varor.forEach(namn => {
+          const v = data.varor[varuId(kat.id, namn)] || { har: true, inkop: false };
+          alla++;
+          if (!v.har)  saknas++;
+          if (v.inkop) inkop++;
+        });
+        data.egna.filter(e => e.kategoriId === kat.id).forEach(e => {
+          alla++;
+          if (!e.har)  saknas++;
+          if (e.inkop) inkop++;
+        });
+      });
+      return { alla, saknas, inkop };
+    }
+
+    /* ── Samla inköpslistans varor ── */
+    function inkopVaror() {
+      const lista = [];
+      KATEGORIER.forEach(kat => {
+        kat.varor.forEach(namn => {
+          const v = data.varor[varuId(kat.id, namn)];
+          if (v && v.inkop) lista.push(namn);
+        });
+        data.egna.filter(e => e.kategoriId === kat.id && e.inkop).forEach(e => lista.push(e.namn));
+      });
+      return lista;
+    }
+
+    /* ── Render ── */
+    function render() {
+      const stats = raknaStats();
+
+      document.getElementById('badge-alla').textContent   = stats.alla;
+      document.getElementById('badge-saknas').textContent = stats.saknas || '0';
+      document.getElementById('badge-inkop').textContent  = stats.inkop  || '0';
+
+      const container = document.getElementById('container');
+      let html = '';
+      let nagonSynlig = false;
+
+      KATEGORIER.forEach(kat => {
+        const standardVaror = kat.varor.map(namn => {
+          const id = varuId(kat.id, namn);
+          const v  = data.varor[id] || { har: true, inkop: false };
+          return { id, namn, har: v.har, inkop: v.inkop, egen: false };
+        });
+
+        const egnaVaror = data.egna
+          .filter(e => e.kategoriId === kat.id)
+          .map(e => ({ id: e.id, namn: e.namn, har: e.har, inkop: e.inkop, egen: true }));
+
+        const alleVaror = [...standardVaror, ...egnaVaror];
+
+        let visaVaror;
+        if      (aktivFlik === 'alla')   visaVaror = alleVaror;
+        else if (aktivFlik === 'saknas') visaVaror = alleVaror.filter(v => !v.har);
+        else                             visaVaror = alleVaror.filter(v => v.inkop);
+
+        const visaKat = visaVaror.length > 0 || aktivFlik === 'alla';
+        if (!visaKat) return;
+        nagonSynlig = true;
+
+        html += `<div class="kategori" data-katid="${kat.id}">`;
+        html += `<div class="kategori-rubrik">${kat.namn}</div>`;
+
+        visaVaror.forEach(v => {
+          const harKls  = v.har   ? ' har'  : '';
+          const inkKls  = v.inkop ? ' inkop' : '';
+          const varid   = v.egen ? '' : `data-varid="${v.id}"`;
+          const egnid   = v.egen ? `data-egnid="${v.id}"` : '';
+          const togId   = v.egen ? `egen:${v.id}` : v.id;
+
+          html += `<div class="vara-rad${harKls}${inkKls}" ${varid}${egnid}>`;
+          html += `<div class="vara-check"></div>`;
+          html += `<span class="vara-namn">${escHtml(v.namn)}</span>`;
+          if (v.har) {
+            html += `<button class="tog-slut-btn" data-togslut="${togId}">Tog slut 🛒</button>`;
+          }
+          if (v.egen) {
+            html += `<button class="ta-bort-btn" data-tabort="${v.id}" title="Ta bort">✕</button>`;
+          }
+          html += `</div>`;
+        });
+
+        /* Lägg till-rad visas bara i "alla"-vyn */
+        if (aktivFlik === 'alla') {
+          const formSynlig = oppnaForm === kat.id;
+          html += `<div class="lagg-till-rad">`;
+          if (!formSynlig) {
+            html += `<button class="lagg-till-btn" data-oppnaform="${kat.id}">+ Lägg till vara</button>`;
+          } else {
+            html += `<div class="ny-vara-form synlig" data-form="${kat.id}">`;
+            html += `<input class="ny-vara-input" type="text" placeholder="Varunamn…" data-forminput="${kat.id}" maxlength="60" autocomplete="off">`;
+            html += `<button class="ny-vara-spara" data-sparavar="${kat.id}">Lägg till</button>`;
+            html += `<button class="ny-vara-avbryt" data-stangform="${kat.id}">✕</button>`;
+            html += `</div>`;
+          }
+          html += `</div>`;
+        }
+
+        html += `</div>`; /* .kategori */
+      });
+
+      /* Tom-state per flik */
+      if (!nagonSynlig) {
+        const tomText = {
+          saknas: { ikon: '✅', text: 'Skafferiet är välfyllt – ingenting saknas just nu.' },
+          inkop:  { ikon: '🛒', text: 'Inköpslistan är tom.<br>Tryck <em>Tog slut</em> när något tar slut.' }
+        }[aktivFlik] || { ikon: '🗄️', text: '' };
+        html += `<div class="tom-state"><div class="tom-ikon">${tomText.ikon}</div><div class="tom-text">${tomText.text}</div></div>`;
+      }
+
+      /* Inköpspanel – visas i alla flikar utom "inkop" (där renderas den ovan) */
+      const lista = inkopVaror();
+
+      if (aktivFlik === 'inkop') {
+        html += `<div class="inkop-panel">`;
+        html += `<div class="inkop-panel-rubrik"><h3>🛒 Inköpslista</h3>`;
+        if (lista.length) html += `<button class="kopiera-btn" id="kopiera-btn">📋 Kopiera</button>`;
+        html += `</div>`;
+        html += lista.length
+          ? `<div class="inkop-lista">${lista.map(n => `• ${escHtml(n)}`).join('<br>')}</div>`
+          : `<div class="inkop-tom">Listan är tom</div>`;
+        html += `</div>`;
+      } else if (lista.length > 0) {
+        html += `<div class="inkop-panel">`;
+        html += `<div class="inkop-panel-rubrik"><h3>🛒 Inköpslista (${lista.length})</h3>`;
+        html += `<button class="kopiera-btn" id="kopiera-btn">📋 Kopiera</button></div>`;
+        html += `<div class="inkop-lista">${lista.map(n => `• ${escHtml(n)}`).join('<br>')}</div>`;
+        html += `</div>`;
+      }
+
+      container.innerHTML = html;
+      kopplaHandlers();
+
+      /* Fokusera formulärinput om ett formulär precis öppnades */
+      if (oppnaForm) {
+        const inp = container.querySelector(`[data-forminput="${oppnaForm}"]`);
+        if (inp) setTimeout(() => inp.focus(), 30);
+      }
+    }
+
+    /* ── Händelsehantering ── */
+    function kopplaHandlers() {
+      const container = document.getElementById('container');
+
+      /* Filterflikar */
+      document.querySelectorAll('.flik').forEach(btn => {
+        btn.onclick = () => {
+          aktivFlik = btn.dataset.flik;
+          oppnaForm = null;
+          document.querySelectorAll('.flik').forEach(b => b.classList.toggle('aktiv', b === btn));
+          render();
+        };
+      });
+
+      /* Klick på vara-rad: toggla har */
+      container.querySelectorAll('.vara-rad').forEach(rad => {
+        rad.addEventListener('click', e => {
+          if (e.target.closest('.tog-slut-btn, .ta-bort-btn, .ny-vara-form, .lagg-till-rad')) return;
+          const varid = rad.dataset.varid;
+          const egnid = rad.dataset.egnid;
+          if (varid) {
+            if (!data.varor[varid]) data.varor[varid] = { har: false, inkop: false };
+            data.varor[varid].har = !data.varor[varid].har;
+            if (data.varor[varid].har) data.varor[varid].inkop = false;
+          } else if (egnid) {
+            const e = data.egna.find(x => x.id === egnid);
+            if (e) { e.har = !e.har; if (e.har) e.inkop = false; }
+          }
+          spara();
+          render();
+        });
+      });
+
+      /* Tog slut */
+      container.querySelectorAll('.tog-slut-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          const raw = btn.dataset.togslut;
+          if (raw.startsWith('egen:')) {
+            const id = raw.slice(5);
+            const egn = data.egna.find(x => x.id === id);
+            if (egn) { egn.har = false; egn.inkop = true; }
+          } else {
+            if (!data.varor[raw]) data.varor[raw] = { har: true, inkop: false };
+            data.varor[raw].har   = false;
+            data.varor[raw].inkop = true;
+          }
+          spara();
+          render();
+        });
+      });
+
+      /* Ta bort egen vara */
+      container.querySelectorAll('.ta-bort-btn').forEach(btn => {
+        btn.addEventListener('click', e => {
+          e.stopPropagation();
+          data.egna = data.egna.filter(x => x.id !== btn.dataset.tabort);
+          spara();
+          render();
+        });
+      });
+
+      /* Öppna ny-vara-formulär */
+      container.querySelectorAll('[data-oppnaform]').forEach(btn => {
+        btn.addEventListener('click', () => { oppnaForm = btn.dataset.oppnaform; render(); });
+      });
+
+      /* Stäng formulär */
+      container.querySelectorAll('[data-stangform]').forEach(btn => {
+        btn.addEventListener('click', () => { oppnaForm = null; render(); });
+      });
+
+      /* Spara ny vara via knapp */
+      container.querySelectorAll('[data-sparavar]').forEach(btn => {
+        btn.addEventListener('click', () => sparaNyVara(btn.dataset.sparavar));
+      });
+
+      /* Spara ny vara via Enter, avbryt via Esc */
+      container.querySelectorAll('[data-forminput]').forEach(inp => {
+        inp.addEventListener('keydown', e => {
+          if (e.key === 'Enter')  { e.preventDefault(); sparaNyVara(inp.dataset.forminput); }
+          if (e.key === 'Escape') { oppnaForm = null; render(); }
+        });
+      });
+
+      /* Kopiera inköpslista */
+      const kopBtn = document.getElementById('kopiera-btn');
+      if (kopBtn) {
+        kopBtn.addEventListener('click', () => {
+          const text = inkopVaror().map(n => '• ' + n).join('\n');
+          navigator.clipboard.writeText(text).then(() => {
+            kopBtn.textContent = '✓ Kopierat';
+            kopBtn.classList.add('kopierat');
+            setTimeout(() => { kopBtn.textContent = '📋 Kopiera'; kopBtn.classList.remove('kopierat'); }, 2000);
+          }).catch(() => {});
+        });
+      }
+    }
+
+    function sparaNyVara(katId) {
+      const inp = document.querySelector(`[data-forminput="${katId}"]`);
+      if (!inp) return;
+      const namn = inp.value.trim();
+      if (!namn) return;
+      data.egna.push({ id: nyttId(), kategoriId: katId, namn, har: true, inkop: false });
+      oppnaForm = null;
+      spara();
+      render();
+    }
+
+    /* ── Starta ── */
+    ladda();
+    render();
+  </script>
+
+</body>
+</html>

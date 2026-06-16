@@ -182,6 +182,15 @@
       border-color: #7a1a2a;
     }
 
+    /* Skafferiet – olivgrön accent, full bredd */
+    .kort-skafferi {
+      grid-column: 1 / -1;
+      background: linear-gradient(145deg, #151e0a, #0e1507);
+      border-color: #3a5a1a;
+      min-height: 70px;
+      padding: 0.9rem 1.5rem;
+    }
+
     /* Köket – guld, full bredd, dominant */
     .kort-kok {
       grid-column: 1 / -1;
@@ -446,6 +455,14 @@
       <span class="kort-ikon">🍷</span>
       <div class="kort-text">
         <div class="kort-namn">Vinkällaren</div>
+      </div>
+    </a>
+
+    <a href="skafferi.html" class="kort kort-skafferi">
+      <span class="kort-ikon">🗄️</span>
+      <div class="kort-text">
+        <div class="kort-namn">Skafferiet</div>
+        <div class="kort-under">Vad finns hemma?</div>
       </div>
     </a>
 
