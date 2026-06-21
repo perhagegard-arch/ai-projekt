@@ -323,6 +323,21 @@
   .fridge-edit-row { display: flex; gap: 8px; margin-bottom: 10px; }
   .fridge-edit-row input { flex: 1; }
 
+  /* WIZARD / HANTERA FRYSAR */
+  .wizard-step { display: none; }
+  .wizard-step.active { display: block; }
+  .wizard-row { border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin-bottom: 12px; background: var(--surface); }
+  .wizard-row-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .wizard-row-head input[type=text] { flex: 1; }
+  .wizard-fack-row { display: flex; align-items: center; gap: 10px; }
+  .wizard-fack-row input[type=number] { width: 90px; flex: none; }
+  .wizard-fack-row label.checklbl { display: flex; align-items: center; gap: 8px; text-transform: none; font-weight: 500; color: var(--text); margin-bottom: 0; }
+  .wizard-fack-row input[type=checkbox] { width: auto; flex: none; accent-color: var(--accent); }
+  .wizard-summary-item { font-size: 14px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .wizard-summary-item:last-child { border-bottom: none; }
+  .wizard-remove-row { flex-shrink: 0; background: transparent; border: none; color: var(--danger); font-size: 18px; cursor: pointer; padding: 4px 8px; }
+  .wizard-remove-row:disabled { color: var(--muted); cursor: not-allowed; opacity: 0.5; }
+
   .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
   .bar-label { width: 90px; font-size: 13px; flex-shrink: 0; }
   .bar-track { flex: 1; height: 22px; background: var(--surface); border-radius: 6px; overflow: hidden; }
@@ -430,6 +445,12 @@
 <main>
   <!-- INVENTORY VIEW -->
   <div id="view-inventory">
+    <div id="setup-prompt" class="empty" style="display:none">
+      <div class="empty-icon">🧊</div>
+      <p>Inga frysar uppsatta ännu</p>
+      <button class="add-btn" style="margin-top:16px" onclick="openWizard()">＋ Sätt upp dina frysar</button>
+    </div>
+    <div id="inventory-main">
     <div id="eat-first-banner"></div>
     <div class="stats" id="stats">
     <div class="stat-card"><div class="stat-val">4</div><div class="stat-lbl">Förpackningar</div></div>
@@ -491,6 +512,7 @@
           </div>
         </div>
       </div></div>
+    </div>
   </div>
 
   <!-- SUMMARY VIEW -->
@@ -588,12 +610,10 @@
     </div>
 
     <div class="panel">
-      <h3>Platser &amp; fack</h3>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">Fasta platser – ändras i koden (FRYSAR-konfigurationen).</p>
-      <div style="font-size:14px;line-height:2.2;">
-        🧊 <b>Stående frysen</b> – Fack 1–6<br>
-        🧊 <b>Stora frysen</b> – Hänghylla 1–3, Back 1–4, Småhyllan<br>
-        🧊 <b>Lilla frysen</b> – ingen fackindelning
+      <h3>🧊 Dina frysar</h3>
+      <div id="settings-frys-list" style="font-size:14px;line-height:2.2;"></div>
+      <div class="settings-btns" style="margin-top:14px">
+        <button onclick="openManageFrys()">⚙️ Hantera frysar</button>
       </div>
     </div>
 
@@ -753,6 +773,60 @@
   </div>
 </div>
 
+<!-- SETUP-WIZARD -->
+<div class="modal-bg" id="wizard-bg">
+  <div class="modal" id="wizard-modal">
+    <div class="modal-handle"></div>
+
+    <div class="wizard-step active" id="wizard-step-1">
+      <h2>🧊 Välkommen till Frysregister</h2>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:20px;">Låt oss sätta upp dina frysar – tar under en minut.</p>
+      <div class="form-group">
+        <label>Hur många frysar har du?</label>
+        <input type="number" id="wz-count" min="1" max="8" value="3">
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="closeWizardSkip()">Hoppa över</button>
+        <button class="btn-save" onclick="wizardStep1Next()">Nästa →</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" id="wizard-step-2">
+      <h2>Berätta om dina frysar</h2>
+      <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">Ge varje frys ett namn, och ange om den är indelad i fack eller hyllor.</p>
+      <div id="wizard-rows"></div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="wizardGoTo(1)">← Tillbaka</button>
+        <button class="btn-save" onclick="wizardStep2Next()">Nästa →</button>
+      </div>
+    </div>
+
+    <div class="wizard-step" id="wizard-step-3">
+      <h2>Klart att skapa!</h2>
+      <div class="panel" id="wizard-summary"></div>
+      <div class="form-actions">
+        <button class="btn-cancel" onclick="wizardGoTo(2)">← Tillbaka</button>
+        <button class="btn-save" onclick="wizardFinish()">✅ Skapa frysar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HANTERA FRYSAR -->
+<div class="modal-bg" id="manage-bg" onclick="closeManageFrys(event)">
+  <div class="modal" id="manage-modal">
+    <div class="modal-handle"></div>
+    <h2>⚙️ Hantera frysar</h2>
+    <p style="font-size:14px;color:var(--muted);margin-bottom:16px;">Ändra namn eller fackindelning, lägg till en ny frys, eller ta bort en tom frys.</p>
+    <div id="manage-rows"></div>
+    <button class="add-btn" style="margin-bottom:0" onclick="manageAddRow()">＋ Lägg till frys</button>
+    <div class="form-actions">
+      <button class="btn-cancel" onclick="closeManageFrys()">Avbryt</button>
+      <button class="btn-save" onclick="manageSave()">Spara</button>
+    </div>
+  </div>
+</div>
+
 <!-- CONFIRM DELETE -->
 <div class="confirm-bg" id="confirm-bg">
   <div class="confirm-box">
@@ -772,8 +846,14 @@
 const STORAGE_KEY = 'frysregister_v1';
 const HISTORY_KEY = 'frysregister_history_v1';
 
-// ── Platskonfiguration – ändra här för att lägga till/ta bort platser och fack ──
-const FRYSAR = [
+// ── Platskonfiguration ────────────────────────────────────────────────
+// Frysar konfigureras numera per användare/enhet via setup-wizarden och sparas
+// i localStorage (FRYS_CONFIG_KEY). PERS_FRYSAR nedan är Pers ursprungliga
+// hårdkodade uppsättning – den används för att migrera in befintliga
+// installationer tyst (ingen wizard, ingen dataförlust) och som förifyllda
+// standardvärden i wizarden.
+const FRYS_CONFIG_KEY = 'frys_config_v1';
+const PERS_FRYSAR = [
   {
     namn: 'Stående frysen',
     fack: ['Fack 1','Fack 2','Fack 3','Fack 4','Fack 5','Fack 6']
@@ -791,6 +871,7 @@ const FRYSAR = [
     fack: []
   }
 ];
+let FRYSAR = [];
 const CATEGORY_EMOJI = { 'Vilt':'🦌','Fågel':'🦢','Fisk':'🐟','Grönsaker':'🥦','Bär & Frukt':'🫐','Lagad mat':'🍲','Chark & Korv':'🌭','Bröd & Bak':'🍞','Övrigt':'📦' };
 
 // Rekommenderade frystider i månader (baserat på Livsmedelsverket, Svenskt Kött, Råd & Rön)
@@ -821,7 +902,8 @@ function recommendedMonths(item) {
   return base.months;
 }
 
-const fridges = FRYSAR.map(f => f.namn);
+let fridges = [];
+function refreshFridgeNames() { fridges = FRYSAR.map(f => f.namn); }
 
 let items = [], history = [];
 let activeTab = 'Alla', activeFilter = 'Alla', activeCutFilter = 'Alla';
@@ -835,6 +917,29 @@ function load() {
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+}
+
+// ── Frys-konfiguration: ladda/spara/migrera ─────────────────────────
+function loadFrysConfig() {
+  try {
+    const raw = localStorage.getItem(FRYS_CONFIG_KEY);
+    const cfg = raw && JSON.parse(raw);
+    if (Array.isArray(cfg) && cfg.length) return cfg;
+  } catch {}
+  return null;
+}
+function saveFrysConfig(cfg) {
+  FRYSAR = cfg;
+  localStorage.setItem(FRYS_CONFIG_KEY, JSON.stringify(cfg));
+}
+function initFrysConfig() {
+  const saved = loadFrysConfig();
+  if (saved) { FRYSAR = saved; return; }
+  // Ingen sparad konfig – men redan varor i frysen (befintlig användare från
+  // innan wizarden fanns) → återskapa Pers struktur tyst, ingen wizard.
+  if (items.length) { saveFrysConfig(PERS_FRYSAR); return; }
+  // Helt ny installation utan data och utan konfig → wizarden tar vid.
+  FRYSAR = [];
 }
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 
@@ -1391,6 +1496,10 @@ function ageLabel(item) {
 
 // ── RENDER MAIN ───────────────────────────────────────────────────────
 function render() {
+  const harFrysar = FRYSAR.length > 0;
+  document.getElementById('setup-prompt').style.display = harFrysar ? 'none' : '';
+  document.getElementById('inventory-main').style.display = harFrysar ? '' : 'none';
+  if (!harFrysar) return;
   renderTabs();
   renderEatFirst();
   renderStats();
@@ -1796,9 +1905,174 @@ function renderHistoryView() {
   }).join('');
 }
 
+// ── SETUP-WIZARD ──────────────────────────────────────────────────────
+let wizardData = [];
+
+function openWizard() {
+  // Förifyll med Pers standarduppsättning så den är lätt att återskapa
+  wizardData = PERS_FRYSAR.map(f => ({
+    namn: f.namn,
+    harFack: true,
+    antal: f.fack ? f.fack.length : (f.fackgrupper ? f.fackgrupper.reduce((s,g) => s + g.fack.length, 0) : 0)
+  }));
+  wizardData[2].harFack = false; // Lilla frysen har inga fack i standardvärdena
+  document.getElementById('wz-count').value = wizardData.length;
+  wizardGoTo(1);
+  document.getElementById('wizard-bg').classList.add('open');
+}
+function closeWizardSkip() {
+  document.getElementById('wizard-bg').classList.remove('open');
+}
+function wizardGoTo(step) {
+  [1,2,3].forEach(n => document.getElementById('wizard-step-'+n).classList.toggle('active', n === step));
+  if (step === 2) renderWizardRows();
+  if (step === 3) renderWizardSummary();
+}
+function wizardStep1Next() {
+  const n = Math.max(1, Math.min(8, parseInt(document.getElementById('wz-count').value) || 1));
+  document.getElementById('wz-count').value = n;
+  const resized = [];
+  for (let i = 0; i < n; i++) {
+    resized.push(wizardData[i] || { namn: 'Frys ' + (i+1), harFack: false, antal: 0 });
+  }
+  wizardData = resized;
+  wizardGoTo(2);
+}
+function renderWizardRows() {
+  const el = document.getElementById('wizard-rows');
+  el.innerHTML = wizardData.map((row, idx) => `
+    <div class="wizard-row">
+      <div class="wizard-row-head"><span>Frys ${idx+1}</span></div>
+      <div class="form-group">
+        <label>Namn</label>
+        <input type="text" value="${(row.namn||'').replace(/"/g,'&quot;')}" oninput="wizardData[${idx}].namn = this.value">
+      </div>
+      <div class="wizard-fack-row">
+        <label class="checklbl"><input type="checkbox" ${row.harFack?'checked':''} onchange="wizardToggleFack(${idx}, this.checked)"> Har fack/hyllor</label>
+        <input type="number" min="1" max="30" value="${row.antal||1}" style="${row.harFack?'':'display:none'}" id="wz-antal-${idx}" oninput="wizardData[${idx}].antal = parseInt(this.value)||1">
+      </div>
+    </div>`).join('');
+}
+function wizardToggleFack(idx, checked) {
+  wizardData[idx].harFack = checked;
+  const inp = document.getElementById('wz-antal-'+idx);
+  if (inp) { inp.style.display = checked ? '' : 'none'; if (checked && !wizardData[idx].antal) wizardData[idx].antal = 1; }
+}
+function wizardStep2Next() {
+  wizardGoTo(3);
+}
+function renderWizardSummary() {
+  const el = document.getElementById('wizard-summary');
+  el.innerHTML = wizardData.map(row =>
+    `<div class="wizard-summary-item">🧊 <b>${row.namn || 'Namnlös frys'}</b> – ${row.harFack ? row.antal + ' fack' : 'inga fack'}</div>`
+  ).join('');
+}
+function wizardFinish() {
+  const cfg = wizardData.map(row => ({
+    namn: (row.namn || 'Frys').trim() || 'Frys',
+    fack: row.harFack ? Array.from({length: row.antal||1}, (_,i) => 'Fack ' + (i+1)) : []
+  }));
+  saveFrysConfig(cfg);
+  refreshFridgeNames();
+  document.getElementById('wizard-bg').classList.remove('open');
+  render();
+  toast('🧊 Frysarna är skapade!');
+}
+
 // ── SETTINGS ──────────────────────────────────────────────────────────
-// Platser och fack är konfigurerade i FRYSAR-konstanten – ingen runtime-editor behövs.
-function renderSettings() {}
+function frysFackCount(f) {
+  if (f.fackgrupper) return f.fackgrupper.reduce((s,g) => s + g.fack.length, 0);
+  return (f.fack||[]).length;
+}
+function renderSettings() {
+  const el = document.getElementById('settings-frys-list');
+  if (!el) return;
+  el.innerHTML = FRYSAR.map(f => {
+    const cnt = frysFackCount(f);
+    return `🧊 <b>${f.namn}</b> – ${cnt>0 ? cnt+' fack' : 'ingen fackindelning'}<br>`;
+  }).join('') || '<span style="color:var(--muted)">Inga frysar uppsatta.</span>';
+}
+
+// ── HANTERA FRYSAR ────────────────────────────────────────────────────
+let manageData = [];
+
+function itemCountForFridge(namn) {
+  return items.filter(i => i.fridge === namn).length;
+}
+function openManageFrys() {
+  manageData = FRYSAR.map(f => ({
+    namn: f.namn,
+    harFack: frysFackCount(f) > 0,
+    antal: frysFackCount(f) || 1,
+    _origNamn: f.namn,
+    _orig: f,
+    _edited: false,
+    isNew: false
+  }));
+  renderManageRows();
+  document.getElementById('manage-bg').classList.add('open');
+}
+function closeManageFrys(e) {
+  if (e && e.target !== document.getElementById('manage-bg')) return;
+  document.getElementById('manage-bg').classList.remove('open');
+}
+function renderManageRows() {
+  const el = document.getElementById('manage-rows');
+  el.innerHTML = manageData.map((row, idx) => {
+    const cnt = row.isNew ? 0 : itemCountForFridge(row._origNamn);
+    return `
+    <div class="wizard-row">
+      <div class="wizard-row-head">
+        <input type="text" value="${(row.namn||'').replace(/"/g,'&quot;')}" oninput="manageEditName(${idx}, this.value)">
+        <button class="wizard-remove-row" ${cnt>0 ? 'disabled title="Töm frysen på varor först"' : 'title="Ta bort frys"'} onclick="manageRemoveRow(${idx})">✕</button>
+      </div>
+      ${cnt>0 ? `<div style="font-size:12px;color:var(--muted);margin-bottom:8px;">${cnt} vara/varor ligger i denna frys</div>` : ''}
+      <div class="wizard-fack-row">
+        <label class="checklbl"><input type="checkbox" ${row.harFack?'checked':''} onchange="manageToggleFack(${idx}, this.checked)"> Har fack/hyllor</label>
+        <input type="number" min="1" max="30" value="${row.antal||1}" style="${row.harFack?'':'display:none'}" id="mg-antal-${idx}" oninput="manageEditAntal(${idx}, this.value)">
+      </div>
+    </div>`;
+  }).join('');
+}
+function manageEditName(idx, val) { manageData[idx].namn = val; manageData[idx]._edited = true; }
+function manageToggleFack(idx, checked) {
+  manageData[idx].harFack = checked;
+  manageData[idx]._edited = true;
+  const inp = document.getElementById('mg-antal-'+idx);
+  if (inp) { inp.style.display = checked ? '' : 'none'; if (checked && !manageData[idx].antal) manageData[idx].antal = 1; }
+}
+function manageEditAntal(idx, val) { manageData[idx].antal = parseInt(val)||1; manageData[idx]._edited = true; }
+function manageAddRow() {
+  manageData.push({ namn: 'Ny frys', harFack: false, antal: 1, _origNamn: null, _orig: null, _edited: true, isNew: true });
+  renderManageRows();
+}
+function manageRemoveRow(idx) {
+  const row = manageData[idx];
+  if (!row.isNew && itemCountForFridge(row._origNamn) > 0) return;
+  manageData.splice(idx, 1);
+  renderManageRows();
+}
+function manageSave() {
+  if (!manageData.length) { alert('Du måste ha minst en frys.'); return; }
+  const cfg = manageData.map(row =>
+    (!row._edited && row._orig) ? row._orig : {
+      namn: (row.namn||'Frys').trim() || 'Frys',
+      fack: row.harFack ? Array.from({length: row.antal||1}, (_,i) => 'Fack ' + (i+1)) : []
+    });
+  // Cascada namnbyten till befintliga varor så de inte tappar sin frys-koppling
+  manageData.forEach(row => {
+    if (!row.isNew && row._origNamn && row.namn !== row._origNamn) {
+      items.forEach(i => { if (i.fridge === row._origNamn) i.fridge = row.namn; });
+    }
+  });
+  save();
+  saveFrysConfig(cfg);
+  refreshFridgeNames();
+  document.getElementById('manage-bg').classList.remove('open');
+  render();
+  renderSettings();
+  toast('🧊 Frysarna är uppdaterade');
+}
 
 function saveAIKeyFromSettings() {
   const v = document.getElementById('settings-apikey').value.trim();
@@ -1823,7 +2097,7 @@ function downloadFile(filename, content, type) {
 }
 
 function exportData() {
-  const payload = { version: 2, exported: new Date().toISOString(), fridges, items, history };
+  const payload = { version: 3, exported: new Date().toISOString(), frysConfig: FRYSAR, fridges, items, history };
   downloadFile('frysregister-backup-' + new Date().toISOString().slice(0,10) + '.json',
     JSON.stringify(payload, null, 2), 'application/json');
   toast('Säkerhetskopia exporterad ✅');
@@ -1839,7 +2113,11 @@ function importData(ev) {
       if (!Array.isArray(data.items)) throw new Error('fel format');
       if (!confirm('Detta ersätter all nuvarande data med säkerhetskopian. Fortsätt?')) return;
       items   = data.items;
-      fridges = Array.isArray(data.fridges) && data.fridges.length ? data.fridges : [...DEFAULT_FRIDGES];
+      // Äldre säkerhetskopior saknar frysConfig – behåll då nuvarande/Pers uppsättning istället för att krascha
+      const cfg = Array.isArray(data.frysConfig) && data.frysConfig.length ? data.frysConfig
+                : (FRYSAR.length ? FRYSAR : PERS_FRYSAR);
+      saveFrysConfig(cfg);
+      refreshFridgeNames();
       history = Array.isArray(data.history) ? data.history : [];
       activeTab = 'Alla';
       save(); render(); setView('inventory');
@@ -1868,7 +2146,10 @@ function exportCSV() {
 
 // ── INIT ──────────────────────────────────────────────────────────────
 load();
+initFrysConfig();
+refreshFridgeNames();
 render();
+if (!FRYSAR.length) openWizard();
 </script>
 
 
