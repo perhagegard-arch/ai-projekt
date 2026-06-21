@@ -952,6 +952,48 @@
     function hamtaVinkallare() { try { return JSON.parse(localStorage.getItem('vinkallare_viner') || '[]'); } catch(e) { return []; } }
     function hamtaSousvide()   { try { return JSON.parse(localStorage.getItem('sousvide_koningar') || '[]'); } catch(e) { return []; } }
 
+    /* Skafferiets standardvaror – namnen finns bara här, localStorage sparar bara ID:n.
+       Hålls i synk med KATEGORIER i skafferi.html. */
+    const SKAFFERI_KATEGORIER = [
+      { id: 'kryddor',   varor: ['Salt','Svartpeppar','Vitpeppar','Paprikapulver','Rökt paprika','Spiskummin','Timjan (torkad)','Oregano (torkad)','Lagerblad','Chiliflakes','Kanel','Kardemumma','Gurkmeja','Curry','Rosmarin (torkad)','Cayennepeppar','Muskot'] },
+      { id: 'oljor',     varor: ['Olivolja','Rapsolja','Sesamolja','Balsamvinäger','Rödvinsvinäger','Vitvinsvinäger','Äppelcidervinäger'] },
+      { id: 'saser',     varor: ['Sojasås','Fisksås','Kalvfond','Hönsfond','Grönsaksbuljong','Dijonsenap','Grovsenap','Worcestershire','Tomatpuré','Sweet chili','Tabasco'] },
+      { id: 'torrvaror', varor: ['Vetemjöl','Strösocker','Farinsocker','Pasta','Ris (långkornigt)','Couscous','Ströbröd','Panko','Bakpulver','Bikarbonat','Majsstärkelse'] },
+      { id: 'konserver', varor: ['Krossade tomater','Kokosmjölk','Kapris','Oliver (gröna)','Ansjovisfilé','Tonfisk (i olja)','Vita bönor'] },
+      { id: 'sprit',     varor: ['Cognac','Madeira','Portvin','Torrt vitt vin','Calvados'] },
+      { id: 'kyl',       varor: ['Smör','Grädde (40%)','Crème fraîche','Ägg','Mjölk','Parmesan','Citron'] }
+    ];
+
+    function skafferiNormId(s) {
+      return s.toLowerCase()
+        .replace(/å/g,'a').replace(/ä/g,'a').replace(/ö/g,'o')
+        .replace(/é/g,'e').replace(/[^a-z0-9]/g,'_')
+        .replace(/_+/g,'_').replace(/^_|_$/g,'');
+    }
+
+    /* Returnerar namnen på allt Per har hemma i skafferiet (har: true). Tom/trasig data → []. */
+    function hamtaSkafferidata() {
+      try {
+        const raw = localStorage.getItem('skafferi_v1');
+        if (!raw) return [];
+        const data = JSON.parse(raw);
+        if (!data || typeof data.varor !== 'object') return [];
+
+        const namn = [];
+        SKAFFERI_KATEGORIER.forEach(kat => {
+          kat.varor.forEach(v => {
+            const id = kat.id + '_' + skafferiNormId(v);
+            const post = data.varor[id];
+            if (!post || post.har) namn.push(v);
+          });
+        });
+        (data.egna || []).forEach(e => { if (e && e.har) namn.push(e.namn); });
+        return namn;
+      } catch (e) {
+        return [];
+      }
+    }
+
     /* ── Vintyp-metadata och normalisering ── */
     const VIN_TYPER = {
       rod:         { emoji: '🍷', label: 'Röda' },
@@ -1695,6 +1737,7 @@ ${rattText}`;
       const frysvarer  = hamtaFrysdata();
       const sousvide   = hamtaSousvide();
       const vinkallare = hamtaVinkallare().filter(v => (Number(v.antal) || 0) > 0);
+      const skafferi   = hamtaSkafferidata();
 
       const atSnartVaror = frysvarer.filter(isAtSnart);
       const ovrigaVaror  = frysvarer.filter(v => !isAtSnart(v));
@@ -1712,6 +1755,10 @@ ${rattText}`;
             return `- ${v.namn || 'Okänt vin'}${v.årgång || v.argarg ? ' ' + (v.årgång || v.argarg) : ''}, ${v.typ || ''}, ${v.druva || ''} (${v.antal} fl${hyll ? ', ' + hyll : ''}${pris})`;
           }).join('\n')
         : '(tomt)';
+
+      const skafferiText = skafferi.length
+        ? skafferi.join(', ')
+        : '(tomt eller okänt – anta inget utöver det som anges i receptet)';
 
       const svText = sousvide.length
         ? sousvide.slice(0, 20).map(k => {
@@ -1749,6 +1796,9 @@ ${frysText}
 ## Vinkällaren
 ${vinText}
 
+## Skafferiet (kryddor, oljor, såser och basvaror Per redan har hemma – utan exakta mängder, anta tillräckligt för en middag)
+${skafferiText}
+
 ## Sous vide-historik (egna körningar och betyg)
 ${svText}
 
@@ -1782,6 +1832,7 @@ För varje rätt (förrätt/varmrätt/efterrätt om valda):
 
 **Ingredienser (${antal} pers):**
 - [Ingrediens] [FRYS] – om den kommer från frysen
+- [Ingrediens] [SKAFFERI] – om den redan finns i skafferiet
 - [Ingrediens] – köpas
 
 **Tillagning:**
@@ -1798,13 +1849,13 @@ Ta bara med viner som faktiskt finns i källardatan ovan.
 
 ## Inköpslista
 - [Vara som behöver köpas, med mängd]
-(Bara varor som inte finns i frysen)
+(Bara varor som inte finns i frysen eller skafferiet)
 
 ---
 
 Avsluta inte med "Smaklig måltid" eller liknande fraser.
 
-Var ärlig: Hitta aldrig på viner, hyllplatser eller sous vide-körningar som inte finns i datan ovan. Saknas passande vin i källaren – säg det och ge ett köpförslag istället.`;
+Var ärlig: Hitta aldrig på viner, hyllplatser, sous vide-körningar eller skafferivaror som inte finns i datan ovan. Saknas passande vin i källaren – säg det och ge ett köpförslag istället. Skafferiet visar bara OM en vara finns (inga mängder) – anta tillräcklig mängd för en middag, men ta aldrig med en skafferivara i inköpslistan. Du får gärna föreslå tillbehör eller smaktillsatser som drar nytta av skafferiet (t.ex. torkad svamp → svampsås), men bara varor som faktiskt står listade ovan.`;
     }
 
     /* ── Anropa Claude API ── */
