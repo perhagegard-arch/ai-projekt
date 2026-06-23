@@ -428,7 +428,6 @@
     </div>
     <div class="header-spacer"></div>
     <button class="icon-btn" onclick="setView(&#39;summary&#39;)" title="Sammanställning">📋</button>
-    <button class="icon-btn" onclick="setView(&#39;saved&#39;)" title="Sparade recept">📖</button>
     <button class="icon-btn" onclick="setView(&#39;stats&#39;)" title="Statistik">📊</button>
     <button class="icon-btn" onclick="setView(&#39;history&#39;)" title="Historik">📜</button>
     <button class="icon-btn" onclick="setView(&#39;settings&#39;)" title="Inställningar">⚙️</button>
@@ -525,14 +524,6 @@
   </div>
 
   <!-- SAVED RECIPES VIEW -->
-  <div id="view-saved" style="display:none">
-    <div class="view-tabs">
-      <button class="view-tab active" onclick="setView(&#39;saved&#39;)">📖 Sparade recept</button>
-      <button class="view-tab" onclick="setView(&#39;inventory&#39;)">← Tillbaka</button>
-    </div>
-    <div id="saved-content"></div>
-  </div>
-
   <!-- STATS VIEW -->
   <div id="view-stats" style="display:none">
     <div class="view-tabs">
@@ -893,66 +884,12 @@ function toast(msg) {
   t._timer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-// ── SPARADE RECEPT ────────────────────────────────────────────────────
-const SAVED_KEY = 'frysregister_saved_recipes_v1';
-let savedRecipes = [];
-try { savedRecipes = JSON.parse(localStorage.getItem(SAVED_KEY)) || []; } catch { savedRecipes = []; }
-
-function deleteSavedRecipe(id) {
-  savedRecipes = savedRecipes.filter(r => r.id !== id);
-  localStorage.setItem(SAVED_KEY, JSON.stringify(savedRecipes));
-  renderSavedView();
-  toast('Recept borttaget');
-}
-
-function recipeCardHtml(r, opts) {
-  // Gemensam kortritare för AI-recept, menyrätter och sparade recept
-  const ingsHtml = (r.ings||'').split('\n').map(l => {
-    const fromFreezer = l.includes('[FRYS]');
-    const clean = l.replace('[FRYS]','').replace(/^[-•]\s*/,'').trim();
-    if (!clean) return '';
-    return `<div class="${fromFreezer?'ing-have':'ing-miss'}">${fromFreezer?'✓ ':'+ '}${clean}${fromFreezer?' – från frysen!':''}</div>`;
-  }).join('');
-
-  return `
-    <div class="recipe-card full-match" style="margin-top:12px">
-      <div class="recipe-head">
-        <h3>${opts.emoji||''} ${r.title || 'Recept'}</h3>
-        <span class="match-badge full">${opts.badge}</span>
-      </div>
-      ${r.desc ? `<div class="recipe-desc">${r.desc}</div>` : ''}
-      ${ingsHtml ? `<div class="recipe-ings">${ingsHtml}</div>` : ''}
-      ${r.steps ? `<button class="recipe-toggle" onclick="this.nextElementSibling.classList.toggle('open')">📖 Visa tillagning</button>
-      <div class="recipe-steps" style="white-space:pre-line">${r.steps}</div>` : ''}
-      ${r.plating ? `<div class="recipe-desc" style="margin-top:10px">🎨 <b>Uppläggning:</b> ${r.plating}</div>` : ''}
-      ${r.wine ? `<div class="recipe-wine">🍷 <b>Vintips:</b> ${r.wine}</div>` : ''}
-      ${opts.buttons || ''}
-    </div>`;
-}
-
-function renderSavedView() {
-  const el = document.getElementById('saved-content');
-  if (!savedRecipes.length) {
-    el.innerHTML = `<div class="empty"><div class="empty-icon">📖</div><p>Inga sparade recept ännu.</p></div>`;
-    return;
-  }
-  el.innerHTML = savedRecipes.map(r => {
-    const d = new Date(r.saved).toLocaleDateString('sv-SE',{day:'numeric',month:'short',year:'numeric'});
-    return recipeCardHtml(r, {
-      emoji: '',
-      badge: d,
-      buttons: `<button class="recipe-toggle" style="color:var(--danger);margin-left:8px" onclick="if(confirm('Ta bort receptet?'))deleteSavedRecipe('${r.id}')">🗑️ Ta bort</button>`
-    });
-  }).join('');
-}
-
 // ── VIEWS ─────────────────────────────────────────────────────────────
 function setView(v) {
   currentView = v;
-  ['inventory','summary','saved','stats','history','settings'].forEach(x =>
+  ['inventory','summary','stats','history','settings'].forEach(x =>
     document.getElementById('view-'+x).style.display = x === v ? '' : 'none');
   if (v === 'summary')  renderSummaryView();
-  if (v === 'saved')    renderSavedView();
   if (v === 'stats')    renderStatsView();
   if (v === 'history')  renderHistoryView();
   if (v === 'settings') renderSettings();
