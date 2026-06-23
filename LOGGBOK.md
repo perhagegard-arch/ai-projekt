@@ -36,15 +36,15 @@ Per gick från att köra Claude Code i PowerShell till att jobba helt i chatten,
 - En funktion = ett ansvar (små namngivna funktioner)
 
 **Snabba vinster värda att göra nu (statisk app):**
-- `loading="lazy"` på bilder (stora stämningsbilder, t.ex. jakt-host.jpg ~4 MB)
-- Ladda-tillstånd/spinner på AI-knappar (anrop tar sekunder)
-- Genomgång att HTML-escape (`h()`) används konsekvent på all användarinput
-- Stärka try/catch där localStorage/API läses
+- ✅ `loading="lazy"` tillagt på etikett-thumbnails (2026-06-23). NOT: vinsten mindre än väntat – de stora stämningsbilderna är CSS-bakgrunder (inte `<img>`) och redan hyfsat komprimerade. Logotyper i headers lämnades utan lazy (syns direkt).
+- ✅ Ladda-tillstånd på AI-knappar – REDAN VÄLGJORT i hela appen (kontrollerat 2026-06-23): etikettmagin "⏳ Analyserar…", Köket spinner + "AI-kocken tänker… 30–60 sek", Kockens viskning, receptbanken "Skriver om receptet…". Alla med inaktiv knapp under anropet. Inget att göra.
+- Genomgång att HTML-escape (`h()`) används konsekvent – se teknisk skuld nedan (skjuts till multiuser-steget).
+- Stärka try/catch där localStorage/API läses (löpande).
 
 **Blir RELEVANTA först vid multiuser + databas (etapp 2–3):**
 - **Miljövariabler/.env för hemligheter** – gäller INTE nu (ingen server, API-nyckeln matas in av användaren i deras localStorage). Blir kritiskt när en server med Pers nyckel finns: nyckeln i `.env`, aldrig i koden, `.env` i `.gitignore`.
 - **Felhantering på varje databasoperation** – idag mest localStorage; vid moln blir try/catch på varje DB-anrop ett måste.
-- **Input-validering/sanering** – viktigare när data skrivs till en DELAD databas som andra ser.
+- **Input-validering/sanering (HTML-escape)** – KONKRET TEKNISK SKULD funnen 2026-06-23: `h()`-escapefunktionen finns bara i vinkallare.html. De andra fyra sidorna (kok, frys, skafferi, receptbank) sätter användardata (varunamn, anteckningar) via innerHTML utan escape. Risk LÅG idag (Per är ende användaren – skadar inte sig själv), men MÅSTE åtgärdas vid multiuser, då andras input visas. Görs naturligt när datalagret byggs om mot databasen i etapp 2 – att escape-säkra localStorage-versionen nu vore att putsa något som snart ersätts. *Inte glömt – det står här.*
 - **Cachning av API-svar** – marginellt nu (anropen är unika); kan bli relevant för sällan ändrad delad data.
 - **Paginering** – inte nu (45 viner). Aktuellt om en användare får hundratals.
 
