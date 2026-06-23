@@ -3088,19 +3088,27 @@
     // kan öppnas igen via "Hantera platser". forhandsifylld = befintlig
     // konfig att utgå från (annars Pers uppsättning som mall).
     function visaPlatsWizard(forhandsifylld) {
-      const start = forhandsifylld || PERS_PLATSKONFIG;
-      // Konvertera konfig → redigerbar form
-      const platser = Object.entries(start).map(([namn, k]) => {
-        const harZoner = k.zoner.length > 1 || (k.zoner[0] && k.zoner[0].namn);
-        return {
-          namn,
-          harZoner: !!harZoner,
-          hyllor: harZoner ? 6 : (k.zoner[0] ? k.zoner[0].hyllor : 6),
-          zoner: harZoner
-            ? k.zoner.map(z => ({ namn: z.namn, hyllor: z.hyllor }))
-            : [{ namn: 'Vitt', hyllor: 3 }, { namn: 'Rött', hyllor: 8 }]
-        };
-      });
+      let platser;
+      if (forhandsifylld) {
+        // "Hantera platser": utgå från användarens nuvarande uppsättning
+        platser = Object.entries(forhandsifylld).map(([namn, k]) => {
+          const harZoner = k.zoner.length > 1 || (k.zoner[0] && k.zoner[0].namn);
+          return {
+            namn,
+            harZoner: !!harZoner,
+            hyllor: harZoner ? 6 : (k.zoner[0] ? k.zoner[0].hyllor : 6),
+            zoner: harZoner
+              ? k.zoner.map(z => ({ namn: z.namn, hyllor: z.hyllor }))
+              : [{ namn: 'Vitt', hyllor: 3 }, { namn: 'Rött', hyllor: 8 }]
+          };
+        });
+      } else {
+        // Ny användare: börja med EN tom plats att döpa själv – inga
+        // ärvda namn från Per. Användaren bygger sin egen uppsättning.
+        platser = [
+          { namn: '', harZoner: false, hyllor: 6, zoner: [{ namn: 'Vitt', hyllor: 3 }, { namn: 'Rött', hyllor: 8 }] }
+        ];
+      }
 
       const overlay = document.createElement('div');
       overlay.className = 'wizard-overlay';
@@ -3111,7 +3119,7 @@
           <div class="wiz-plats" data-i="${i}">
             <div class="wiz-plats-rad">
               <input class="wiz-input wiz-namn" data-i="${i}"
-                     placeholder="Platsens namn (t.ex. Vinkyl, Källare)"
+                     placeholder="Döp din plats (t.ex. Vinkyl, Källare, Garage, Skåp)"
                      value="${h(p.namn)}">
               ${platser.length > 1 ? `<button class="wiz-ta-bort" data-i="${i}" title="Ta bort plats">✕</button>` : ''}
             </div>
