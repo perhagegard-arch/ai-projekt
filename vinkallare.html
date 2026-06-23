@@ -1161,6 +1161,68 @@
       padding: 3.5rem 1rem;
       color: #555;
     }
+
+    /* ── Setup-wizard / Hantera platser ── */
+    .wizard-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.78);
+      display: flex; align-items: flex-start; justify-content: center;
+      overflow-y: auto; padding: 2rem 1rem;
+    }
+    .wizard-ruta {
+      background: #1a1a1a; border: 1px solid #333; border-radius: 14px;
+      padding: 1.6rem; max-width: 560px; width: 100%;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+    }
+    .wiz-rubrik { margin: 0 0 0.4rem; color: #e0e0e0; font-size: 1.3rem; }
+    .wiz-intro { margin: 0 0 1.2rem; color: #999; font-size: 0.9rem; line-height: 1.5; }
+    .wiz-plats {
+      background: #222; border: 1px solid #333; border-radius: 10px;
+      padding: 1rem; margin-bottom: 0.9rem;
+    }
+    .wiz-plats-rad { display: flex; gap: 0.5rem; align-items: center; }
+    .wiz-input {
+      background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 7px;
+      color: #e0e0e0; padding: 0.55rem 0.7rem; font-size: 0.92rem; flex: 1;
+    }
+    .wiz-input:focus { outline: none; border-color: #8a6d3b; }
+    .wiz-namn { font-weight: 600; }
+    .wiz-checkbox {
+      display: flex; align-items: center; gap: 0.5rem;
+      color: #bbb; font-size: 0.86rem; margin: 0.7rem 0 0; cursor: pointer;
+    }
+    .wiz-checkbox input { width: 16px; height: 16px; accent-color: #8a6d3b; }
+    .wiz-zoner { margin-top: 0.7rem; padding-left: 0.4rem; border-left: 2px solid #3a3a3a; }
+    .wiz-zon-rad, .wiz-hyllor-rad {
+      display: flex; gap: 0.45rem; align-items: center; margin-top: 0.5rem;
+    }
+    .wiz-zon-namn { flex: 2; }
+    .wiz-zon-hyllor, .wiz-hyllor { flex: 0 0 80px; max-width: 80px; }
+    .wiz-zon-etikett { color: #888; font-size: 0.82rem; }
+    .wiz-zon-bort, .wiz-ta-bort {
+      background: none; border: none; color: #a55; font-size: 1rem;
+      cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 5px;
+    }
+    .wiz-zon-bort:hover, .wiz-ta-bort:hover { background: #3a2020; color: #d77; }
+    .wiz-lagg-zon, .wiz-lagg-plats {
+      background: #2a2a2a; border: 1px dashed #4a4a4a; border-radius: 7px;
+      color: #bbb; padding: 0.45rem 0.8rem; font-size: 0.85rem;
+      cursor: pointer; margin-top: 0.6rem;
+    }
+    .wiz-lagg-zon:hover, .wiz-lagg-plats:hover { background: #333; color: #e0e0e0; }
+    .wiz-lagg-plats { display: block; width: 100%; margin-top: 0.3rem; }
+    .wiz-knappar { display: flex; gap: 0.6rem; justify-content: flex-end; margin-top: 1.4rem; }
+    .wiz-avbryt {
+      background: #2a2a2a; border: 1px solid #3a3a3a; border-radius: 8px;
+      color: #bbb; padding: 0.6rem 1.1rem; font-size: 0.9rem; cursor: pointer;
+    }
+    .wiz-avbryt:hover { background: #333; }
+    .wiz-klar {
+      background: linear-gradient(135deg, #8a6d3b, #6d5530);
+      border: none; border-radius: 8px; color: #f5e9d0;
+      padding: 0.6rem 1.3rem; font-size: 0.92rem; font-weight: 600; cursor: pointer;
+    }
+    .wiz-klar:hover { filter: brightness(1.1); }
   </style>
 </head>
 <body>
@@ -1238,6 +1300,7 @@
 
       <!-- Verktyg -->
       <div class="verktygsrad">
+      <button class="verktygknapp" id="hantera-platser-btn">⚙️ Hantera platser</button>
       <button class="verktygknapp" id="exportera-btn">↓ Säkerhetskopia</button>
       <label class="verktygknapp">
         ↑ Importera
@@ -1428,8 +1491,14 @@
     const LS_NYCKEL = 'vinkallare_viner';
     const AR_NU = new Date().getFullYear();
 
-    // Hyllplatskonfiguration – Vinkylen har zoner Vitt (H1–3) och Rött (H1–8)
-    const PLATSKONFIG = {
+    // ── Hyllplatskonfiguration (konfigurerbar per användare) ─────────
+    // Nyckel i localStorage där användarens egen platsuppsättning sparas.
+    const PLATSKONFIG_NYCKEL = 'vinkallare_platskonfig_v1';
+
+    // Pers ursprungliga uppsättning – används som standardvärde, för
+    // migrering av befintliga användare, och som förifyllt i wizarden.
+    // Vinkylen har zoner Vitt (H1–3) och Rött (H1–8); Garaget en zon.
+    const PERS_PLATSKONFIG = {
       Vinkylen: {
         zoner: [
           { namn: 'Vitt', hyllor: 3, css: 'zon-vitt' },
@@ -1442,6 +1511,64 @@
         ]
       }
     };
+
+    // CSS-klasser som roterar för nya användares zoner (visuell variation).
+    const ZON_CSS_VAL = ['zon-neutral', 'zon-vitt', 'zon-rott'];
+
+    // Läser platskonfigurationen. Ordning:
+    //   1. Sparad konfiguration i localStorage (användarens egen)
+    //   2. Annars: om viner redan finns → Pers uppsättning (silent migration)
+    //   3. Annars: tom → wizard visas för ny användare
+    // Robust: trasig data får aldrig krascha sidan, faller tillbaka säkert.
+    function laddaPlatskonfig() {
+      try {
+        const sparad = localStorage.getItem(PLATSKONFIG_NYCKEL);
+        if (sparad) {
+          const obj = JSON.parse(sparad);
+          if (obj && typeof obj === 'object' && Object.keys(obj).length > 0) {
+            return obj;
+          }
+        }
+      } catch (e) {
+        // Trasig konfig – fortsätt till fallback nedan
+      }
+      // Ingen giltig sparad konfig. Har användaren redan viner? Då är det
+      // Per (eller någon med befintlig data) → återställ Pers uppsättning.
+      try {
+        const befintliga = JSON.parse(localStorage.getItem(LS_NYCKEL) || '[]');
+        if (Array.isArray(befintliga) && befintliga.length > 0) {
+          const kopia = JSON.parse(JSON.stringify(PERS_PLATSKONFIG));
+          sparaPlatskonfig(kopia);   // skriv in så den ligger fast framåt
+          return kopia;
+        }
+      } catch (e) {
+        // localStorage otillgängligt – faller tillbaka på Pers uppsättning
+      }
+      // Helt ny användare utan viner → tom konfig (wizard tar över)
+      return {};
+    }
+
+    function sparaPlatskonfig(konfig) {
+      try {
+        localStorage.setItem(PLATSKONFIG_NYCKEL, JSON.stringify(konfig));
+      } catch (e) {
+        // Kunde inte spara – appen fungerar ändå för nuvarande session
+      }
+    }
+
+    // Avgör om en plats är Pers special-Vinkyl (ritas med SVG).
+    // Endast Pers exakta Vinkylen-uppsättning får Temptech-SVG:n; alla
+    // andra platser (även nya användares) ritas med generella rack-vyn.
+    function arPersVinkyl(platsNamn, konfig) {
+      if (platsNamn !== 'Vinkylen') return false;
+      const z = konfig && konfig.zoner;
+      if (!z || z.length !== 2) return false;
+      return z[0].namn === 'Vitt' && z[0].hyllor === 3
+          && z[1].namn === 'Rött' && z[1].hyllor === 8;
+    }
+
+    // Den aktiva konfigurationen (let så den kan bytas via wizard/hantera).
+    let PLATSKONFIG = laddaPlatskonfig();
 
     let viner = [];
     let arkiv = [];
@@ -1977,8 +2104,10 @@
 
     // ── Export ───────────────────────────────────────────────────────
 
+    document.getElementById('hantera-platser-btn').addEventListener('click', hanteraPlatser);
+
     document.getElementById('exportera-btn').addEventListener('click', () => {
-      const payload = JSON.stringify({ version: 1, exportdatum: idag(), viner, arkiv }, null, 2);
+      const payload = JSON.stringify({ version: 2, exportdatum: idag(), viner, arkiv, platskonfig: PLATSKONFIG }, null, 2);
       const blob = new Blob([payload], { type: 'application/json' });
       const url  = URL.createObjectURL(blob);
       const a    = Object.assign(document.createElement('a'), { href: url, download: `vinkallare-${idag()}.json` });
@@ -2003,7 +2132,16 @@
           arkiv = arkivLista;
           spara();
           sparaArkiv();
-          renderAllt();
+          // Platskonfig följer med i nyare backuper (version 2+). Saknas den
+          // (äldre backup) behålls nuvarande konfig – ingen förändring.
+          if (parsed.platskonfig && typeof parsed.platskonfig === 'object'
+              && Object.keys(parsed.platskonfig).length > 0) {
+            PLATSKONFIG = parsed.platskonfig;
+            sparaPlatskonfig(PLATSKONFIG);
+            aterbyggPlatsberoende();
+          } else {
+            renderAllt();
+          }
         } catch {
           alert('Ogiltigt format – kontrollera att filen är en giltig JSON-export.');
         }
@@ -2607,7 +2745,9 @@
     }
 
     function rackKortHtml(platsNamn, konfig, sok) {
-      if (platsNamn === 'Vinkylen') return vinkylenSvgKort(sok);
+      // Bara Pers exakta Vinkyl-uppsättning får Temptech-SVG:n.
+      // Alla andra platser (även nya användares) ritas generellt nedan.
+      if (arPersVinkyl(platsNamn, konfig)) return vinkylenSvgKort(sok);
       const erOppen     = oppnaRack.has(platsNamn);
       const totalFlaskor = viner
         .filter(v => (v.hyllplats || '').startsWith(platsNamn))
@@ -2916,10 +3056,181 @@
       });
     });
 
+    // ══ Setup-wizard & Hantera platser ═══════════════════════════════
+
+    // Bygger en plats-konfig från wizard-/formulärdata.
+    // platser: [{ namn, harZoner, zoner: [{namn, hyllor}] }]
+    function byggKonfigFranFormular(platser) {
+      const konfig = {};
+      platser.forEach((p, pi) => {
+        const namn = (p.namn || '').trim() || ('Plats ' + (pi + 1));
+        let zoner;
+        if (p.harZoner && p.zoner && p.zoner.length > 0) {
+          zoner = p.zoner.map((z, zi) => ({
+            namn: (z.namn || '').trim(),
+            hyllor: Math.max(1, parseInt(z.hyllor, 10) || 1),
+            css: ZON_CSS_VAL[zi % ZON_CSS_VAL.length]
+          }));
+        } else {
+          // Plats utan zoner – en enda namnlös zon
+          zoner = [{
+            namn: '',
+            hyllor: Math.max(1, parseInt(p.hyllor, 10) || 1),
+            css: 'zon-neutral'
+          }];
+        }
+        konfig[namn] = { zoner };
+      });
+      return konfig;
+    }
+
+    // Visar setup-wizarden (overlay). Anropas för nya användare, och
+    // kan öppnas igen via "Hantera platser". forhandsifylld = befintlig
+    // konfig att utgå från (annars Pers uppsättning som mall).
+    function visaPlatsWizard(forhandsifylld) {
+      const start = forhandsifylld || PERS_PLATSKONFIG;
+      // Konvertera konfig → redigerbar form
+      const platser = Object.entries(start).map(([namn, k]) => {
+        const harZoner = k.zoner.length > 1 || (k.zoner[0] && k.zoner[0].namn);
+        return {
+          namn,
+          harZoner: !!harZoner,
+          hyllor: harZoner ? 6 : (k.zoner[0] ? k.zoner[0].hyllor : 6),
+          zoner: harZoner
+            ? k.zoner.map(z => ({ namn: z.namn, hyllor: z.hyllor }))
+            : [{ namn: 'Vitt', hyllor: 3 }, { namn: 'Rött', hyllor: 8 }]
+        };
+      });
+
+      const overlay = document.createElement('div');
+      overlay.className = 'wizard-overlay';
+      overlay.id = 'plats-wizard';
+
+      function rita() {
+        const platsKort = platser.map((p, i) => `
+          <div class="wiz-plats" data-i="${i}">
+            <div class="wiz-plats-rad">
+              <input class="wiz-input wiz-namn" data-i="${i}"
+                     placeholder="Platsens namn (t.ex. Vinkyl, Källare)"
+                     value="${h(p.namn)}">
+              ${platser.length > 1 ? `<button class="wiz-ta-bort" data-i="${i}" title="Ta bort plats">✕</button>` : ''}
+            </div>
+            <label class="wiz-checkbox">
+              <input type="checkbox" class="wiz-harzoner" data-i="${i}" ${p.harZoner ? 'checked' : ''}>
+              Dela upp i zoner (t.ex. en avdelning för vitt och en för rött)
+            </label>
+            ${p.harZoner ? `
+              <div class="wiz-zoner">
+                ${p.zoner.map((z, zi) => `
+                  <div class="wiz-zon-rad" data-i="${i}" data-zi="${zi}">
+                    <input class="wiz-input wiz-zon-namn" data-i="${i}" data-zi="${zi}"
+                           placeholder="Zonnamn" value="${h(z.namn)}">
+                    <input class="wiz-input wiz-zon-hyllor" type="number" min="1" max="50"
+                           data-i="${i}" data-zi="${zi}"
+                           placeholder="Hyllor" value="${z.hyllor}">
+                    <span class="wiz-zon-etikett">hyllor</span>
+                    ${p.zoner.length > 1 ? `<button class="wiz-zon-bort" data-i="${i}" data-zi="${zi}" title="Ta bort zon">✕</button>` : ''}
+                  </div>
+                `).join('')}
+                <button class="wiz-lagg-zon" data-i="${i}">+ Lägg till zon</button>
+              </div>
+            ` : `
+              <div class="wiz-hyllor-rad">
+                <input class="wiz-input wiz-hyllor" type="number" min="1" max="50"
+                       data-i="${i}" placeholder="Antal hyllor" value="${p.hyllor}">
+                <span class="wiz-zon-etikett">hyllor</span>
+              </div>
+            `}
+          </div>
+        `).join('');
+
+        overlay.innerHTML = `
+          <div class="wizard-ruta">
+            <h2 class="wiz-rubrik">🍷 Sätt upp din vinkällare</h2>
+            <p class="wiz-intro">Lägg till dina förvaringsplatser – en vinkyl, ett garage, en källare... Du kan ändra det här när som helst senare.</p>
+            <div class="wiz-platser">${platsKort}</div>
+            <button class="wiz-lagg-plats">+ Lägg till plats</button>
+            <div class="wiz-knappar">
+              ${forhandsifylld ? '<button class="wiz-avbryt">Avbryt</button>' : ''}
+              <button class="wiz-klar">Klar – skapa min källare</button>
+            </div>
+          </div>`;
+
+        kopplaHandelser();
+      }
+
+      function kopplaHandelser() {
+        overlay.querySelectorAll('.wiz-namn').forEach(el =>
+          el.addEventListener('input', e => { platser[+e.target.dataset.i].namn = e.target.value; }));
+        overlay.querySelectorAll('.wiz-harzoner').forEach(el =>
+          el.addEventListener('change', e => {
+            const i = +e.target.dataset.i;
+            platser[i].harZoner = e.target.checked;
+            rita();
+          }));
+        overlay.querySelectorAll('.wiz-hyllor').forEach(el =>
+          el.addEventListener('input', e => { platser[+e.target.dataset.i].hyllor = e.target.value; }));
+        overlay.querySelectorAll('.wiz-zon-namn').forEach(el =>
+          el.addEventListener('input', e => { platser[+e.target.dataset.i].zoner[+e.target.dataset.zi].namn = e.target.value; }));
+        overlay.querySelectorAll('.wiz-zon-hyllor').forEach(el =>
+          el.addEventListener('input', e => { platser[+e.target.dataset.i].zoner[+e.target.dataset.zi].hyllor = e.target.value; }));
+        overlay.querySelectorAll('.wiz-ta-bort').forEach(el =>
+          el.addEventListener('click', e => { platser.splice(+e.target.dataset.i, 1); rita(); }));
+        overlay.querySelectorAll('.wiz-zon-bort').forEach(el =>
+          el.addEventListener('click', e => { platser[+e.target.dataset.i].zoner.splice(+e.target.dataset.zi, 1); rita(); }));
+        overlay.querySelectorAll('.wiz-lagg-zon').forEach(el =>
+          el.addEventListener('click', e => { platser[+e.target.dataset.i].zoner.push({ namn: '', hyllor: 4 }); rita(); }));
+        overlay.querySelector('.wiz-lagg-plats').addEventListener('click', () => {
+          platser.push({ namn: '', harZoner: false, hyllor: 6, zoner: [{ namn: 'Vitt', hyllor: 3 }, { namn: 'Rött', hyllor: 8 }] });
+          rita();
+        });
+        const avbryt = overlay.querySelector('.wiz-avbryt');
+        if (avbryt) avbryt.addEventListener('click', () => overlay.remove());
+        overlay.querySelector('.wiz-klar').addEventListener('click', () => {
+          if (platser.length === 0) { alert('Lägg till minst en plats.'); return; }
+          const nyKonfig = byggKonfigFranFormular(platser);
+          PLATSKONFIG = nyKonfig;
+          sparaPlatskonfig(nyKonfig);
+          overlay.remove();
+          // Bygg om allt som beror på platser
+          aterbyggPlatsberoende();
+        });
+      }
+
+      rita();
+      document.body.appendChild(overlay);
+    }
+
+    // Bygger om de delar av UI:t som beror på PLATSKONFIG efter ändring.
+    function aterbyggPlatsberoende() {
+      // Plats-dropdownen i lägg-till-formuläret
+      const fp = document.getElementById('f-plats');
+      if (fp) {
+        fp.innerHTML = '<option value="">Välj plats</option>';
+        Object.keys(PLATSKONFIG).forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.textContent = p;
+          fp.appendChild(opt);
+        });
+      }
+      renderAllt();
+    }
+
+    // Öppnar "Hantera platser" – samma wizard, förifylld med nuvarande konfig.
+    function hanteraPlatser() {
+      visaPlatsWizard(PLATSKONFIG);
+    }
+
     // ── Start ────────────────────────────────────────────────────────
     ladda();
     laddaArkiv();
-    renderAllt();
+    // Ny användare utan platskonfig och utan viner → visa wizard
+    if (Object.keys(PLATSKONFIG).length === 0) {
+      renderAllt();
+      visaPlatsWizard(null);
+    } else {
+      renderAllt();
+    }
   </script>
 
 </body>
