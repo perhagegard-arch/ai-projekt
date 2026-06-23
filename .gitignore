@@ -8,3 +8,12 @@ __pycache__/
 
 # Claude-inställningar
 .claude/settings.local.json
+
+# Node
+node_modules/
+package-lock.json
+
+# Skärmdumpar (test/screenshots)
+screenshot-*.png
+ss_*.png
+test-*.png
