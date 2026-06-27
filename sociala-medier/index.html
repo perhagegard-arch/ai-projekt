@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sociala medier – Pers Kök &amp; Vinkällare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --vinrod:#7a1a2a; --guld:#d4a84b; --guld-damp:#a07830; --mork:#121212; --mork2:#1a1a1a;
+    --mork3:#242018; --kram:#f5ede0; --text:#e8e2d6; --text-damp:#b8b0a0; --linje:rgba(212,168,75,0.18);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{background:#0e0e0e; color:var(--text); font-family:'Inter',sans-serif; line-height:1.6; padding:2rem 1rem 5rem}
+  h1,h2,h3{font-family:'Fraunces',serif; font-weight:500}
+  img{display:block; max-width:100%}
+
+  .topp{text-align:center; max-width:680px; margin:0 auto 3rem}
+  .topp img{width:80px; margin:0 auto 1rem}
+  .topp h1{font-size:2.2rem; color:var(--kram); margin-bottom:0.6rem}
+  .topp p{color:var(--text-damp); font-size:1.02rem}
+  .topp .hint{margin-top:1.2rem; font-size:0.9rem; color:var(--guld); background:rgba(212,168,75,0.08);
+    border:1px solid var(--linje); border-radius:10px; padding:0.8rem 1rem}
+
+  .inlagg{max-width:600px; margin:0 auto 3.5rem; background:var(--mork2); border:1px solid var(--linje);
+    border-radius:18px; overflow:hidden}
+  .inlagg-nr{display:flex; align-items:center; gap:0.6rem; padding:1rem 1.3rem; border-bottom:1px solid var(--linje)}
+  .inlagg-nr .pill{background:var(--vinrod); color:var(--kram); font-size:0.75rem; font-weight:600;
+    padding:0.25rem 0.7rem; border-radius:50px; letter-spacing:0.05em}
+  .inlagg-nr .vinkel{color:var(--guld); font-size:0.85rem; font-weight:500}
+
+  /* Instagram-kortet (kvadrat med text-overlay) */
+  .kort{position:relative; aspect-ratio:1/1; overflow:hidden}
+  .kort > img:not(.kort-logga){width:100%; height:100%; object-fit:cover}
+  .kort::after{content:''; position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(10,8,6,0.45) 0%, transparent 30%, transparent 55%, rgba(10,8,6,0.85) 100%)}
+  .kort img.kort-logga{position:absolute; top:1rem; right:1rem; width:54px; height:54px; z-index:3;
+    filter:drop-shadow(0 2px 8px rgba(0,0,0,0.6)); border-radius:50%; object-fit:cover}
+  .kort-text{position:absolute; left:0; right:0; bottom:0; padding:1.8rem 1.6rem; z-index:3}
+  .kort-eyebrow{text-transform:uppercase; letter-spacing:0.3em; font-size:0.66rem; color:var(--guld);
+    font-weight:600; margin-bottom:0.5rem}
+  .kort-rubrik{font-family:'Fraunces',serif; font-size:1.9rem; color:#fff; line-height:1.1;
+    text-shadow:0 2px 16px rgba(0,0,0,0.6); font-weight:500}
+  .kort-rubrik.liten{font-size:1.55rem}
+
+  /* Texten under (att kopiera) */
+  .text-block{padding:1.4rem 1.5rem}
+  .text-block .etikett{font-size:0.72rem; text-transform:uppercase; letter-spacing:0.15em;
+    color:var(--text-damp); font-weight:600; margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center}
+  .kopiera{background:none; border:1px solid var(--guld-damp); color:var(--guld); font-size:0.72rem;
+    padding:0.25rem 0.7rem; border-radius:6px; cursor:pointer; font-family:inherit; transition:all .2s}
+  .kopiera:hover{background:rgba(212,168,75,0.12)}
+  .bildtext{color:var(--text); font-size:0.98rem; white-space:pre-line; margin-bottom:1rem}
+  .hashtags{color:var(--guld); font-size:0.88rem; font-weight:500; border-top:1px solid var(--linje); padding-top:0.9rem}
+
+  .fot{max-width:600px; margin:2rem auto 0; text-align:center; color:var(--text-damp); font-size:0.88rem;
+    background:var(--mork2); border:1px solid var(--linje); border-radius:14px; padding:1.4rem}
+  .fot b{color:var(--guld)}
+</style>
+</head>
+<body>
+
+<div class="topp">
+  <img src="bilder/logga.png" alt="">
+  <h1>Fem inlägg för sociala medier</h1>
+  <p>Färdiga utkast för Instagram &amp; Facebook – bild, text och hashtags. Välj de du gillar, justera tonen, och lägg upp.</p>
+  <div class="hint">💡 Bilden visar hur inlägget ser ut publicerat. Texten under varje bild är att kopiera till bildtexten (caption).</div>
+</div>
+
+<!-- ── 1 ── -->
+<article class="inlagg">
+  <div class="inlagg-nr"><span class="pill">Inlägg 1</span><span class="vinkel">Resan &amp; historien</span></div>
+  <div class="kort">
+    <img src="bilder/1-resa.jpg" alt="">
+    <img src="bilder/logga.png" class="kort-logga" alt="">
+    <div class="kort-text">
+      <div class="kort-eyebrow">Från jakttorn till kod</div>
+      <div class="kort-rubrik">Jag byggde mitt eget kök – med en AI</div>
+    </div>
+  </div>
+  <div class="text-block">
+    <div class="etikett">Bildtext <button class="kopiera" onclick="kop(this)">Kopiera</button></div>
+    <div class="bildtext">Det började med en frys full av vilt och en vinkällare som bara växte. Jag ville ha ordning – och bestämde mig för att bygga appen själv, tillsammans med en AI. 🍷
+
+Idag samlar "Pers Kök &amp; Vinkällare" allt: maten, viltet, vinet och skafferiet. Inte byggt av ett techbolag – byggt av en jägare och vinälskare vid köksbordet.
+
+Vem hade trott det? 😅</div>
+    <div class="hashtags">#vinkällare #hemmakock #vibecoding #byggselv #matlagning #vinintresse #jägare</div>
+  </div>
+</article>
+
+<!-- ── 2 ── -->
+<article class="inlagg">
+  <div class="inlagg-nr"><span class="pill">Inlägg 2</span><span class="vinkel">Frysen &amp; viltet</span></div>
+  <div class="kort">
+    <img src="bilder/2-jakt.jpg" alt="">
+    <img src="bilder/logga.png" class="kort-logga" alt="">
+    <div class="kort-text">
+      <div class="kort-eyebrow">Från skog till bord</div>
+      <div class="kort-rubrik">Vet du vad som ligger längst bak i frysen?</div>
+    </div>
+  </div>
+  <div class="text-block">
+    <div class="etikett">Bildtext <button class="kopiera" onclick="kop(this)">Kopiera</button></div>
+    <div class="bildtext">Vildsvin, älg, rådjur – allt får sin plats. Styckdetalj, fack och datum, så du alltid vet vad du har och hur länge det legat. 🦌
+
+Aldrig mer en gåtfull frusen påse utan namn. Råvaran från skogen förtjänar bättre än så.
+
+Hur håller du koll på ditt vilt?</div>
+    <div class="hashtags">#jakt #vilt #vildsvin #frysen #frånskogtillbord #jaktmat #viltkött #svenskjakt</div>
+  </div>
+</article>
+
+<!-- ── 3 ── -->
+<article class="inlagg">
+  <div class="inlagg-nr"><span class="pill">Inlägg 3</span><span class="vinkel">Vinkällaren</span></div>
+  <div class="kort">
+    <img src="bilder/3-vin.jpg" alt="">
+    <img src="bilder/logga.png" class="kort-logga" alt="">
+    <div class="kort-text">
+      <div class="kort-eyebrow">Hela källaren i fickan</div>
+      <div class="kort-rubrik liten">Fota etiketten – appen läser in vinet åt dig</div>
+    </div>
+  </div>
+  <div class="text-block">
+    <div class="etikett">Bildtext <button class="kopiera" onclick="kop(this)">Kopiera</button></div>
+    <div class="bildtext">Druva, årgång, hyllplats – en bild på etiketten räcker. 📸🍷
+
+Jag är ganska ny i vinvärlden och lär mig hela tiden. Resorna till Frankrike, Italien och Tyskland har gett mersmak – och en källare som behöver hållas ordning på.
+
+Nu vet jag alltid vad jag har, och var det står.</div>
+    <div class="hashtags">#vin #vinkällare #wine #vinintresse #piemonte #frankrike #vinresa #winelover</div>
+  </div>
+</article>
+
+<!-- ── 4 ── -->
+<article class="inlagg">
+  <div class="inlagg-nr"><span class="pill">Inlägg 4</span><span class="vinkel">Köket / AI-kocken</span></div>
+  <div class="kort">
+    <img src="bilder/4-mat.jpg" alt="">
+    <img src="bilder/logga.png" class="kort-logga" alt="">
+    <div class="kort-text">
+      <div class="kort-eyebrow">Vad blir det idag?</div>
+      <div class="kort-rubrik">En kock som vet vad du har hemma</div>
+    </div>
+  </div>
+  <div class="text-block">
+    <div class="etikett">Bildtext <button class="kopiera" onclick="kop(this)">Kopiera</button></div>
+    <div class="bildtext">"Vad blir det idag?" – den eviga frågan. 🍳
+
+Min AI-kock kollar vad som finns i frysen och skafferiet, och föreslår middag av det du faktiskt har hemma. Inga extra svängar till affären.
+
+Och så klart: ett vintips från källaren som passar till. 🍷</div>
+    <div class="hashtags">#hemmakock #middagstips #matlagning #vadblirdetidag #foodie #recept #matinspo</div>
+  </div>
+</article>
+
+<!-- ── 5 ── -->
+<article class="inlagg">
+  <div class="inlagg-nr"><span class="pill">Inlägg 5</span><span class="vinkel">Naturen &amp; råvaran</span></div>
+  <div class="kort">
+    <img src="bilder/5-kraftor.jpg" alt="">
+    <img src="bilder/logga.png" class="kort-logga" alt="">
+    <div class="kort-text">
+      <div class="kort-eyebrow">Råvaran börjar i naturen</div>
+      <div class="kort-rubrik">Den bästa maten börjar långt före köket</div>
+    </div>
+  </div>
+  <div class="text-block">
+    <div class="etikett">Bildtext <button class="kopiera" onclick="kop(this)">Kopiera</button></div>
+    <div class="bildtext">Kräftor från sjön, abborre från båten, svamp från skogen, vilt från jakten. 🦞🍄
+
+Bakom varje måltid finns en tur ut i naturen. Det är där råvaran – och glädjen – börjar. Och allt hamnar så småningom i appen, redo att bli middag.
+
+Augustinätter vid kräftburarna är svårslaget. 🌙</div>
+    <div class="hashtags">#kräftfiske #kräftor #fiske #svampplockning #kantareller #närodlat #frånnaturen #sjöliv</div>
+  </div>
+</article>
+
+<div class="fot">
+  Det här är <b>utkast</b> – välj de du gillar och justera tonen så den känns som din. Vill du ha fler vinklar, andra bilder eller en annan ton? Säg till, så gör jag om.
+</div>
+
+<script>
+  function kop(btn){
+    const txt = btn.closest('.text-block').querySelector('.bildtext').innerText;
+    const tags = btn.closest('.text-block').querySelector('.hashtags').innerText;
+    navigator.clipboard.writeText(txt + '\n\n' + tags).then(()=>{
+      const o = btn.textContent; btn.textContent = '✓ Kopierat!';
+      setTimeout(()=>btn.textContent=o, 1800);
+    }).catch(()=>{ btn.textContent='Kunde ej kopiera'; });
+  }
+</script>
+
+</body>
+</html>
