@@ -3,11 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pers Kök &amp; Vinkällare – appen för matlagning, vintips och vinkällare</title>
-<meta name="description" content="Pers Kök & Vinkällare är matappen som förenklar din matlagning och vinmatchning. Håll koll på vinkällaren, viltet i frysen och skafferiet – och få middagstips av en AI-kock som vet vad du har hemma.">
-<meta property="og:title" content="Pers Kök & Vinkällare – matapp för matlagning och vintips">
-<meta property="og:description" content="Appen som samlar ditt kök: vinkällare, frys, skafferi och en AI-kock. Matlagning och vinmatchning på ett ställe.">
+<title>Pers Kök &amp; Vinkällare – AI-kocken som vet vad du har hemma</title>
+<meta name="description" content="Pers Kök & Vinkällare är appen som samlar ditt kök: viltet i frysen, vinet i källaren, skafferiet – och en AI-kock som föreslår tre middagar av det du faktiskt har hemma.">
+<meta property="og:title" content="Pers Kök & Vinkällare – AI-kocken som vet vad du har hemma">
+<meta property="og:description" content="Viltet i frysen, vinet i källaren och en AI-kock som föreslår tre middagar av det du har hemma. Byggt av en jägare, fiskare och vinälskare.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://perhagegard-arch.github.io/ai-projekt/hemsida-prototyp/">
+<meta property="og:image" content="https://perhagegard-arch.github.io/ai-projekt/hemsida-prototyp/bilder/og-bild.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -33,7 +35,7 @@
   .hero-logga{width:120px; height:120px; object-fit:contain; margin:0 auto 1.5rem; filter:drop-shadow(0 4px 20px rgba(0,0,0,0.6))}
   .hero h1{font-size:clamp(2.6rem,7vw,4.8rem); color:var(--kram); text-shadow:0 2px 30px rgba(0,0,0,0.5); margin-bottom:0.5rem}
   .hero .ingress{font-size:clamp(1.05rem,2.4vw,1.35rem); color:var(--text); font-weight:400;
-    max-width:580px; margin:1.2rem auto 2.2rem; text-shadow:0 1px 12px rgba(0,0,0,0.6)}
+    max-width:600px; margin:1.2rem auto 2.2rem; text-shadow:0 1px 12px rgba(0,0,0,0.6)}
   .eyebrow{text-transform:uppercase; letter-spacing:0.35em; font-size:0.72rem; color:var(--guld); font-weight:600}
   .hero .eyebrow{margin-bottom:0.8rem}
   .knapp{display:inline-block; background:var(--vinrod); color:var(--kram); padding:0.95rem 2.4rem;
@@ -42,6 +44,7 @@
   .knapp:hover{background:var(--vinrod-ljus); transform:translateY(-2px); box-shadow:0 8px 32px rgba(122,26,42,0.55)}
   .knapp-guld{background:transparent; color:var(--guld); border:1px solid var(--guld-damp); box-shadow:none; margin-left:0.6rem}
   .knapp-guld:hover{background:rgba(212,168,75,0.1); color:var(--kram); transform:translateY(-2px)}
+  .friktion{display:block; margin-top:0.9rem; font-size:0.82rem; color:var(--text-damp); letter-spacing:0.03em}
   .scroll-pil{position:absolute; bottom:2rem; left:50%; transform:translateX(-50%); z-index:2;
     color:var(--guld); font-size:1.6rem; animation:guppa 2s ease-in-out infinite; opacity:.8}
 
@@ -57,13 +60,32 @@
     font-family:'Fraunces',serif; font-weight:400; line-height:1.6; color:var(--text); font-style:italic}
   .intro-text .guld{color:var(--guld); font-style:normal}
 
-  /* ── Fyra delar ── */
+  /* ── Så funkar det (telefonramar) ── */
+  .steg-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:2.2rem; align-items:start}
+  @media(max-width:820px){.steg-grid{grid-template-columns:1fr; max-width:360px; margin:0 auto}}
+  .steg{text-align:center}
+  .steg-nr{display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px;
+    border-radius:50%; background:rgba(212,168,75,0.14); border:1px solid var(--guld-damp);
+    color:var(--guld); font-weight:600; font-family:'Fraunces',serif; margin-bottom:0.9rem}
+  .telefon{position:relative; border-radius:34px; overflow:hidden; border:3px solid #2e2a22;
+    box-shadow:0 18px 50px rgba(0,0,0,0.55), inset 0 0 0 1px rgba(212,168,75,0.15);
+    background:#000; margin:0 auto 1.2rem; max-width:290px}
+  .telefon::before{content:''; position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:86px; height:8px; border-radius:8px; background:rgba(0,0,0,0.75); z-index:2;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,0.06)}
+  .telefon img{width:100%}
+  .steg h3{font-size:1.25rem; color:var(--kram); margin-bottom:0.4rem}
+  .steg p{color:var(--text-damp); font-size:0.95rem; max-width:290px; margin:0 auto}
+  .mikrobevis{margin-top:0.7rem; font-size:0.82rem; color:var(--guld); font-style:italic; font-family:'Fraunces',serif}
+
+  /* ── Funktionskort ── */
   .delar{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:1.5rem}
   .del-kort{background:var(--mork2); border:1px solid var(--linje); border-radius:16px; padding:2.2rem 1.8rem; transition:all .3s ease}
   .del-kort:hover{transform:translateY(-6px); border-color:var(--guld-damp); box-shadow:0 12px 40px rgba(0,0,0,0.4)}
   .del-ikon{font-size:2.6rem; margin-bottom:1rem; display:block}
   .del-kort h3{font-size:1.5rem; color:var(--guld); margin-bottom:0.6rem}
   .del-kort p{color:var(--text-damp); font-size:0.98rem}
+  .cta-rad{text-align:center; margin-top:3rem}
 
   /* ── Passioner (bildrutnät) ── */
   .passioner{background:var(--mork2); border-top:1px solid var(--linje); border-bottom:1px solid var(--linje)}
@@ -72,11 +94,9 @@
   .passion img{width:100%; height:100%; object-fit:cover; transition:transform .6s ease; filter:brightness(0.78)}
   .passion:hover img{transform:scale(1.06); filter:brightness(0.9)}
   .passion-text{position:absolute; left:0; right:0; bottom:0; padding:1.6rem 1.4rem 1.3rem;
-    background:linear-gradient(180deg, transparent, rgba(10,8,6,0.85)); z-index:2}
+    background:linear-gradient(180deg, transparent, rgba(10,8,6,0.88)); z-index:2}
   .passion-text h3{font-size:1.45rem; color:var(--kram); margin-bottom:0.2rem}
   .passion-text p{font-size:0.9rem; color:var(--text-damp); line-height:1.5}
-  .passion.stor{aspect-ratio:auto; grid-column:span 2}
-  @media(max-width:620px){.passion.stor{grid-column:span 1}}
 
   /* ── Berättelse ── */
   .berattelse{display:grid; grid-template-columns:1fr 1fr; gap:3.5rem; align-items:center}
@@ -87,7 +107,7 @@
   .berattelse-text p{color:var(--text-damp); margin-bottom:1rem; font-size:1.05rem}
   .berattelse-text .sign{font-family:'Fraunces',serif; font-style:italic; color:var(--guld); font-size:1.15rem; margin-top:1.5rem}
 
-  /* ── Resegalleri ── */
+  /* ── Galleri ── */
   .galleri{display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:180px; gap:0.6rem}
   .galleri figure{overflow:hidden; border-radius:10px; margin:0; position:relative}
   .galleri img{width:100%; height:100%; object-fit:cover; filter:brightness(0.85); transition:all .5s ease}
@@ -100,15 +120,24 @@
     .galleri .hog{grid-row:span 1}
   }
 
+  /* ── FAQ ── */
+  .faq{max-width:680px; margin:0 auto}
+  .faq details{border-bottom:1px solid var(--linje); padding:0.4rem 0}
+  .faq summary{cursor:pointer; list-style:none; display:flex; justify-content:space-between; align-items:center;
+    padding:0.9rem 0.2rem; font-family:'Fraunces',serif; font-size:1.15rem; color:var(--kram)}
+  .faq summary::-webkit-details-marker{display:none}
+  .faq summary::after{content:'+'; color:var(--guld); font-size:1.4rem; transition:transform .25s ease}
+  .faq details[open] summary::after{transform:rotate(45deg)}
+  .faq .svar{padding:0 0.2rem 1.1rem; color:var(--text-damp); font-size:0.98rem}
+
   /* ── Avslut ── */
   .avslut{text-align:center; background:linear-gradient(180deg,var(--mork) 0%,var(--mork3) 100%); border-top:1px solid var(--linje)}
   .avslut h2{font-size:clamp(2rem,5vw,3.2rem); color:var(--kram); margin-bottom:1rem}
   .avslut p{color:var(--text-damp); max-width:520px; margin:0 auto 2.2rem; font-size:1.1rem}
-  .teaser-pill{display:inline-block; background:rgba(212,168,75,0.12); color:var(--guld); border:1px solid var(--guld-damp);
-    border-radius:50px; padding:0.4rem 1.2rem; font-size:0.85rem; font-weight:500; margin-bottom:2rem; letter-spacing:0.05em}
 
   footer{text-align:center; padding:2.5rem 1.5rem; color:var(--text-damp); font-size:0.85rem; border-top:1px solid var(--linje); background:var(--mork)}
   footer .logga-liten{width:42px; height:42px; object-fit:contain; opacity:0.7; margin:0 auto 0.8rem}
+  footer a{color:var(--guld-damp)}
 
   @keyframes stigUpp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
   @keyframes guppa{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(10px)}}
@@ -132,9 +161,10 @@
     <img src="bilder/logga.png" alt="Pers Kök &amp; Vinkällare" class="hero-logga">
     <div class="eyebrow">Kök · Vin · Jakt · Fiske · Skog</div>
     <h1>Välkommen hem</h1>
-    <p class="ingress">Appen som förenklar din matlagning och vinmatchning – allt i ett kök, samlat på ett ställe. Maten du lagar, viltet i frysen, vinet i källaren, och en AI-kock som vet vad du har hemma.</p>
-    <a href="#delar" class="knapp">Utforska</a>
-    <a href="#passioner" class="knapp knapp-guld">Det här är jag</a>
+    <p class="ingress">Viltet i frysen, vinet i källaren och en AI-kock som föreslår tre middagar av det du faktiskt har hemma — med rätt flaska till.</p>
+    <a href="https://perskok.hagegard.com/?utm_source=hemsidan" class="knapp">Öppna appen</a>
+    <a href="#sa-funkar" class="knapp knapp-guld">Så funkar det</a>
+    <span class="friktion">Gratis · logga in med ditt Google-konto på tio sekunder</span>
   </div>
   <div class="scroll-pil">↓</div>
 </header>
@@ -146,23 +176,60 @@
   </div>
 </section>
 
-<!-- ══ FYRA DELAR ══ -->
-<section class="sektion" id="delar">
+<!-- ══ SÅ FUNKAR DET ══ -->
+<section class="sektion" id="sa-funkar">
   <div class="sektion-rubrik reveal">
-    <span class="eyebrow">Fyra rum, ett hem</span>
-    <h2>Allt köket behöver</h2>
-    <p>Varje del löser sin sak – och de pratar med varandra. Vinet vet vad som passar viltet, kocken vet vad som finns i frysen.</p>
+    <span class="eyebrow">Tre steg till middag</span>
+    <h2>Så funkar det</h2>
+    <p>Appen känner ditt kök. Du väljer bara vad du är sugen på.</p>
   </div>
-  <div class="delar">
-    <div class="del-kort reveal"><span class="del-ikon">🍳</span><h3>Köket</h3><p>Vad blir det idag? AI-kocken föreslår middag av det du faktiskt har hemma – från frys och skafferi.</p></div>
-    <div class="del-kort reveal"><span class="del-ikon">🧊</span><h3>Frysen</h3><p>Håll koll på viltet. Vildsvin, älg, rådjur – styckdetalj, fack och datum. Aldrig mer en gåtfull påse längst bak.</p></div>
-    <div class="del-kort reveal"><span class="del-ikon">🍷</span><h3>Vinkällaren</h3><p>Hela källaren i fickan. Fota etiketten så läser appen in vinet åt dig – druva, årgång, hyllplats.</p></div>
-    <div class="del-kort reveal"><span class="del-ikon">🥫</span><h3>Skafferiet</h3><p>Vad finns hemma? Håll reda på skafferiets grunder så kocken vet vad som går att laga – och vad som saknas.</p></div>
+  <div class="steg-grid">
+    <div class="steg reveal">
+      <span class="steg-nr">1</span>
+      <div class="telefon"><img src="bilder/app-frysen.jpg" alt="Frysen i appen – rådjur, lax och älg med hylla och hållbarhet" loading="lazy"></div>
+      <h3>Fyll ditt kök</h3>
+      <p>Lägg in viltet i frysen och vinet i källaren. Fota etiketten så läser appen in flaskan åt dig – med doft, smak och lagringspotential.</p>
+    </div>
+    <div class="steg reveal">
+      <span class="steg-nr">2</span>
+      <div class="telefon"><img src="bilder/app-koket.jpg" alt="Köket i appen – välj utgångspunkt, rätter och hur festligt" loading="lazy"></div>
+      <h3>Säg vad du är sugen på</h3>
+      <p>Utgå från frysen, ett vin eller låt kocken välja fritt. Vardag eller full Michelin – du bestämmer nivån.</p>
+    </div>
+    <div class="steg reveal">
+      <span class="steg-nr">3</span>
+      <div class="telefon"><img src="bilder/app-forslag.jpg" alt="Tre menyförslag från AI-kocken med vinval ur egna källaren" loading="lazy"></div>
+      <h3>Välj bland tre menyer</h3>
+      <p>AI-kocken ger tre förslag byggda på det du har. Välj det som lockar – hela receptet skrivs, med inköpslista.</p>
+      <div class="mikrobevis">"Rådjur innanlår – skoglig elegans, med en Volnay ur egna källaren."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ FUNKTIONERNA ══ -->
+<section class="passioner" id="delar" style="background:var(--mork)">
+  <div class="sektion" style="padding-top:4rem">
+    <div class="sektion-rubrik reveal">
+      <span class="eyebrow">Sex rum, ett hem</span>
+      <h2>Allt köket behöver</h2>
+      <p>Varje del löser sin sak – och de pratar med varandra. Vinet vet vad som passar viltet, kocken vet vad som finns i frysen.</p>
+    </div>
+    <div class="delar">
+      <div class="del-kort reveal"><span class="del-ikon">🍳</span><h3>Köket</h3><p>AI-kocken föreslår tre middagar av det du har hemma. Räcker inte källaren tipsar den om köpviner – med länk rakt in i Systembolagets sortiment.</p></div>
+      <div class="del-kort reveal"><span class="del-ikon">🧊</span><h3>Frysen</h3><p>Vildsvin, älg, rådjur – styckdetalj, fack och hållbarhet. Appen säger till när något bör ätas. Aldrig mer en gåtfull påse längst bak.</p></div>
+      <div class="del-kort reveal"><span class="del-ikon">🍷</span><h3>Vinkällaren</h3><p>Fota etiketten så skriver appen provningsanteckningarna: doft, smak, vad det passar till och hur länge det kan ligga.</p></div>
+      <div class="del-kort reveal"><span class="del-ikon">🥫</span><h3>Skafferiet</h3><p>Vad finns hemma? Håll reda på grunderna så kocken vet vad som går att laga – och vad som saknas.</p></div>
+      <div class="del-kort reveal"><span class="del-ikon">🌡️</span><h3>Sous vide-dagboken</h3><p>Temperatur, tid och betyg på varje körning. Kocken minns att laxen blev perfekt på 50 grader – och föreslår det igen.</p></div>
+      <div class="del-kort reveal"><span class="del-ikon">🤝</span><h3>Dela</h3><p>Skicka ett recept som länk till vem som helst – eller dela hela vinkällaren med en vän som får titta in.</p></div>
+    </div>
+    <div class="cta-rad reveal">
+      <a href="https://perskok.hagegard.com/?utm_source=hemsidan" class="knapp">Öppna appen</a>
+    </div>
   </div>
 </section>
 
 <!-- ══ PASSIONER ══ -->
-<section class="passioner">
+<section class="passioner" id="passioner">
   <div class="sektion">
     <div class="sektion-rubrik reveal">
       <span class="eyebrow">Det här är jag</span>
@@ -170,10 +237,10 @@
       <p>Bakom varje måltid finns en tur till skogen, sjön eller en vingård. Det är där maten – och glädjen – börjar.</p>
     </div>
     <div class="passion-grid">
-      <div class="passion reveal"><img src="bilder/jakt.jpg" alt="Jakt"><div class="passion-text"><h3>Jakten</h3><p>Vildsvin och vilt från de svenska skogarna – råvaran i sin renaste form.</p></div></div>
-      <div class="passion reveal"><img src="bilder/kraftor.jpg" alt="Kräftfiske"><div class="passion-text"><h3>Kräftorna</h3><p>Augustinätter vid sjön med burar och lykta. En svensk höjdpunkt.</p></div></div>
-      <div class="passion reveal"><img src="bilder/abborre.jpg" alt="Fiske"><div class="passion-text"><h3>Fisket</h3><p>En fin abborre från spegelblankt vatten – fångst till köket.</p></div></div>
-      <div class="passion reveal"><img src="bilder/frankrike.jpg" alt="Vin"><div class="passion-text"><h3>Vinet</h3><p>Frankrike, Italien, Tyskland. Ny i kunskapen, men nyfiken på varje druva.</p></div></div>
+      <div class="passion reveal"><img src="bilder/jakt-hygget.jpg" alt="Per i jaktkläder på hygget" loading="lazy"><div class="passion-text"><h3>Jakten</h3><p>Vildsvin och vilt från de svenska skogarna – råvaran i sin renaste form, från hygget till frysen.</p></div></div>
+      <div class="passion reveal"><img src="bilder/kraftor.jpg" alt="Kräftfiske" loading="lazy"><div class="passion-text"><h3>Kräftorna</h3><p>Augustinätter vid sjön med burar och lykta. En svensk höjdpunkt.</p></div></div>
+      <div class="passion reveal"><img src="bilder/fiske-gadda.jpg" alt="Per med en stor gädda i kvällssol" loading="lazy"><div class="passion-text"><h3>Fisket</h3><p>Kvällsgäddan som fick följa med hem – fångst blir middag, middag blir minne.</p></div></div>
+      <div class="passion reveal"><img src="bilder/frankrike.jpg" alt="Vingård i Frankrike" loading="lazy"><div class="passion-text"><h3>Vinet</h3><p>Frankrike, Italien, Tyskland. Ny i kunskapen, men nyfiken på varje druva.</p></div></div>
     </div>
   </div>
 </section>
@@ -181,7 +248,7 @@
 <!-- ══ BERÄTTELSE ══ -->
 <section class="sektion" id="berattelse">
   <div class="berattelse">
-    <div class="berattelse-bild reveal"><img src="bilder/maria.jpg" alt="Per och Maria på en vingård"></div>
+    <div class="berattelse-bild reveal"><img src="bilder/maria.jpg" alt="Per och Maria på en vingård" loading="lazy"></div>
     <div class="berattelse-text reveal">
       <span class="eyebrow">Historien bakom</span>
       <h2>Från jakttorn till kod</h2>
@@ -192,32 +259,60 @@
   </div>
 </section>
 
-<!-- ══ RESEGALLERI ══ -->
+<!-- ══ GALLERI ══ -->
 <section class="sektion" style="padding-top:0">
   <div class="sektion-rubrik reveal">
     <span class="eyebrow">Smaker &amp; minnen</span>
-    <h2>Vinvägar &amp; vackra bord</h2>
-    <p>Lite av det som inspirerar – vingårdar, gränder och dukade bord från resorna.</p>
+    <h2>Från sjön till bordet</h2>
+    <p>Lite av det som inspirerar – fisketurer, vingårdar, gränder och dukade bord.</p>
   </div>
   <div class="galleri reveal">
-    <figure class="bred hog"><img src="bilder/vinvy-italien.jpg" alt="Vinvy Italien"></figure>
-    <figure><img src="bilder/cinque.jpg" alt="Cinque Terre"></figure>
-    <figure><img src="bilder/bord.jpg" alt="Dukat bord i Italien"></figure>
-    <figure><img src="bilder/vinvy1.jpg" alt="Italiensk by"></figure>
-    <figure><img src="bilder/blommor.jpg" alt="Blommor på bordet"></figure>
-    <figure class="bred"><img src="bilder/dimma.jpg" alt="Dimma över sommaräng"></figure>
-    <figure><img src="bilder/venedig.jpg" alt="Venedig"></figure>
-    <figure><img src="bilder/zigge-fiskar.jpg" alt="Zigge fiskar"></figure>
+    <figure class="bred hog"><img src="bilder/fiske-abborre-mor.jpg" alt="Abborrfiske på sjön" loading="lazy"></figure>
+    <figure><img src="bilder/cinque.jpg" alt="Cinque Terre" loading="lazy"></figure>
+    <figure><img src="bilder/bord.jpg" alt="Dukat bord i Italien" loading="lazy"></figure>
+    <figure><img src="bilder/kraftbur.jpg" alt="Kräftburen vittjas" loading="lazy"></figure>
+    <figure><img src="bilder/blommor.jpg" alt="Blommor på bordet" loading="lazy"></figure>
+    <figure class="bred"><img src="bilder/dimma.jpg" alt="Dimma över sommaräng" loading="lazy"></figure>
+    <figure><img src="bilder/venedig.jpg" alt="Venedig" loading="lazy"></figure>
+    <figure><img src="bilder/per-zigge.jpg" alt="Per och taxen Zigge på klipporna" loading="lazy"></figure>
+  </div>
+</section>
+
+<!-- ══ FAQ ══ -->
+<section class="intro">
+  <div class="sektion">
+    <div class="sektion-rubrik reveal">
+      <span class="eyebrow">Bra att veta</span>
+      <h2>Frågor &amp; svar</h2>
+    </div>
+    <div class="faq reveal">
+      <details>
+        <summary>Kostar det något?</summary>
+        <div class="svar">Nej. Det här är ett passionsprojekt, inte en produkt – appen är gratis att använda.</div>
+      </details>
+      <details>
+        <summary>Behöver jag installera något?</summary>
+        <div class="svar">Nej, appen körs direkt i webbläsaren på mobil, platta och dator. Vill du ha den som en riktig app: öppna den i mobilen och välj "Lägg till på hemskärmen".</div>
+      </details>
+      <details>
+        <summary>Hur loggar jag in?</summary>
+        <div class="svar">Med ditt Google-konto – inget nytt lösenord att komma ihåg. Första inloggningen tar ungefär tio sekunder, sedan bygger du din egen frys och vinkällare.</div>
+      </details>
+      <details>
+        <summary>Ser andra vad jag har i mitt kök?</summary>
+        <div class="svar">Nej. Din frys, källare och dina recept är dina. Vill du dela något gör du det aktivt – ett recept som länk, eller vinkällaren till en vän som får titta (men inte ändra).</div>
+      </details>
+    </div>
   </div>
 </section>
 
 <!-- ══ AVSLUT ══ -->
 <section class="sektion avslut">
   <div class="reveal">
-    <div class="teaser-pill">Snart: logga in &amp; ta med ditt kök överallt</div>
-    <h2>Ett kök som följer med</h2>
-    <p>Idag bor allt på din egen enhet. Snart kan du logga in, ta med ditt kök till alla dina skärmar – och dela vinkällaren med vänner.</p>
-    <a href="#" class="knapp" id="till-appen">Öppna appen</a>
+    <h2>Följ med in i köket</h2>
+    <p>Logga in, bygg din egen frys och vinkällare – och låt AI-kocken föreslå kvällens middag av det du redan har hemma.</p>
+    <a href="https://perskok.hagegard.com/?utm_source=hemsidan" class="knapp">Öppna Pers Kök &amp; Vinkällare</a>
+    <span class="friktion">Funkar i mobilen, på plattan och datorn</span>
   </div>
 </section>
 
@@ -227,6 +322,7 @@
 </footer>
 
 <script>
+  // Mjuk avslöjningsanimation när sektionerna skrollas in
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('syns'); obs.unobserve(e.target); } });
   }, { threshold: 0.12 });
