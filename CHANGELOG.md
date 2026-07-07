@@ -1,5 +1,32 @@
 # Changelog – Pers Kök & Vinkällare
 
+## 2026-07-05 → 2026-07-07 – Hemsidan: från prototyp till skyltfönster (v1 + v2)
+
+### v2 (2026-07-07, commit 4cf100a) – design från Claude Design-appen
+- Nytt arbetsflöde: Per itererar designen i Claude Design → zip till Downloads →
+  Claude Code packar upp, kopplar in riktigt innehåll, granskar lokalt, pushar
+- Appens typsnitt (Instrument Serif + Hanken Grotesk), fyra steg i "Så funkar
+  det" (Vinkällaren eget steg), sticky topbar med "Öppna appen" vid skroll
+- Riktiga appskärmdumpar för Frysen/Köket/Tre förslag; `app-vinkallaren.jpg`
+  är tills vidare Design-mockup med påhittade viner — BYT när Per tar riktig
+  skärmdump (samma filnamn, bara ersätt)
+- og:url tillagd och og:image gjord absolut (paketet hade relativ sökväg)
+
+### v1 (2026-07-05, commit 47a0279) – konverteringsombyggnad
+- Benchmarkad struktur: hero med fungerande "Öppna appen"-CTA
+  (perskok.hagegard.com + utm_source=hemsidan), trestegsflöde med riktiga
+  skärmdumpar i telefonramar, sex funktionskort, mini-FAQ, slut-CTA
+- Pers egna foton in (hygget, kvällsgäddan, abborrfisket, kräftburen,
+  Per + Zigge); tre trasiga bildreferenser i galleriet fixade
+- og-bild skapad; alla bilder optimerade med sharp (55–270 kB)
+
+### Kopplingar & kvarvarande
+- Appen länkar hit: inloggningssidan + Mer-menyn (HEMSIDA_URL i
+  pers-kok/frontend/src/config.ts — EN plats att ändra vid domänflytt)
+- KVAR: flytt till hagegard.com (Render Static Site + CNAME, Per gör DNS);
+  uppdatera då HEMSIDA_URL + og:url/og:image
+
+
 ## [Opublicerad] – 2026-06-13
 
 ### Vinkällaren – bulk-prisuppskattning via AI
